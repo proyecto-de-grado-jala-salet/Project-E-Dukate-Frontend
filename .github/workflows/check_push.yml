@@ -1,0 +1,22 @@
+name: Check Push 📤
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code 📦
+        uses: actions/checkout@v3
+
+      - name: Check if push is from PR 🔍
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.actor }}" != "github-actions[bot]" ]]; then
+            echo "Error: Direct pushes to '${{ github.ref_name }}' are not allowed. Use a pull request. ❌"
+            exit 1
+          else
+            echo "Push to '${{ github.ref_name }}' is valid. ✅"
+          fi
