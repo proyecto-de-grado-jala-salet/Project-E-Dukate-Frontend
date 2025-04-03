@@ -1,7 +1,7 @@
 "use client";
 
-import PatientForm from '../components/PatientForm';
+import { PatientRegistration } from "../pages/PatientRegistration";
 
-export default function PatientPage() {
-  return <PatientForm />;
+export default function Home() {
+  return <PatientRegistration />;
 }
