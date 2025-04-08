@@ -1,5 +1,7 @@
-import React from "react";
-import { TextField, InputAdornment } from "@mui/material";
+import React, { useState } from "react";
+import { TextField, InputAdornment, IconButton } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 interface CustomTextFieldProps {
   label: string;
@@ -9,6 +11,11 @@ interface CustomTextFieldProps {
   required?: boolean;
   adornment?: string;
   fullWidth?: boolean;
+  type?: string;
+  select?: boolean;
+  children?: React.ReactNode;
+  showToggle?: boolean;
+  autoComplete?: string; // Nueva prop para controlar el autocompletado
 }
 
 export const CustomTextField: React.FC<CustomTextFieldProps> = ({
@@ -19,22 +26,51 @@ export const CustomTextField: React.FC<CustomTextFieldProps> = ({
   required = false,
   adornment,
   fullWidth = true,
-}) => (
-  <TextField
-    label={
-      <span>
-        {label}
-        {required && <span style={{ color: "red" }}>*</span>}
-      </span>
-    }
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    error={!!error}
-    helperText={error}
-    variant="outlined"
-    fullWidth={fullWidth}
-    InputProps={
-      adornment ? { startAdornment: <InputAdornment position="start">{adornment}</InputAdornment> } : undefined
-    }
-  />
-);
+  type,
+  select,
+  children,
+  showToggle = false,
+  autoComplete,
+}) => {
+  const [showText, setShowText] = useState(false);
+
+  const handleToggleShowText = () => {
+    setShowText((prev) => !prev);
+  };
+
+  const inputType = showToggle && type === "password" ? (showText ? "text" : "password") : type;
+
+  return (
+    <TextField
+      label={
+        <span>
+          {label}
+          {required && <span style={{ color: "red" }}>*</span>}
+        </span>
+      }
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      error={!!error}
+      helperText={error}
+      variant="outlined"
+      fullWidth={fullWidth}
+      type={inputType}
+      select={select}
+      autoComplete={autoComplete} // Pasamos la prop autoComplete al TextField
+      InputProps={{
+        startAdornment: adornment ? (
+          <InputAdornment position="start">{adornment}</InputAdornment>
+        ) : undefined,
+        endAdornment: showToggle ? (
+          <InputAdornment position="end">
+            <IconButton onClick={handleToggleShowText} edge="end">
+              {showText ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        ) : undefined,
+      }}
+    >
+      {children}
+    </TextField>
+  );
+};

@@ -1,19 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Dayjs } from "dayjs";
-import { PatientData } from "../types/patient";
-import { validatePatientData } from "../utils/validatePatientData";
-import { registerPatient } from "../services/patientService";
+import { SpecialistData } from "../types/specialist";
+import { validateSpecialistData } from "../utils/validateSpecialistData";
+import { registerSpecialist } from "../services/specialistService";
 import { showSuccessNotification, showErrorNotification } from "../services/notificationService";
 
-export const usePatientForm = () => {
-  const [formData, setFormData] = useState<PatientData>({
+export const useSpecialistForm = () => {
+  const [formData, setFormData] = useState<SpecialistData>({
     names: "",
     lastNamePaternal: "",
     lastNameMaternal: "",
     gender: "F",
     dateOfBirth: null,
     mobileNumber: "",
+    specialty: "",
+    yearsOfExperience: "",
+    email: "",
+    password: "",
+    accessCode: "",
+    specialistCode: "", // Nuevo campo para el código del especialista
     address: "",
     identityCard: "",
     phoneNumber: "",
@@ -22,7 +28,7 @@ export const usePatientForm = () => {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const handleChange = (field: keyof PatientData, value: string) => {
+  const handleChange = (field: keyof SpecialistData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
@@ -51,24 +57,34 @@ export const usePatientForm = () => {
   };
 
   const handleSubmit = async () => {
-    const validationErrors = validatePatientData(formData);
+    const validationErrors = validateSpecialistData(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    // Transformar formData para el backend
     const transformedData = {
-      ...formData,
+      names: formData.names,
+      lastNamePaternal: formData.lastNamePaternal,
+      lastNameMaternal: formData.lastNameMaternal,
+      gender: formData.gender,
       dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth.format("YYYY-MM-DD") : null,
-      identityCard: parseInt(formData.identityCard, 10), // Convertir identityCard a número
+      mobileNumber: formData.mobileNumber,
+      specialty: formData.specialty,
+      yearsOfExperience: parseInt(formData.yearsOfExperience, 10),
+      email: formData.email,
+      password: formData.password,
+      specialistCode: formData.specialistCode, // Usamos el valor ingresado por el usuario
+      accessCode: formData.accessCode, // Mantenemos el accessCode como está
+      address: formData.address,
+      identityCard: parseInt(formData.identityCard, 10),
+      phoneNumber: formData.phoneNumber,
+      age: formData.age,
     };
 
-    console.log("Datos enviados al backend:", transformedData); // Para depurar
-
     try {
-      await registerPatient(transformedData);
-      showSuccessNotification("Paciente registrado con éxito");
+      await registerSpecialist(transformedData);
+      showSuccessNotification("Especialista registrado con éxito");
       setErrors({});
       setFormData({
         names: "",
@@ -77,13 +93,18 @@ export const usePatientForm = () => {
         gender: "F",
         dateOfBirth: null,
         mobileNumber: "",
+        specialty: "",
+        yearsOfExperience: "",
+        email: "",
+        password: "",
+        accessCode: "",
+        specialistCode: "", // Reiniciamos el nuevo campo
         address: "",
         identityCard: "",
         phoneNumber: "",
         age: null,
       });
-    } catch (_error) {
-      // console.error("Error al conectar con el backend:", error);
+    } catch (error) { // eslint-disable-next-line @typescript-eslint/no-unused-vars
       showErrorNotification("No se pudo conectar con el servidor. Intenta de nuevo.");
     }
   };
