@@ -15,7 +15,7 @@ interface CustomTextFieldProps {
   select?: boolean;
   children?: React.ReactNode;
   showToggle?: boolean;
-  autoComplete?: string; // Nueva prop para controlar el autocompletado
+  autoComplete?: string;
 }
 
 export const CustomTextField: React.FC<CustomTextFieldProps> = ({
@@ -56,7 +56,7 @@ export const CustomTextField: React.FC<CustomTextFieldProps> = ({
       fullWidth={fullWidth}
       type={inputType}
       select={select}
-      autoComplete={autoComplete} // Pasamos la prop autoComplete al TextField
+      autoComplete={autoComplete}
       InputProps={{
         startAdornment: adornment ? (
           <InputAdornment position="start">{adornment}</InputAdornment>

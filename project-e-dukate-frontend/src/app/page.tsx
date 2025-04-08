@@ -1,10 +1,19 @@
+// "use client";
+
+// import { PatientRegistration } from "../pages/PatientRegistration";
+
+// // import { SpecialistRegistration } from "../pages/SpecialistRegistration";
+
+// export default function Home() {
+//   return <PatientRegistration />;
+//   // return <SpecialistRegistration />;
+// }
+
+
 "use client";
 
-import { PatientRegistration } from "../pages/PatientRegistration";
-
-// import { SpecialistRegistration } from "../pages/SpecialistRegistration";
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return <PatientRegistration />;
-  // return <SpecialistRegistration />;
+  redirect('/dashboard');
 }
