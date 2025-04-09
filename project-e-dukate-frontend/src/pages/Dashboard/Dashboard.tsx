@@ -63,7 +63,7 @@ export const Dashboard: React.FC = () => {
               />
               <Button
                 variant="contained"
-                sx={{ backgroundColor: '#f5c71a', color: 'black', textTransform: 'none' }}
+                sx={{ borderRadius: '12px',backgroundColor: '#f5c71a', color: 'black', textTransform: 'none' }}
                 onClick={handleOpenModal}
               >
                 Añadir Especialidad

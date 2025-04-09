@@ -42,3 +42,49 @@ export const addSpecialty = async (specialtyData: { typeOfSpecialty: string }) =
     throw error;
   }
 };
+
+export const updateSpecialty = async (id: string, specialtyData: { typeOfSpecialty: string }) => {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(specialtyData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al actualizar la especialidad");
+    }
+
+    // Si el código de estado es 204 (No Content), no intentamos parsear JSON
+    if (response.status === 204) {
+      return true; // Operación exitosa
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteSpecialty = async (id: string) => {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al eliminar la especialidad");
+    }
+
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
