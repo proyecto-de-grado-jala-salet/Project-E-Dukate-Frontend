@@ -1,14 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// src/pages/Dashboard/Dashboard.tsx
-
 "use client";
 
 import React, { useState } from 'react';
-import { Box, Typography, TextField, InputAdornment, Button } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { DashboardLayout } from '../../components/common/DashboardLayout';
-import { SpecialtiesTable } from '../../components/common/SpecialtiesTable';
-import { AddSpecialtyModal } from '../../components/common/AddSpecialtyModal';
+import { Sidebar } from '../../components/Sidebar';
+import { Header } from '../../components/Header';
+import { Button } from '../../components/Button';
+import { TextField } from '../../components/TextField';
+import { Modal } from '../../components/Modal';
+import { Table } from '../../components/Table';
+import { useApi } from '../../hooks/useApi';
+import { Specialty, ColumnConfig } from '../../types/table';
 
 const tabMessages: { [key: string]: string } = {
   usuarios: 'Este es el botón de Usuarios',
@@ -19,77 +21,143 @@ const tabMessages: { [key: string]: string } = {
 
 export const Dashboard: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState('especialidades');
-  const [openModal, setOpenModal] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // Para recargar la lista
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Specialty | null>(null);
+  const [newItem, setNewItem] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: specialties, error, addItem, updateItem, deleteItem } = useApi<Specialty>("specialties");
 
-  const handleTabChange = (tab: string) => {
-    setSelectedTab(tab);
+  const columns: ColumnConfig<Specialty>[] = [
+    { header: '#', key: 'index', width: '10%', render: (_, index) => index + 1 },
+    { header: 'Especialidades', key: 'typeOfSpecialty', width: '75%' },
+  ];
+
+  const handleTabChange = (tab: string) => setSelectedTab(tab);
+  const handleOpenAddModal = () => setOpenAddModal(true);
+  const handleCloseAddModal = () => {
+    setNewItem('');
+    setOpenAddModal(false);
+  };
+  const handleOpenEditModal = (item: Specialty) => {
+    setSelectedItem(item);
+    setNewItem(item.typeOfSpecialty);
+    setOpenEditModal(true);
+  };
+  const handleCloseEditModal = () => {
+    setNewItem('');
+    setOpenEditModal(false);
   };
 
-  const handleOpenModal = () => {
-    setOpenModal(true);
+  const handleAddSubmit = () => {
+    if (!newItem.trim()) return;
+    addItem({ typeOfSpecialty: newItem });
+    handleCloseAddModal();
   };
 
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
-
-  const handleAddSuccess = () => {
-    setRefreshKey((prev) => prev + 1); // Incrementar para recargar la lista
+  const handleEditSubmit = () => {
+    if (!newItem.trim() || !selectedItem) return;
+    updateItem(selectedItem.id, { typeOfSpecialty: newItem });
+    handleCloseEditModal();
   };
 
   return (
-    <DashboardLayout
-      selectedTab={selectedTab}
-      onTabChange={handleTabChange}
-      userName="Cara Martinez"
-      userRole="Administrador"
-    >
-      {selectedTab === 'especialidades' ? (
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Especialidades</Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                placeholder="Search product name"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
+    <Box sx={{ display: "flex", height: "100vh" }}>
+      <Sidebar selectedTab={selectedTab} onTabChange={handleTabChange} />
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <Header userName="Cara Martinez" userRole="Administrador" />
+        <Box sx={{ flex: 1, bgcolor: "#f5f5f5", p: 3, overflow: "auto" }}>
+          {selectedTab === "especialidades" ? (
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 3,
                 }}
-                sx={{ backgroundColor: 'white', borderRadius: 1 }}
-              />
-              <Button
-                variant="contained"
-                sx={{ borderRadius: '12px',backgroundColor: '#f5c71a', color: 'black', textTransform: 'none' }}
-                onClick={handleOpenModal}
               >
-                Añadir Especialidad
-              </Button>
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: "bold", color: "black" }}
+                >
+                  Especialidades
+                </Typography>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                  <TextField
+                    placeholder="Buscar Especialidad"
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    startAdornment={<SearchIcon sx={{ color: "gray" }} />}
+                    sx={{
+                      width: "300px",
+                      "& .MuiInputBase-input": {
+                        padding: "10px 14px",
+                      },
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "20px",
+                        backgroundColor: "white",
+                        color: "black",
+                      },
+                    }}
+                  />
+                  <Button
+                    label="Añadir Especialidad"
+                    variant="contained"
+                    sx={{ bgcolor: "#f5c71a", color: "black" }}
+                    onClick={handleOpenAddModal}
+                  />
+                </Box>
+              </Box>
+              <Table
+                items={specialties}
+                columns={columns}
+                error={error}
+                onEdit={handleOpenEditModal}
+                onDelete={deleteItem}
+              />
+              <Modal
+                open={openAddModal}
+                onClose={handleCloseAddModal}
+                title="Añadir Nueva Especialidad"
+                onSubmit={handleAddSubmit}
+              >
+                <TextField
+                  label="Nombre de la Especialidad"
+                  value={newItem}
+                  onChange={setNewItem}
+                  autoComplete="off"
+                />
+              </Modal>
+              <Modal
+                open={openEditModal}
+                onClose={handleCloseEditModal}
+                title="Editar Especialidad"
+                onSubmit={handleEditSubmit}
+              >
+                <TextField
+                  label="Nombre de la Especialidad"
+                  value={newItem}
+                  onChange={setNewItem}
+                  autoComplete="off"
+                />
+              </Modal>
             </Box>
-          </Box>
-          <SpecialtiesTable refreshList={() => setRefreshKey((prev) => prev + 1)} />
-          <AddSpecialtyModal
-            open={openModal}
-            onClose={handleCloseModal}
-            onAddSuccess={handleAddSuccess}
-          />
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <Typography variant="h5">{tabMessages[selectedTab]}</Typography>
+            </Box>
+          )}
         </Box>
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-          }}
-        >
-          <Typography variant="h5">{tabMessages[selectedTab]}</Typography>
-        </Box>
-      )}
-    </DashboardLayout>
+      </Box>
+    </Box>
   );
 };
 
