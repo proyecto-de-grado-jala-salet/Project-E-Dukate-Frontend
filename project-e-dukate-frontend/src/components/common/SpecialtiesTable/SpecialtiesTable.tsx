@@ -9,15 +9,18 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { fetchSpecialties } from '../../../services/specialtyService';
 
 interface Specialty {
-  id: string;
-  typeOfSpecialty: string;
-}
-
-export const SpecialtiesTable: React.FC = () => {
-  const [specialties, setSpecialties] = useState<Specialty[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
+    id: string;
+    typeOfSpecialty: string;
+  }
+  
+  interface SpecialtiesTableProps {
+    refreshList: () => void; // Prop para recargar la lista
+  }
+  
+  export const SpecialtiesTable: React.FC<SpecialtiesTableProps> = ({ refreshList }) => {
+    const [specialties, setSpecialties] = useState<Specialty[]>([]);
+    const [error, setError] = useState<string | null>(null);
+  
     const loadSpecialties = async () => {
       try {
         const data = await fetchSpecialties();
@@ -26,29 +29,35 @@ export const SpecialtiesTable: React.FC = () => {
         setError('Error al cargar las especialidades');
       }
     };
-
-    loadSpecialties();
-  }, []);
-
-  if (error) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <Typography variant="h6" color="error">
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
-
-  if (specialties.length === 0) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <Typography variant="h6">
-          No se encuentra ninguna especialidad
-        </Typography>
-      </Box>
-    );
-  }
+  
+    useEffect(() => {
+      loadSpecialties();
+    }, []);
+  
+    // Usar refreshList para recargar la lista cuando se llame
+    useEffect(() => {
+      loadSpecialties();
+    }, [refreshList]);
+  
+    if (error) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Typography variant="h6" color="error">
+            {error}
+          </Typography>
+        </Box>
+      );
+    }
+  
+    if (specialties.length === 0) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Typography variant="h6">
+            No se encuentra ninguna especialidad
+          </Typography>
+        </Box>
+      );
+    }
 
   return (
     <Box>

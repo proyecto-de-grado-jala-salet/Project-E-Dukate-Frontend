@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/pages/Dashboard/Dashboard.tsx
 
 "use client";
@@ -7,6 +8,7 @@ import { Box, Typography, TextField, InputAdornment, Button } from '@mui/materia
 import SearchIcon from '@mui/icons-material/Search';
 import { DashboardLayout } from '../../components/common/DashboardLayout';
 import { SpecialtiesTable } from '../../components/common/SpecialtiesTable';
+import { AddSpecialtyModal } from '../../components/common/AddSpecialtyModal';
 
 const tabMessages: { [key: string]: string } = {
   usuarios: 'Este es el botón de Usuarios',
@@ -17,9 +19,23 @@ const tabMessages: { [key: string]: string } = {
 
 export const Dashboard: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState('especialidades');
+  const [openModal, setOpenModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Para recargar la lista
 
   const handleTabChange = (tab: string) => {
     setSelectedTab(tab);
+  };
+
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleAddSuccess = () => {
+    setRefreshKey((prev) => prev + 1); // Incrementar para recargar la lista
   };
 
   return (
@@ -48,12 +64,18 @@ export const Dashboard: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: '#f5c71a', color: 'black', textTransform: 'none' }}
+                onClick={handleOpenModal}
               >
                 Añadir Especialidad
               </Button>
             </Box>
           </Box>
-          <SpecialtiesTable />
+          <SpecialtiesTable refreshList={() => setRefreshKey((prev) => prev + 1)} />
+          <AddSpecialtyModal
+            open={openModal}
+            onClose={handleCloseModal}
+            onAddSuccess={handleAddSuccess}
+          />
         </Box>
       ) : (
         <Box
