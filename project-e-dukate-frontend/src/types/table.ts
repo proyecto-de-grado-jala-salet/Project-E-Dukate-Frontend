@@ -7,9 +7,9 @@ export interface Specialty extends GenericItem {
   typeOfSpecialty: string;
 }
 
-export interface ColumnConfig<T extends GenericItem = GenericItem> {
+export interface ColumnConfig<T> {
   header: string;
   key: string;
-  width?: string | number;
-  render?: (item: T, index: number) => React.ReactNode;
+  width?: string;
+  render?: (item: T, index: number, pagination?: { currentPage: number; pageSize: number }) => React.ReactNode;
 }

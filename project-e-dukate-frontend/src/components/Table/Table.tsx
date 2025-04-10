@@ -3,18 +3,36 @@ import { Box, Typography, Table as MuiTable, TableBody, TableCell, TableContaine
 import { FaRegEdit } from "react-icons/fa";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ConfirmationDialog } from '../ConfirmationDialog';
+import { Pagination } from '../Pagination';
 import { GenericItem, ColumnConfig } from '../../types/table';
 
 interface TableProps<T extends GenericItem> {
-  items: T[];
+  items?: T[];
   columns: ColumnConfig<T>[];
   error: string | null;
   onEdit: (item: T) => void;
   onDelete: (id: string) => void;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  loading?: boolean;
   sx?: SxProps;
 }
 
-export const Table = <T extends GenericItem>({ items, columns, error, onEdit, onDelete, sx }: TableProps<T>) => {
+export const Table = <T extends GenericItem>({
+  items = [],
+  columns,
+  error,
+  onEdit,
+  onDelete,
+  totalPages,
+  currentPage,
+  pageSize, // Añadimos pageSize
+  onPageChange,
+  loading = false,
+  sx,
+}: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
 
@@ -28,8 +46,15 @@ export const Table = <T extends GenericItem>({ items, columns, error, onEdit, on
     onEdit(item);
   };
 
+  const toReactNode = (value: unknown): React.ReactNode => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return value;
+    return String(value);
+  };
+
+  if (loading) return <Typography variant="h6">Cargando...</Typography>;
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
-  if (items.length === 0) return <Typography variant="h6">No se encontraron elementos</Typography>;
+  if (!items || items.length === 0) return <Typography variant="h6">No se encontraron elementos</Typography>;
 
   return (
     <Box sx={sx}>
@@ -64,7 +89,9 @@ export const Table = <T extends GenericItem>({ items, columns, error, onEdit, on
                     key={col.key}
                     sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
                   >
-                    {col.render ? col.render(item, rowIndex) : (item[col.key] ?? '')}
+                    {col.render
+                      ? col.render(item, rowIndex, { currentPage, pageSize })
+                      : toReactNode(item[col.key])}
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
@@ -83,6 +110,11 @@ export const Table = <T extends GenericItem>({ items, columns, error, onEdit, on
           </TableBody>
         </MuiTable>
       </TableContainer>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
       <ConfirmationDialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}

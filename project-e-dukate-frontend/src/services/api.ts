@@ -9,10 +9,13 @@ export const apiRequest = async <T>(
   endpoint: ApiEndpoint,
   method: "GET" | "POST" | "PUT" | "DELETE",
   data?: unknown,
-  id?: string
+  id?: string,
+  query?: string
 ): Promise<T> => {
   const baseUrl = API_ENDPOINTS[endpoint];
-  const url = id && (method === "DELETE" || method === "PUT") ? `${baseUrl}/${id}` : baseUrl;
+  const url = id && (method === "DELETE" || method === "PUT")
+    ? `${baseUrl}/${id}${query || ''}`
+    : `${baseUrl}${query || ''}`;
   const options: RequestInit = {
     method,
     headers: { "Content-Type": "application/json" },
