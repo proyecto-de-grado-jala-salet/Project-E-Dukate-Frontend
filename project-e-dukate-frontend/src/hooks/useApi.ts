@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect, useCallback } from "react";
 import { API_ENDPOINTS, apiRequest } from "../services/api";
 import { showNotification } from "../services/notificationService";
@@ -28,7 +29,6 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         "pagination.PageSize": pageSize.toString(),
       });
       const result = await apiRequest<PagedResponse<T>>(endpoint, "GET", undefined, undefined, `?${queryParams}`);
-      console.log("Respuesta del backend:", result);
       if (!result || !result.items) {
         throw new Error("Formato de respuesta inválido: items no encontrado");
       }
@@ -38,7 +38,6 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
       setCurrentPage(result.pageNumber);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Error al cargar los datos";
-      console.error("Error en fetchData:", errorMessage);
       setError(errorMessage);
       showNotification(errorMessage, "error");
     } finally {
@@ -55,8 +54,17 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
       await apiRequest<T>(endpoint, "POST", item);
       await fetchData(currentPage);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al añadir el elemento";
-      showNotification(errorMessage, "error");
+      const response = await fetch(API_ENDPOINTS[endpoint], { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(item) 
+      }).catch(() => null);
+      let errorMessage = "Error al añadir el elemento";
+      if (response && !response.ok) {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      }
+      throw new Error(errorMessage); // Lanzamos el error para que el componente lo capture
     }
   };
 
@@ -65,18 +73,44 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
       await apiRequest<T>(endpoint, "PUT", item, id);
       await fetchData(currentPage);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al actualizar el elemento";
-      showNotification(errorMessage, "error");
+      const response = await fetch(`${API_ENDPOINTS[endpoint]}/${id}`, { 
+        method: "PUT", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(item) 
+      }).catch(() => null);
+      let errorMessage = "Error al actualizar el elemento";
+      if (response && !response.ok) {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
   };
 
   const deleteItem = async (id: string) => {
     try {
       await apiRequest<T>(endpoint, "DELETE", undefined, id);
-      await fetchData(currentPage);
+      const queryParams = new URLSearchParams({
+        "pagination.PageNumber": currentPage.toString(),
+        "pagination.PageSize": pageSize.toString(),
+      });
+      const result = await apiRequest<PagedResponse<T>>(endpoint, "GET", undefined, undefined, `?${queryParams}`);
+      
+      setData(result.items);
+      setTotalCount(result.totalCount);
+      setTotalPages(result.totalPages);
+
+      if (result.items.length === 0 && currentPage > 1) {
+        const previousPage = currentPage - 1;
+        await fetchData(previousPage);
+        return { success: true, movedToPrevious: true, newPage: previousPage };
+      }
+
+      return { success: true, movedToPrevious: false };
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Error al eliminar el elemento";
       showNotification(errorMessage, "error");
+      throw err;
     }
   };
 

@@ -26,6 +26,8 @@ export const Dashboard: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Specialty | null>(null);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null); // Nuevo estado para el error de añadir
   const { data: specialties, error, totalPages, currentPage, pageSize, loading, fetchData, addItem, updateItem, deleteItem } = useApi<Specialty>("specialties");
 
   const columns: ColumnConfig<Specialty>[] = [
@@ -46,32 +48,53 @@ export const Dashboard: React.FC = () => {
   const handleOpenAddModal = () => setOpenAddModal(true);
   const handleCloseAddModal = () => {
     setNewItem('');
+    setAddError(null); // Limpiar el error al cerrar
     setOpenAddModal(false);
   };
   const handleOpenEditModal = (item: Specialty) => {
     setSelectedItem(item);
     setNewItem(item.typeOfSpecialty);
+    setEditError(null);
     setOpenEditModal(true);
   };
   const handleCloseEditModal = () => {
     setNewItem('');
+    setEditError(null);
     setOpenEditModal(false);
   };
 
-  const handleAddSubmit = () => {
+  const handleAddSubmit = async () => {
     if (!newItem.trim()) return;
-    addItem({ typeOfSpecialty: newItem });
-    handleCloseAddModal();
+    try {
+      await addItem({ typeOfSpecialty: newItem });
+      handleCloseAddModal(); // Solo cerramos si el añadido es exitoso
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error desconocido";
+      setAddError(errorMessage); // Mostramos el error y mantenemos el modal abierto
+    }
   };
 
-  const handleEditSubmit = () => {
+  const handleEditSubmit = async () => {
     if (!newItem.trim() || !selectedItem) return;
-    updateItem(selectedItem.id, { typeOfSpecialty: newItem });
-    handleCloseEditModal();
+    try {
+      await updateItem(selectedItem.id, { typeOfSpecialty: newItem });
+      handleCloseEditModal();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error desconocido";
+      setEditError(errorMessage);
+    }
   };
 
   const handlePageChange = (page: number) => {
     fetchData(page);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteItem(id);
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+    }
   };
 
   return (
@@ -105,10 +128,10 @@ export const Dashboard: React.FC = () => {
                 columns={columns}
                 error={error}
                 onEdit={handleOpenEditModal}
-                onDelete={deleteItem}
+                onDelete={handleDelete}
                 totalPages={totalPages}
                 currentPage={currentPage}
-                pageSize={pageSize} // Pasamos pageSize
+                pageSize={pageSize}
                 onPageChange={handlePageChange}
                 loading={loading}
               />
@@ -119,6 +142,8 @@ export const Dashboard: React.FC = () => {
                   onChange={setNewItem}
                   autoComplete="off"
                   required
+                  error={!!addError}
+                  helperText={addError}
                 />
               </Modal>
               <Modal open={openEditModal} onClose={handleCloseEditModal} title="Editar Especialidad" onSubmit={handleEditSubmit}>
@@ -128,6 +153,8 @@ export const Dashboard: React.FC = () => {
                   onChange={setNewItem}
                   autoComplete="off"
                   required
+                  error={!!editError}
+                  helperText={editError}
                 />
               </Modal>
             </Box>
