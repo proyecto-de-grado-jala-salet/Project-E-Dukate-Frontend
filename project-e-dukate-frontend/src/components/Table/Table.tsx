@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { Box, Typography, Table as MuiTable, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, SxProps } from '@mui/material';
 import { FaRegEdit } from "react-icons/fa";
@@ -11,7 +12,7 @@ interface TableProps<T extends GenericItem> {
   columns: ColumnConfig<T>[];
   error: string | null;
   onEdit: (item: T) => void;
-  onDelete: (id: string) => void;
+  onDelete: (item: T) => void;
   totalPages: number;
   currentPage: number;
   pageSize: number;
@@ -28,7 +29,7 @@ export const Table = <T extends GenericItem>({
   onDelete,
   totalPages,
   currentPage,
-  pageSize, // Añadimos pageSize
+  pageSize,
   onPageChange,
   loading = false,
   sx,
@@ -37,7 +38,7 @@ export const Table = <T extends GenericItem>({
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
 
   const handleConfirmDelete = () => {
-    if (itemToDelete) onDelete(itemToDelete.id);
+    if (itemToDelete) onDelete(itemToDelete);
     setItemToDelete(null);
     setOpenDeleteDialog(false);
   };
@@ -64,7 +65,7 @@ export const Table = <T extends GenericItem>({
             <TableRow>
               {columns.map((col) => (
                 <TableCell
-                  key={col.key}
+                  key={col.key as string}
                   sx={{
                     color: "black",
                     fontWeight: "bold",
@@ -86,12 +87,12 @@ export const Table = <T extends GenericItem>({
               <TableRow key={item.id}>
                 {columns.map((col) => (
                   <TableCell
-                    key={col.key}
+                    key={col.key as string}
                     sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
                   >
                     {col.render
                       ? col.render(item, rowIndex, { currentPage, pageSize })
-                      : toReactNode(item[col.key])}
+                      : toReactNode((item as any)[col.key as string])}
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
@@ -120,7 +121,7 @@ export const Table = <T extends GenericItem>({
         onClose={() => setOpenDeleteDialog(false)}
         onConfirm={handleConfirmDelete}
         title="Confirmar Eliminación"
-        message={`¿Estás segura de eliminar "${itemToDelete?.typeOfSpecialty || 'este elemento'}"?`}
+        message={`¿Estás segura de eliminar "${(itemToDelete as any)?.typeOfSpecialty || (itemToDelete as any)?.names || 'este elemento'}"?`}
       />
     </Box>
   );

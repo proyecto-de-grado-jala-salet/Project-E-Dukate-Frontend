@@ -64,7 +64,7 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         const errorData = await response.json();
         errorMessage = errorData.error || errorMessage;
       }
-      throw new Error(errorMessage); // Lanzamos el error para que el componente lo capture
+      throw new Error(errorMessage);
     }
   };
 
@@ -87,9 +87,10 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
     }
   };
 
-  const deleteItem = async (id: string) => {
+  const deleteItem = async (id: string, role?: string) => {
     try {
-      await apiRequest<T>(endpoint, "DELETE", undefined, id);
+      const query = role ? `?role=${role}` : "";
+      await apiRequest<T>(endpoint, "DELETE", undefined, id, query);
       const queryParams = new URLSearchParams({
         "pagination.PageNumber": currentPage.toString(),
         "pagination.PageSize": pageSize.toString(),

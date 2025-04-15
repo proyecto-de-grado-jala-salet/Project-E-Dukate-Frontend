@@ -1,33 +1,28 @@
 export const API_ENDPOINTS = {
   specialties: "http://localhost:8080/api/Specialties",
-  // patients: "http://localhost:8080/api/Patients",
-} as const;
-
-type ApiEndpoint = keyof typeof API_ENDPOINTS;
+  users: "http://localhost:8080/api/Users", // Nuevo endpoint
+};
 
 export const apiRequest = async <T>(
-  endpoint: ApiEndpoint,
-  method: "GET" | "POST" | "PUT" | "DELETE",
-  data?: unknown,
+  endpoint: keyof typeof API_ENDPOINTS,
+  method: string,
+  body?: unknown,
   id?: string,
   query?: string
 ): Promise<T> => {
-  const baseUrl = API_ENDPOINTS[endpoint];
-  const url = id && (method === "DELETE" || method === "PUT")
-    ? `${baseUrl}/${id}${query || ''}`
-    : `${baseUrl}${query || ''}`;
+  const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ""}` : `${API_ENDPOINTS[endpoint]}${query || ""}`;
   const options: RequestInit = {
     method,
-    headers: { "Content-Type": "application/json" },
-    body: data && method !== "DELETE" ? JSON.stringify(data) : undefined,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: body ? JSON.stringify(body) : undefined,
   };
 
   const response = await fetch(url, options);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Error en ${method} a ${url}`);
+    throw new Error(`Error en ${method} a ${url}: ${response.statusText}`);
   }
 
-  if (response.status === 204) return true as T;
-  return response.json();
+  return response.status === 204 ? ({} as T) : response.json();
 };
