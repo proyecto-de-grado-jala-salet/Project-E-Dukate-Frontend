@@ -1,0 +1,14 @@
+"use client";
+
+import React from 'react';
+import { Box, Typography } from '@mui/material';
+
+export const Metrics: React.FC = () => {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Typography variant="h5">This is the Metrics section</Typography>
+    </Box>
+  );
+};
+
+export default Metrics;
