@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <Box sx={{ display: 'flex', height: '100vh' }}>
       <Sidebar selectedTab={getSelectedTab()} />
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Header userName="Cara Martinez" userRole="Administrator" />
+        <Header userName="Cara Martinez" userRole="Administrador" />
         <Box sx={{ flex: 1, bgcolor: '#f5f5f5', p: 3, overflow: 'auto' }}>
           {children}
         </Box>

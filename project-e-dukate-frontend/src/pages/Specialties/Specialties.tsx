@@ -33,7 +33,7 @@ export const Specialties: React.FC = () => {
 
   const specialtyColumns: ColumnConfig<Specialty>[] = [
     { header: '', key: 'spacerLeft', width: '5%' },
-    { header: 'Specialties', key: 'typeOfSpecialty', width: '5%' },
+    { header: 'Especialidad', key: 'typeOfSpecialty', width: '5%' },
     { header: '', key: 'spacerRight', width: '65%' },
   ];
 
@@ -95,10 +95,10 @@ export const Specialties: React.FC = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Specialties</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Especialidades</Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
-            placeholder="Search specialty name"
+            placeholder="Buscar especialidad"
             value={searchTerm}
             onChange={setSearchTerm}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
@@ -108,7 +108,7 @@ export const Specialties: React.FC = () => {
             }}
           />
           <Button
-            label="Add Specialty"
+            label="Añadir Especialidad"
             variant="contained"
             sx={{ bgcolor: '#f5c71a', color: 'black' }}
             onClick={handleOpenAddModal}
@@ -130,11 +130,11 @@ export const Specialties: React.FC = () => {
       <Modal
         open={openAddModal}
         onClose={handleCloseAddModal}
-        title="Add New Specialty"
+        title="Añadir Nueva Especialidad"
         onSubmit={handleAddSubmit}
       >
         <TextField
-          label="Specialty Name"
+          label="Nombre de la Especialidad"
           value={newItem}
           onChange={setNewItem}
           autoComplete="off"
@@ -146,11 +146,11 @@ export const Specialties: React.FC = () => {
       <Modal
         open={openEditModal}
         onClose={handleCloseEditModal}
-        title="Edit Specialty"
+        title="Editar Especialidad"
         onSubmit={handleEditSubmit}
       >
         <TextField
-          label="Specialty Name"
+          label="Nombre de la Especialidad"
           value={newItem}
           onChange={setNewItem}
           autoComplete="off"

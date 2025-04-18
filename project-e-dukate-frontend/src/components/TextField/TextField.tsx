@@ -12,8 +12,8 @@ interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange'> {
   sx?: SxProps;
   select?: boolean;
   children?: React.ReactNode;
-  error?: boolean | undefined; // Explicitly define error as boolean | undefined
-  helperText?: string | null;  // Separate prop for the error message
+  error?: boolean | undefined;
+  helperText?: string | null;
 }
 
 export const TextField: React.FC<CustomTextFieldProps> = ({
@@ -55,8 +55,8 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
       label={renderLabel()}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      error={error} // Now correctly typed as boolean | undefined
-      helperText={helperText} // Pass the string or null directly
+      error={error}
+      helperText={helperText}
       type={inputType}
       fullWidth
       autoComplete={autoComplete}

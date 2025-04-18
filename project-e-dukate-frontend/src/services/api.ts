@@ -1,6 +1,6 @@
 export const API_ENDPOINTS = {
   specialties: "http://localhost:8080/api/Specialties",
-  users: "http://localhost:8080/api/Users", // Nuevo endpoint
+  users: "http://localhost:8080/api/Users",
 };
 
 export const apiRequest = async <T>(

@@ -23,11 +23,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const router = useRouter();
 
   const menuItems: MenuItem[] = [
-    { label: 'Specialties', icon: <FaStethoscope size={20} />, value: 'especialidades' },
-    { label: 'Users', icon: <PeopleAltOutlinedIcon />, value: 'usuarios' },
-    { label: 'Payments', icon: <PaymentsOutlinedIcon />, value: 'pagos' },
-    { label: 'Schedules', icon: <CalendarMonthOutlinedIcon />, value: 'horarios' },
-    { label: 'Metrics', icon: <BarChartIcon />, value: 'metricas' },
+    { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades' },
+    { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios' },
+    { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos' },
+    { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios' },
+    { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas' },
   ];
 
   const handleLogout = () => router.push('/login');

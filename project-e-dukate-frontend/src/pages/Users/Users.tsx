@@ -7,6 +7,7 @@ import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
 import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
+import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
 
 interface User {
@@ -19,6 +20,7 @@ interface User {
 }
 
 export const Users: React.FC = () => {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const {
     data: users,
@@ -32,9 +34,9 @@ export const Users: React.FC = () => {
   } = useApi<User>("users");
 
   const userColumns: ColumnConfig<User>[] = [
-    { header: 'Name', key: 'names', width: '20%' },
+    { header: 'Nombre(s)', key: 'names', width: '20%' },
     {
-      header: 'Last Name',
+      header: 'Apellido',
       key: 'lastName',
       width: '20%',
       render: (item) => `${item.lastNamePaternal} ${item.lastNameMaternal || ''}`.trim(),
@@ -59,7 +61,7 @@ export const Users: React.FC = () => {
         </span>
       ),
     },
-    { header: 'Mobile', key: 'mobileNumber', width: '20%' },
+    { header: 'Celular', key: 'mobileNumber', width: '20%' },
   ];
 
   const handlePageChange = (page: number) => {
@@ -74,13 +76,17 @@ export const Users: React.FC = () => {
     }
   };
 
+  const handleAddUser = () => {
+    router.push('/dashboard/usuarios/agregar');
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Users</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Usuarios</Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
-            placeholder="Search user name"
+            placeholder="Buscar nombre de usuario"
             value={searchTerm}
             onChange={setSearchTerm}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
@@ -90,10 +96,10 @@ export const Users: React.FC = () => {
             }}
           />
           <Button
-            label="Add User"
+            label="Añadir Usuario"
             variant="contained"
             sx={{ bgcolor: '#f5c71a', color: 'black' }}
-            onClick={() => alert("Add user functionality not implemented yet")}
+            onClick={handleAddUser}
           />
         </Box>
       </Box>
