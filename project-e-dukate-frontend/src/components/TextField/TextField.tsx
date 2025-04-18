@@ -12,7 +12,7 @@ interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange'> {
   sx?: SxProps;
   select?: boolean;
   children?: React.ReactNode;
-  error?: boolean | undefined;
+  error?: boolean;
   helperText?: string | null;
 }
 

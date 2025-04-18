@@ -18,10 +18,10 @@ interface PersonalInfoFormProps {
     mobileNumber: string;
   };
   handleInputChange: (field: keyof PersonalInfoFormProps['formData']) => (value: string) => void;
+  errors?: { [key: string]: string };
 }
 
-export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, handleInputChange }) => {
-
+export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, handleInputChange, errors = {} }) => {
   const birthDateValue = formData.birthDate ? dayjs(formData.birthDate, 'YYYY-MM-DD') : null;
 
   const handleDateChange = (newValue: dayjs.Dayjs | null) => {
@@ -30,7 +30,7 @@ export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, ha
   };
 
   return (
-    <FormSection title="Personal Information">
+    <FormSection title="Información Personal">
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Box sx={{ width: "150px" }}>
           <Typography variant="body1" sx={{ fontWeight: "bold" }}>
@@ -45,17 +45,23 @@ export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, ha
                 value: formData.names,
                 onChange: handleInputChange("names"),
                 required: true,
+                error: !!errors.names,
+                helperText: errors.names,
               },
               {
                 label: "Apellido Paterno",
                 value: formData.lastNamePaternal,
                 onChange: handleInputChange("lastNamePaternal"),
                 required: true,
+                error: !!errors.lastNamePaternal,
+                helperText: errors.lastNamePaternal,
               },
               {
                 label: "Apellido Materno",
                 value: formData.lastNameMaternal,
                 onChange: handleInputChange("lastNameMaternal"),
+                error: !!errors.lastNameMaternal,
+                helperText: errors.lastNameMaternal,
               },
             ]}
           />
@@ -89,36 +95,37 @@ export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, ha
             onChange: handleInputChange("birthDate"),
 
             render: () => (
-              <LocalizationProvider
-                dateAdapter={AdapterDayjs}
-                adapterLocale="es"
-              >
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                 <DatePicker
                   value={birthDateValue}
                   onChange={handleDateChange}
                   format="YYYY-MM-DD"
                   slotProps={{
                     textField: {
-                      variant: "outlined",
+                      variant: 'outlined',
                       fullWidth: true,
                       label: (
                         <Typography variant="body1">
                           Fecha de Nacimiento
-                          <span style={{ color: "red" }}> *</span>
+                          <span style={{ color: 'red' }}> *</span>
                         </Typography>
                       ),
+                      error: !!errors.dateOfBirth || !!errors.birthDate,
+                      helperText: errors.dateOfBirth || errors.birthDate,
                     },
                   }}
                 />
               </LocalizationProvider>
             ),
-            required: true,
           },
           {
             label: "Nro. Celular",
             value: formData.mobileNumber,
             onChange: handleInputChange("mobileNumber"),
             required: true,
+            error: !!errors.mobileNumber,
+            helperText: errors.mobileNumber,
+            startAdornment: "+591",
           },
         ]}
       />

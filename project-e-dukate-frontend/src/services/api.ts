@@ -1,6 +1,8 @@
 export const API_ENDPOINTS = {
-  specialties: "http://localhost:8080/api/Specialties",
-  users: "http://localhost:8080/api/Users",
+  specialties: 'http://localhost:8080/api/Specialties',
+  users: 'http://localhost:8080/api/Users',
+  administrators: 'http://localhost:8080/api/Administrators',
+  specialists: 'http://localhost:8080/api/Specialists',
 };
 
 export const apiRequest = async <T>(
@@ -10,11 +12,11 @@ export const apiRequest = async <T>(
   id?: string,
   query?: string
 ): Promise<T> => {
-  const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ""}` : `${API_ENDPOINTS[endpoint]}${query || ""}`;
+  const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ''}` : `${API_ENDPOINTS[endpoint]}${query || ''}`;
   const options: RequestInit = {
     method,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: body ? JSON.stringify(body) : undefined,
   };

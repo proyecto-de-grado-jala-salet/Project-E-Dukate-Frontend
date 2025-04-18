@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, List, ListItemButton, ListItemIcon, ListItemText, SxProps } from '@mui/material';
 import { FaStethoscope } from "react-icons/fa";
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import { RiUserHeartLine } from "react-icons/ri";
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -25,6 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const menuItems: MenuItem[] = [
     { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades' },
     { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios' },
+    { label: 'Paciente', icon: <RiUserHeartLine size={25}/>, value: 'paciente' },
     { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos' },
     { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios' },
     { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas' },

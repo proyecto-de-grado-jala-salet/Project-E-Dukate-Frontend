@@ -7,7 +7,8 @@ interface DropdownProps {
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   required?: boolean;
-  error?: string;
+  error?: boolean; // Cambiar a booleano
+  helperText?: string;
   sx?: object;
 }
 
@@ -16,8 +17,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
   value,
   onChange,
   options,
-  required = false,
-  error,
+  required,
+  error = false,
+  helperText,
   sx,
 }) => {
   return (
@@ -44,7 +46,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         }}
       >
         <MenuItem value="">
-          <em>Select an option</em>
+          <em>Seleccione una opción</em>
         </MenuItem>
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>
@@ -52,7 +54,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           </MenuItem>
         ))}
       </Select>
-      {error && <FormHelperText>{error}</FormHelperText>}
+      {helperText && <FormHelperText>{helperText}</FormHelperText>}
     </FormControl>
   );
 };

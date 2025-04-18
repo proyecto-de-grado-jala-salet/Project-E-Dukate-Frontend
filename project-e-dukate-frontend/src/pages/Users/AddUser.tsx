@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { Button } from '../../components/Button';
 import { useRouter } from 'next/navigation';
-import { useApi } from '../../hooks/useApi';
+import { addAdministrator, addSpecialist } from '../../services/userService';
 import {
   RoleSelector,
   PersonalInfoForm,
@@ -12,25 +12,8 @@ import {
   AdministratorForm,
   SpecialistForm,
 } from '../../components/FormComponents';
-
-interface User {
-  id: string;
-  names: string;
-  lastNamePaternal: string;
-  lastNameMaternal: string;
-  gender: 'Femenino' | 'Masculino';
-  birthDate: string;
-  mobileNumber: string;
-  role: string;
-  idNumber: string;
-  phoneNumber: string;
-  address: string;
-  email: string;
-  password: string;
-  code?: string;
-  position?: string;
-  yearsOfExperience?: string;
-}
+import { validateAdministrator, validateSpecialist } from '../../utils/validators';
+import { AdministratorDto, SpecialistDto } from '../../types/user';
 
 interface AddUserProps {
   initialRole?: string | null;
@@ -38,7 +21,6 @@ interface AddUserProps {
 
 export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
   const router = useRouter();
-  const { addItem: addUser } = useApi<User>("users");
   const [role, setRole] = useState<string | null>(initialRole);
   const [formData, setFormData] = useState({
     names: '',
@@ -56,69 +38,90 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
     position: '',
     yearsOfExperience: '',
   });
-  const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [backendError, setBackendError] = useState<string | null>(null);
 
   const handleInputChange = (field: keyof typeof formData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormErrors((prev) => ({ ...prev, [field]: '' }));
   };
 
-  const validateForm = () => {
-    const requiredFields = [
-      'names',
-      'lastNamePaternal',
-      'gender',
-      'birthDate',
-      'mobileNumber',
-      'idNumber',
-      'address',
-      'email',
-      'password',
-    ];
-
-    if (role === 'Specialist') {
-      requiredFields.push('code', 'position', 'yearsOfExperience');
+  const calculateAge = (birthDate: string): number => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
     }
-
-    const missingFields = requiredFields.filter((field) => !formData[field as keyof typeof formData]);
-    if (missingFields.length > 0) {
-      setError(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      return false;
-    }
-    setError(null);
-    return true;
+    return age;
   };
 
   const handleSubmit = async () => {
     if (!role) return;
-    if (!validateForm()) return;
 
-    try {
-      const userData: Partial<User> = {
-        names: formData.names,
-        lastNamePaternal: formData.lastNamePaternal,
-        lastNameMaternal: formData.lastNameMaternal,
-        gender: formData.gender,
-        birthDate: formData.birthDate,
-        mobileNumber: formData.mobileNumber,
-        role,
-        idNumber: formData.idNumber,
-        phoneNumber: formData.phoneNumber,
-        address: formData.address,
+    setBackendError(null);
+    setFormErrors({});
+
+    const baseUserData = {
+      names: formData.names,
+      lastNamePaternal: formData.lastNamePaternal,
+      lastNameMaternal: formData.lastNameMaternal || undefined,
+      mobileNumber: formData.mobileNumber,
+      identityCard: parseInt(formData.idNumber, 10) || 0,
+      phoneNumber: formData.phoneNumber || undefined,
+      age: calculateAge(formData.birthDate),
+      gender: formData.gender === 'Femenino' ? 'F' : 'M',
+      dateOfBirth: formData.birthDate,
+      address: formData.address,
+    };
+
+    let errors: { [key: string]: string } = {};
+
+    if (role === 'Administrator') {
+      const adminData: AdministratorDto = {
+        ...baseUserData,
         email: formData.email,
         password: formData.password,
       };
-
-      if (role === 'Specialist') {
-        userData.code = formData.code;
-        userData.position = formData.position;
-        userData.yearsOfExperience = formData.yearsOfExperience;
+      errors = validateAdministrator(adminData);
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
       }
-
-      await addUser(userData);
-      router.push('/dashboard/usuarios');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Error adding user";
-      setError(errorMessage);
+      try {
+        await addAdministrator(adminData);
+        router.push('/dashboard/usuarios');
+      } catch (err) {
+        setBackendError(err instanceof Error ? err.message : 'Error al añadir administrador');
+      }
+    } else if (role === 'Specialist') {
+      const specialistData: SpecialistDto = {
+        ...baseUserData,
+        email: formData.email,
+        password: formData.password,
+        typeOfSpecialty: formData.position,
+        yearsOfExperience: parseInt(formData.yearsOfExperience, 10) || 0,
+        specialistCode: formData.code,
+      };
+      errors = validateSpecialist(specialistData);
+      if (Object.keys(errors).length > 0) {
+        // Mapear errores a los nombres de los campos del formulario
+        const mappedErrors = {
+          ...errors,
+          code: errors.specialistCode,
+          position: errors.typeOfSpecialty,
+          yearsOfExperience: errors.yearsOfExperience,
+        };
+        setFormErrors(mappedErrors);
+        return;
+      }
+      try {
+        await addSpecialist(specialistData);
+        router.push('/dashboard/usuarios');
+      } catch (err) {
+        setBackendError(err instanceof Error ? err.message : 'Error al añadir especialista');
+      }
     }
   };
 
@@ -144,17 +147,17 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
       </Typography>
       <RoleSelector selectedRole={role} onRoleSelect={setRole} />
 
-      <PersonalInfoForm formData={formData} handleInputChange={handleInputChange} />
-      <GeneralInfoForm formData={formData} handleInputChange={handleInputChange} />
+      <PersonalInfoForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
+      <GeneralInfoForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
       {role === 'Administrator' ? (
-        <AdministratorForm formData={formData} handleInputChange={handleInputChange} />
+        <AdministratorForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
       ) : (
-        <SpecialistForm formData={formData} handleInputChange={handleInputChange} />
+        <SpecialistForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
       )}
 
-      {error && (
+      {backendError && (
         <Typography color="error" sx={{ mb: 2 }}>
-          {error}
+          {backendError}
         </Typography>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>

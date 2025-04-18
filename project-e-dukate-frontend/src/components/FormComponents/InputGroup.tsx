@@ -8,6 +8,11 @@ interface InputField {
   onChange: (value: string) => void;
   required?: boolean;
   render?: () => React.ReactNode;
+  startAdornment?: string;
+  type?: string;
+  showToggle?: boolean;
+  error?: boolean;
+  helperText?: string;
 }
 
 interface InputGroupProps {
@@ -27,6 +32,11 @@ export const InputGroup: React.FC<InputGroupProps> = ({ fields }) => {
               value={field.value}
               onChange={field.onChange}
               required={field.required}
+              startAdornment={field.startAdornment}
+              type={field.type}
+              showToggle={field.showToggle}
+              error={field.error}
+              helperText={field.helperText}
               sx={{ flex: 1 }}
             />
           )}
