@@ -8,7 +8,7 @@ interface AdministratorFormProps {
     password: string;
   };
   handleInputChange: (field: keyof AdministratorFormProps['formData']) => (value: string) => void;
-  errors?: { [key: string]: string }; // Nueva prop para errores
+  errors?: { [key: string]: string };
 }
 
 export const AdministratorForm: React.FC<AdministratorFormProps> = ({ formData, handleInputChange, errors = {} }) => {
@@ -30,7 +30,7 @@ export const AdministratorForm: React.FC<AdministratorFormProps> = ({ formData, 
             onChange: handleInputChange('password'),
             required: true,
             type: 'password',
-            showToggle: true, // Activar el "ojito"
+            showToggle: true,
             error: !!errors.password,
             helperText: errors.password,
           },

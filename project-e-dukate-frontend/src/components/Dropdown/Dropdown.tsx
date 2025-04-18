@@ -7,7 +7,7 @@ interface DropdownProps {
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   required?: boolean;
-  error?: boolean; // Cambiar a booleano
+  error?: boolean;
   helperText?: string;
   sx?: object;
 }
