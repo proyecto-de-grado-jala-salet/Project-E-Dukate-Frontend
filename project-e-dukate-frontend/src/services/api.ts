@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
   users: 'http://localhost:8080/api/Users',
   administrators: 'http://localhost:8080/api/Administrators',
   specialists: 'http://localhost:8080/api/Specialists',
+  patients: 'http://localhost:8080/api/Patients',
 };
 
 export const apiRequest = async <T>(

@@ -26,7 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const menuItems: MenuItem[] = [
     { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades' },
     { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios' },
-    { label: 'Paciente', icon: <RiUserHeartLine size={25}/>, value: 'paciente' },
+    { label: 'Pacientes', icon: <RiUserHeartLine size={25}/>, value: 'pacientes' },
     { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos' },
     { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios' },
     { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas' },
