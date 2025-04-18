@@ -106,7 +106,6 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
       };
       errors = validateSpecialist(specialistData);
       if (Object.keys(errors).length > 0) {
-        // Mapear errores a los nombres de los campos del formulario
         const mappedErrors = {
           ...errors,
           code: errors.specialistCode,

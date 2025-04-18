@@ -1,5 +1,4 @@
-// src/utils/validators.ts
-import { AdministratorDto, SpecialistDto } from '../types/user';
+import { AdministratorDto, PatientDto, SpecialistDto } from '../types/user';
 
 interface ValidationErrors {
   [key: string]: string;
@@ -76,6 +75,51 @@ export const validateSpecialist = (data: SpecialistDto): ValidationErrors => {
     errors.yearsOfExperience = 'Los años de experiencia son obligatorios.';
   else if (data.yearsOfExperience < 0)
     errors.yearsOfExperience = 'Los años de experiencia deben ser un número positivo.';
+
+  return errors;
+};
+
+export const validatePatient = (data: PatientDto): ValidationErrors => {
+  const errors: ValidationErrors = {};
+
+  if (!data.names) errors.names = 'Los nombres son obligatorios.';
+  else if (data.names.length < 2 || data.names.length > 50)
+    errors.names = 'Los nombres deben tener entre 2 y 50 caracteres.';
+
+  if (!data.lastNamePaternal) errors.lastNamePaternal = 'El apellido paterno es obligatorio.';
+  else if (data.lastNamePaternal.length < 2 || data.lastNamePaternal.length > 50)
+    errors.lastNamePaternal = 'El apellido paterno debe tener entre 2 y 50 caracteres.';
+
+  if (data.lastNameMaternal && (data.lastNameMaternal.length < 2 || data.lastNameMaternal.length > 50))
+    errors.lastNameMaternal = 'El apellido materno debe tener entre 2 y 50 caracteres.';
+
+  if (!data.mobileNumber) errors.mobileNumber = 'El número de celular es obligatorio.';
+  else if (!/^[67]\d{7}$/.test(data.mobileNumber))
+    errors.mobileNumber = 'El número de celular debe empezar con 6 o 7 y tener 8 dígitos.';
+
+  if (!data.identityCard) errors.identityCard = 'La cédula de identidad es obligatoria.';
+  else if (data.identityCard.toString().length < 7 || data.identityCard.toString().length > 8)
+    errors.identityCard = 'La cédula de identidad debe tener entre 7 y 8 dígitos.';
+
+  if (data.phoneNumber && !/^\d{8}$/.test(data.phoneNumber))
+    errors.phoneNumber = 'El número de teléfono debe tener 8 dígitos.';
+
+  if (!data.age) errors.age = 'La edad es obligatoria.';
+  else if (data.age < 0 || data.age > 100) errors.age = 'La edad debe estar entre 0 y 100 años.';
+
+  if (!data.gender) errors.gender = 'El género es obligatorio.';
+  else if (data.gender !== 'M' && data.gender !== 'F')
+    errors.gender = 'El género debe ser "M" o "F".';
+
+  if (!data.dateOfBirth) errors.dateOfBirth = 'La fecha de nacimiento es obligatoria.';
+  else {
+    const birthDate = new Date(data.dateOfBirth);
+    const today = new Date();
+    if (birthDate > today) errors.dateOfBirth = 'La fecha de nacimiento no puede ser futura.';
+  }
+
+  if (!data.address) errors.address = 'La dirección es obligatoria.';
+  else if (data.address.length > 200) errors.address = 'La dirección no debe exceder los 200 caracteres.';
 
   return errors;
 };

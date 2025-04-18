@@ -32,7 +32,7 @@ export const Patients: React.FC = () => {
     loading: patientsLoading,
     fetchData: fetchPatients,
     deleteItem: deletePatient,
-  } = useApi<Patient>("patients");
+  } = useApi<Patient>('patients');
 
   const patientColumns: ColumnConfig<Patient>[] = [
     { header: 'Nombre', key: 'names', width: '20%' },
@@ -44,7 +44,7 @@ export const Patients: React.FC = () => {
     },
     { header: 'Celular', key: 'mobileNumber', width: '20%' },
     { header: 'CI', key: 'identityCard', width: '20%' },
-    { header: 'Age', key: 'age', width: '10%' },
+    { header: 'Edad', key: 'age', width: '10%' },
   ];
 
   const handlePageChange = (page: number) => {
@@ -55,24 +55,13 @@ export const Patients: React.FC = () => {
     try {
       await deletePatient(item.id);
     } catch (err) {
-      console.error("Error deleting patient:", err);
+      console.error('Error deleting patient:', err);
     }
   };
 
   const handleAddPatient = () => {
     router.push('/dashboard/pacientes/agregar');
   };
-
-  const handleEdit = (item: Patient) => {
-    router.push(`/dashboard/pacientes/editar/${item.id}`);
-  };
-
-  // Filter patients based on search term
-  const filteredPatients = patients?.filter((patient) =>
-    `${patient.names} ${patient.lastNamePaternal} ${patient.lastNameMaternal || ''}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
 
   return (
     <Box>
@@ -100,10 +89,10 @@ export const Patients: React.FC = () => {
         </Box>
       </Box>
       <Table
-        items={filteredPatients ?? []}
+        items={patients ?? []}
         columns={patientColumns}
         error={patientsError}
-        onEdit={handleEdit}
+        onEdit={(item) => alert(`Edit patient (${item.id}) functionality not implemented yet`)}
         onDelete={handleDelete}
         totalPages={patientsTotalPages}
         currentPage={patientsCurrentPage}

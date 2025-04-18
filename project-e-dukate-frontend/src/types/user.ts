@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BaseUserDto {
   names: string;
   lastNamePaternal: string;
@@ -23,3 +24,5 @@ export interface SpecialistDto extends BaseUserDto {
   yearsOfExperience: number;
   specialistCode: string;
 }
+
+export interface PatientDto extends BaseUserDto {}
