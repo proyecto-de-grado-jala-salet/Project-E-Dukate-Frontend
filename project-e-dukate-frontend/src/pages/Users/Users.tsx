@@ -42,7 +42,7 @@ export const Users: React.FC = () => {
       render: (item) => `${item.lastNamePaternal} ${item.lastNameMaternal || ''}`.trim(),
     },
     {
-      header: 'Role',
+      header: 'Rol',
       key: 'role',
       width: '20%',
       render: (item) => (
@@ -64,6 +64,10 @@ export const Users: React.FC = () => {
     { header: 'Celular', key: 'mobileNumber', width: '20%' },
   ];
 
+  const handleAddUser = () => {
+    router.push('/dashboard/usuarios/agregar');
+  };
+
   const handlePageChange = (page: number) => {
     fetchUsers(page);
   };
@@ -76,17 +80,22 @@ export const Users: React.FC = () => {
     }
   };
 
-  const handleAddUser = () => {
-    router.push('/dashboard/usuarios/agregar');
+  const handleEdit = async (item: User) => {
+    try {
+      router.push(`/dashboard/usuarios/editar/${item.id}?role=${item.role}`);
+    } catch (err) {
+      console.error('Error navigating to edit page:', err);
+      alert('Error al navegar a la página de edición');
+    }
   };
 
   return (
-    <Box>
+    <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Usuarios</Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <TextField
-            placeholder="Buscar nombre de usuario"
+            placeholder="Buscar usuario"
             value={searchTerm}
             onChange={setSearchTerm}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
@@ -107,7 +116,7 @@ export const Users: React.FC = () => {
         items={users ?? []}
         columns={userColumns}
         error={usersError}
-        onEdit={(item) => alert(`Edit user (${item.id}) functionality not implemented yet`)}
+        onEdit={handleEdit}
         onDelete={handleDelete}
         totalPages={usersTotalPages}
         currentPage={usersCurrentPage}
