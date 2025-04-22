@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/services/api';
 import { showNotification } from '@/services/notificationService';
 import { BaseUser, UserRole, SpecialistResponse, Administrator, Specialist } from '@/types/userTypes';
+import { useUserEditStore } from '@/stores/userStore';
 
 interface UseUserEditProps<T extends BaseUser> {
   role: UserRole | null;
@@ -15,6 +16,8 @@ interface UseUserEditResult<T extends BaseUser> {
   userData: T | null;
   formData: T | null;
   loading: boolean;
+  isSubmitting: boolean;
+  isUpdateSuccessful: boolean;
   error: string | null;
   handleSubmit: () => Promise<void>;
   setFormData: React.Dispatch<React.SetStateAction<T | null>>;
@@ -22,9 +25,12 @@ interface UseUserEditResult<T extends BaseUser> {
 
 export const useUserEdit = <T extends BaseUser>({ role, id }: UseUserEditProps<T>): UseUserEditResult<T> => {
   const router = useRouter();
+  const { clearUserEditData } = useUserEditStore();
   const [userData, setUserData] = useState<T | null>(null);
   const [formData, setFormData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdateSuccessful, setIsUpdateSuccessful] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,21 +60,30 @@ export const useUserEdit = <T extends BaseUser>({ role, id }: UseUserEditProps<T
       }
     };
 
-    fetchUserData();
+    if (id) {
+      fetchUserData();
+    } else {
+      setError('No se proporcionó un ID de usuario');
+      setLoading(false);
+    }
   }, [id, role]);
 
   const handleSubmit = async () => {
     if (!formData) return;
     try {
+      setIsSubmitting(true);
       if (role === 'Administrator') {
         const { id, ...dataToSend } = formData as Administrator;
         await apiRequest('administrators', 'PUT', dataToSend, id);
-        router.push('/dashboard/usuarios');
       } else if (role === 'Specialist') {
         const { id, ...dataToSend } = formData as unknown as Specialist;
         await apiRequest('specialists', 'PUT', dataToSend, id);
-        router.push('/dashboard/usuarios');
       }
+      setIsUpdateSuccessful(true);
+      router.push('/dashboard/usuarios');
+      setTimeout(() => {
+        clearUserEditData();
+      }, 100);
     } catch (err: any) {
       console.error('Error updating user:', err);
       const errorMessage = err.message || 'Error al actualizar los datos';
@@ -79,8 +94,10 @@ export const useUserEdit = <T extends BaseUser>({ role, id }: UseUserEditProps<T
       } catch (parseError) {
         showNotification(errorMessage, 'error');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  return { userData, formData, loading, error, handleSubmit, setFormData };
+  return { userData, formData, loading, isSubmitting, isUpdateSuccessful, error, handleSubmit, setFormData };
 };

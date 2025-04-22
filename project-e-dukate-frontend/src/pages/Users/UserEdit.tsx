@@ -14,9 +14,10 @@ interface UserEditProps<T extends BaseUser> {
   role: UserRole | null;
   handleSubmit: () => Promise<void>;
   setFormData: React.Dispatch<React.SetStateAction<T | null>>;
+  isSubmitting?: boolean;
 }
 
-export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, setFormData }: UserEditProps<T>) => {
+export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, setFormData, isSubmitting }: UserEditProps<T>) => {
   const router = useRouter();
 
   const handlePersonalInfoChange = (
@@ -141,13 +142,15 @@ export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, set
         <Button
           variant="outlined"
           onClick={handleCancel}
+          disabled={isSubmitting}
         >
           Cancelar
         </Button>
         <Button
           variant="contained"
           onClick={handleSubmit}
-          sx={{ bgcolor: '#f5c71a', color: 'black'}}
+          disabled={isSubmitting}
+          sx={{ bgcolor: '#f5c71a', color: 'black' }}
         >
           Actualizar
         </Button>

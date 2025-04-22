@@ -9,6 +9,7 @@ import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
+import { useUserEditStore } from '../../stores/userStore';
 
 interface User {
   id: string;
@@ -22,6 +23,7 @@ interface User {
 export const Users: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const { setUserEditData } = useUserEditStore();
   const {
     data: users,
     error: usersError,
@@ -82,7 +84,13 @@ export const Users: React.FC = () => {
 
   const handleEdit = async (item: User) => {
     try {
-      router.push(`/dashboard/usuarios/editar/${item.id}?role=${item.role}`);
+      setUserEditData(item.id, item.role);
+      const userNameSlug = `${item.names}-${item.lastNamePaternal}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      router.push(`/dashboard/usuarios/editar/${userNameSlug}?role=${item.role}`);
     } catch (err) {
       console.error('Error navigating to edit page:', err);
       alert('Error al navegar a la página de edición');
