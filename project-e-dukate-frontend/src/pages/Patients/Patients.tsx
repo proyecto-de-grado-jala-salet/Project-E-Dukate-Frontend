@@ -9,6 +9,7 @@ import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
+import { useEditStore } from '../../stores/editStore';
 
 interface Patient {
   id: string;
@@ -23,6 +24,7 @@ interface Patient {
 export const Patients: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const { setEditData } = useEditStore();
   const {
     data: patients,
     error: patientsError,
@@ -63,6 +65,21 @@ export const Patients: React.FC = () => {
     router.push('/dashboard/pacientes/agregar');
   };
 
+  const handleEdit = async (item: Patient) => {
+    try {
+      setEditData(item.id, '', 'patient');
+      const patientNameSlug = `${item.names}-${item.lastNamePaternal}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      router.push(`/dashboard/pacientes/editar/${patientNameSlug}`);
+    } catch (err) {
+      console.error('Error navigating to edit page:', err);
+      alert('Error al navegar a la página de edición');
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -92,7 +109,7 @@ export const Patients: React.FC = () => {
         items={patients ?? []}
         columns={patientColumns}
         error={patientsError}
-        onEdit={(item) => alert(`Edit patient (${item.id}) functionality not implemented yet`)}
+        onEdit={handleEdit}
         onDelete={handleDelete}
         totalPages={patientsTotalPages}
         currentPage={patientsCurrentPage}

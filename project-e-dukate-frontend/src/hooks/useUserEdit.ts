@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/services/api';
 import { showNotification } from '@/services/notificationService';
 import { BaseUser, UserRole, SpecialistResponse, Administrator, Specialist } from '@/types/userTypes';
-import { useUserEditStore } from '@/stores/userStore';
+import { useEditStore } from '@/stores/editStore';
 
 interface UseUserEditProps<T extends BaseUser> {
   role: UserRole | null;
@@ -25,7 +25,7 @@ interface UseUserEditResult<T extends BaseUser> {
 
 export const useUserEdit = <T extends BaseUser>({ role, id }: UseUserEditProps<T>): UseUserEditResult<T> => {
   const router = useRouter();
-  const { clearUserEditData } = useUserEditStore();
+  const { clearEditData } = useEditStore();
   const [userData, setUserData] = useState<T | null>(null);
   const [formData, setFormData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +82,7 @@ export const useUserEdit = <T extends BaseUser>({ role, id }: UseUserEditProps<T
       setIsUpdateSuccessful(true);
       router.push('/dashboard/usuarios');
       setTimeout(() => {
-        clearUserEditData();
+        clearEditData();
       }, 100);
     } catch (err: any) {
       console.error('Error updating user:', err);

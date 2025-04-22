@@ -22,6 +22,20 @@ export interface Specialist extends BaseUser {
   specialistCode: string;
 }
 
+export interface Patient {
+  id: string;
+  names: string;
+  lastNamePaternal: string;
+  lastNameMaternal?: string;
+  mobileNumber: string;
+  identityCard: number;
+  phoneNumber?: string;
+  age: number;
+  gender: string;
+  dateOfBirth: string;
+  address: string;
+}
+
 export type UserRole = 'Administrator' | 'Specialist';
 
 export type User = Administrator | Specialist;

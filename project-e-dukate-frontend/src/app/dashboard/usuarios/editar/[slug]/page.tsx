@@ -10,7 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { useUserEdit } from "@/hooks/useUserEdit";
 import { UserEdit } from "@/pages/Users";
 import { User, UserRole } from "@/types/userTypes";
-import { useUserEditStore } from "@/stores/userStore";
+import { useEditStore } from "@/stores/editStore";
 
 interface UserEditPageProps {
   params: Promise<{ slug: string }>;
@@ -21,7 +21,7 @@ export default function UserEditPage({ params }: UserEditPageProps) {
   const { slug } = resolvedParams;
   const searchParams = useSearchParams();
   const role = searchParams ? (searchParams.get("role") as UserRole) : null;
-  const { userId } = useUserEditStore();
+  const { entityId, entityType } = useEditStore();
   const {
     formData,
     loading,
@@ -30,7 +30,7 @@ export default function UserEditPage({ params }: UserEditPageProps) {
     error,
     handleSubmit,
     setFormData,
-  } = useUserEdit<User>({ role, id: userId || "" });
+  } = useUserEdit<User>({ role, id: entityId || "" });
 
   if (isSubmitting || isUpdateSuccessful) {
     return (
@@ -47,7 +47,7 @@ export default function UserEditPage({ params }: UserEditPageProps) {
     );
   }
 
-  if (!userId) {
+  if (!entityId || entityType !== 'user') {
     return (
       <Box sx={{ p: 3 }}>
         <Typography variant="h6" color="error">

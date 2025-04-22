@@ -9,7 +9,7 @@ import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
-import { useUserEditStore } from '../../stores/userStore';
+import { useEditStore } from '../../stores/editStore';
 
 interface User {
   id: string;
@@ -23,7 +23,7 @@ interface User {
 export const Users: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const { setUserEditData } = useUserEditStore();
+  const { setEditData } = useEditStore();
   const {
     data: users,
     error: usersError,
@@ -84,7 +84,7 @@ export const Users: React.FC = () => {
 
   const handleEdit = async (item: User) => {
     try {
-      setUserEditData(item.id, item.role);
+      setEditData(item.id, item.role, 'user');
       const userNameSlug = `${item.names}-${item.lastNamePaternal}`
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '-')
