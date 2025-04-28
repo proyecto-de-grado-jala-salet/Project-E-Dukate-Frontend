@@ -11,14 +11,16 @@ interface TableProps<T extends GenericItem> {
   items?: T[];
   columns: ColumnConfig<T>[];
   error: string | null;
-  onEdit: (item: T) => void;
-  onDelete: (item: T) => void;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
   totalPages: number;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
   loading?: boolean;
   sx?: SxProps;
+  enableEdit?: boolean;
+  enableDelete?: boolean;
 }
 
 export const Table = <T extends GenericItem>({
@@ -33,18 +35,24 @@ export const Table = <T extends GenericItem>({
   onPageChange,
   loading = false,
   sx,
+  enableEdit = true,
+  enableDelete = true,
 }: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
 
   const handleConfirmDelete = () => {
-    if (itemToDelete) onDelete(itemToDelete);
+    if (itemToDelete && onDelete) {
+      onDelete(itemToDelete);
+    }
     setItemToDelete(null);
     setOpenDeleteDialog(false);
   };
 
   const handleEdit = (item: T) => {
-    onEdit(item);
+    if (onEdit) {
+      onEdit(item);
+    }
   };
 
   const toReactNode = (value: unknown): React.ReactNode => {
@@ -96,15 +104,24 @@ export const Table = <T extends GenericItem>({
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
-                  <IconButton onClick={() => handleEdit(item)}>
-                    <FaRegEdit />
-                  </IconButton>
-                  <IconButton onClick={() => {
-                    setItemToDelete(item);
-                    setOpenDeleteDialog(true);
-                  }}>
-                    <DeleteOutlineIcon sx={{ color: "red" }} />
-                  </IconButton>
+                  {enableEdit && onEdit && (
+                    <IconButton onClick={() => handleEdit(item)}>
+                      <FaRegEdit />
+                    </IconButton>
+                  )}
+                  {enableDelete && onDelete && (
+                    <IconButton onClick={() => {
+                      setItemToDelete(item);
+                      setOpenDeleteDialog(true);
+                    }}>
+                      <DeleteOutlineIcon sx={{ color: "red" }} />
+                    </IconButton>
+                  )}
+                  {(!enableEdit || !onEdit) && (!enableDelete || !onDelete) && (
+                    <Typography variant="body2" color="textSecondary">
+                      -
+                    </Typography>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

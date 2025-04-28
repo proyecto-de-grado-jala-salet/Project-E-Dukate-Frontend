@@ -14,12 +14,24 @@ export interface BaseUser {
   password: string;
 }
 
-export type Administrator = BaseUser
+export type Administrator = BaseUser;
+
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+}
+
+export interface Schedule {
+  dayOfWeek: string;
+  timeSlots: TimeSlot[];
+  attends: boolean;
+}
 
 export interface Specialist extends BaseUser {
   typeOfSpecialty: string;
   yearsOfExperience: number;
   specialistCode: string;
+  schedules: Schedule[];
 }
 
 export interface Patient {
