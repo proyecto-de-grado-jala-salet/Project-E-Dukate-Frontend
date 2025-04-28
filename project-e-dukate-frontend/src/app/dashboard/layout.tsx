@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar selectedTab={getSelectedTab()} />
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Header userName="Cara Martinez" userRole="Administrador" />
-        <Box sx={{ flex: 1, bgcolor: '#f5f5f5', p: 3, overflow: 'auto' }}>
+        <Box sx={{ flex: 1, bgcolor: '#EDEDED', p: 3, overflow: 'auto' }}>
           {children}
         </Box>
       </Box>

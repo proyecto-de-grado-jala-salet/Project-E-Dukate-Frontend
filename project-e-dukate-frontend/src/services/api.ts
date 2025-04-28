@@ -1,9 +1,9 @@
 export const API_ENDPOINTS = {
-  specialties: 'http://localhost:8080/api/Specialties',
-  users: 'http://localhost:8080/api/Users',
-  administrators: 'http://localhost:8080/api/Administrators',
-  specialists: 'http://localhost:8080/api/Specialists',
-  patients: 'http://localhost:8080/api/Patients',
+  specialties: 'http://localhost:5275/api/Specialties',
+  users: 'http://localhost:5275/api/Users',
+  administrators: 'http://localhost:5275/api/Administrators',
+  specialists: 'http://localhost:5275/api/Specialists',
+  patients: 'http://localhost:5275/api/Patients',
 };
 
 export const apiRequest = async <T>(
