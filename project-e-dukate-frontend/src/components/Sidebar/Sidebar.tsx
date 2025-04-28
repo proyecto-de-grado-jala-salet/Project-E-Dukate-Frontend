@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, SxProps } from '@mui/material';
+import { Box, List, ListItemButton, ListItemIcon, SxProps, Tooltip } from '@mui/material';
 import { FaStethoscope } from "react-icons/fa";
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import { RiUserHeartLine } from "react-icons/ri";
@@ -26,7 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const menuItems: MenuItem[] = [
     { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades' },
     { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios' },
-    { label: 'Pacientes', icon: <RiUserHeartLine size={25}/>, value: 'pacientes' },
+    { label: 'Pacientes', icon: <RiUserHeartLine size={25} />, value: 'pacientes' },
     { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos' },
     { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios' },
     { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas' },
@@ -35,48 +35,60 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const handleLogout = () => router.push('/login');
 
   return (
-    <Box sx={{ width: 330, height: '100vh', bgcolor: '#04633c', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', ...sx }}>
+    <Box sx={{ width: 120, height: '100vh', bgcolor: '#013c28', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', ...sx }}>
       <Box>
-        <Box sx={{ p: 6, display: 'flex', alignItems: 'center' }}>
-          <img src="/E-Dukate_Logo.png" alt="E-Dukate Logo" />
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+          <img src="/E-Dukate_Logo.png" alt="E-Dukate Logo" style={{ width: 60 }} />
         </Box>
         <List>
           {menuItems.map((item) => (
-            <ListItemButton
-              key={item.value}
-              onClick={() => router.push(`/dashboard/${item.value}`)}
-              sx={{
-                mx: 2,
-                borderRadius: 2,
-                pl: 4,
-                bgcolor: selectedTab === item.value ? 'white' : 'transparent',
-                color: selectedTab === item.value ? '#04633c' : 'white',
-                '&:hover': { bgcolor: selectedTab === item.value ? 'white' : 'rgba(255, 255, 255, 0.1)' },
-                ...(selectedTab === item.value && {
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    left: -16,
-                    top: 0,
-                    bottom: 0,
-                    width: 4,
-                    bgcolor: 'white',
-                    borderRadius: '0 2px 2px 0',
-                  },
-                }),
-              }}
-            >
-              <ListItemIcon sx={{ color: selectedTab === item.value ? '#04633c' : 'white' }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
+            <Tooltip title={item.label} placement="right" key={item.value}>
+              <ListItemButton
+                onClick={() => router.push(`/dashboard/${item.value}`)}
+                sx={{
+                  mx: 2,
+                  borderRadius: 2,
+                  justifyContent: 'center',
+                  bgcolor: selectedTab === item.value ? 'white' : 'transparent',
+                  color: selectedTab === item.value ? '#04633c' : 'white',
+                  '&:hover': { bgcolor: selectedTab === item.value ? 'white' : 'rgba(255, 255, 255, 0.1)' },
+                  ...(selectedTab === item.value && {
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: -16,
+                      top: 0,
+                      bottom: 0,
+                      width: 4,
+                      bgcolor: 'white',
+                      borderRadius: '0 2px 2px 0',
+                    },
+                  }),
+                }}
+              >
+                <ListItemIcon sx={{ color: selectedTab === item.value ? '#04633c' : 'white', minWidth: 0 }}>
+                  {item.icon}
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
           ))}
         </List>
       </Box>
       <List>
-        <ListItemButton onClick={handleLogout} sx={{ pl: 7, color: 'white', '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' } }}>
-          <ListItemIcon sx={{ color: 'white' }}><LogoutIcon /></ListItemIcon>
-          <ListItemText primary="Logout" />
-        </ListItemButton>
+        <Tooltip title="Logout" placement="right">
+          <ListItemButton
+            onClick={handleLogout}
+            sx={{
+              justifyContent: 'center',
+              color: 'white',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' },
+            }}
+          >
+            <ListItemIcon sx={{ color: 'white', minWidth: 0 }}>
+              <LogoutIcon />
+            </ListItemIcon>
+          </ListItemButton>
+        </Tooltip>
       </List>
     </Box>
   );

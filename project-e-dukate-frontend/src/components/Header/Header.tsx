@@ -22,16 +22,16 @@ export const Header: React.FC<HeaderProps> = ({ userName, userRole, sx }) => {
   };
 
   return (
-    <Box sx={{ height: 80, bgcolor: '#04633c', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: 4, ...sx }}>
-      <IconButton sx={{ color: 'white' }}>
+    <Box sx={{ height: 75, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: 4, ...sx }}>
+      <IconButton sx={{ color: '#000000' }}>
         <FaRegUserCircle size={30} />
       </IconButton>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', mr: 1 }}>
-          <Typography variant="body1" sx={{ color: 'white' }}>{userName}</Typography>
-          <Typography variant="body2" sx={{ color: 'white' }}>{userRole}</Typography>
+          <Typography variant="body1" sx={{ color: '#000000' }}>{userName}</Typography>
+          <Typography variant="body2" sx={{ color: '#000000' }}>{userRole}</Typography>
         </Box>
-        <IconButton onClick={handleMenuOpen} sx={{ color: 'white' }}>
+        <IconButton onClick={handleMenuOpen} sx={{ color: '#000000' }}>
           <ArrowDropDownIcon />
         </IconButton>
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
