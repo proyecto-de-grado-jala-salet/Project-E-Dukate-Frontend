@@ -11,6 +11,7 @@ import { useEditStore } from '@/stores/editStore';
 import { TextField } from '../../components/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import { dayTranslation, formatTimeSlot } from '@/utils/scheduleUtils';
+import slugify from 'slugify';
 
 const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string => {
   const dayInEnglish = Object.keys(dayTranslation).find(
@@ -70,7 +71,9 @@ export const Schedules: React.FC = () => {
   const handleEdit = true
     ? (item: Specialist) => {
         setEditData(item.id, 'Specialist', 'user');
-        router.push('/dashboard/usuarios/edit');
+        const specialistName = `${item.names} ${item.lastNamePaternal} ${item.lastNameMaternal || ''}`.toLowerCase();
+        const slug = slugify(specialistName, { lower: true, strict: true });
+        router.push(`/dashboard/horarios/${slug}`);
       }
     : undefined;
 
