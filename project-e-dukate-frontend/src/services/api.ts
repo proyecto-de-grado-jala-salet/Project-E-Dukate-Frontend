@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
   administrators: 'http://localhost:5275/api/Administrators',
   specialists: 'http://localhost:5275/api/Specialists',
   patients: 'http://localhost:5275/api/Patients',
+  schedules: 'http://localhost:5275/api/Schedules',
 };
 
 export const apiRequest = async <T>(
