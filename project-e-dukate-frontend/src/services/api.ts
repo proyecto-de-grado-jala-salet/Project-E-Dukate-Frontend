@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export const API_ENDPOINTS = {
   specialties: 'http://localhost:5275/api/Specialties',
   users: 'http://localhost:5275/api/Users',
@@ -25,7 +27,17 @@ export const apiRequest = async <T>(
 
   const response = await fetch(url, options);
   if (!response.ok) {
-    throw new Error(`Error en ${method} a ${url}: ${response.statusText}`);
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch (e) {
+      errorData = await response.text();
+    }
+    const error = new Error(
+      `Error en ${method} a ${url}: ${response.statusText}`
+    );
+    (error as any).response = { data: errorData, status: response.status };
+    throw error;
   }
 
   return response.status === 204 ? ({} as T) : response.json();
