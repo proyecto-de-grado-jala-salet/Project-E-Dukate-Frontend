@@ -1,4 +1,3 @@
-// src/components/TimeSlotEditor/TimeSlotEditor.tsx
 import React from "react";
 import { Box, IconButton } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";

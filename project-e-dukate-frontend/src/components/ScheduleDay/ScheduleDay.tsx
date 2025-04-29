@@ -1,4 +1,3 @@
-// src/components/ScheduleDay/ScheduleDay.tsx
 import React from "react";
 import { Box, Typography, FormControlLabel, Checkbox, IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";

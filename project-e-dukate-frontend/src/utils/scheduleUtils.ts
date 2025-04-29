@@ -1,4 +1,3 @@
-// src/utils/scheduleUtils.ts
 import { TimeSlot } from "@/types/userTypes";
 import { TimeSlotDto } from "@/types/schedule";
 import dayjs from "dayjs";

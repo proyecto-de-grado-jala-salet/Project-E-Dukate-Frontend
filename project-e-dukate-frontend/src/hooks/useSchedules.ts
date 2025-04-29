@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// src/hooks/useSchedules.ts
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { fetchSchedules, updateSchedules } from "@/services/scheduleService";
@@ -24,7 +23,7 @@ export const useSchedules = () => {
         const initializedSchedules = initializeSchedules(mappedSchedules);
         setSchedules(initializedSchedules);
       } catch (error) {
-        // Error ya manejado en el servicio con showNotification
+        console.error('Error fetching Schedules details:', error);
       } finally {
         setLoading(false);
       }
@@ -39,7 +38,7 @@ export const useSchedules = () => {
       await updateSchedules(entityId, schedules);
       router.push("/dashboard/horarios");
     } catch (error) {
-      // Error ya manejado en el servicio con showNotification
+      console.error('Error submit details:', error);
     }
   };
 
