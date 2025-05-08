@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const API_ENDPOINTS = {
   specialties: 'http://localhost:5275/api/Specialties',
   users: 'http://localhost:5275/api/Users',
@@ -7,6 +7,19 @@ export const API_ENDPOINTS = {
   specialists: 'http://localhost:5275/api/Specialists',
   patients: 'http://localhost:5275/api/Patients',
   schedules: 'http://localhost:5275/api/Schedules',
+  login: 'http://localhost:5275/api/auth/login',
+};
+
+export const setAuthToken = (token: string) => {
+  sessionStorage.setItem('authToken', token);
+};
+
+export const getAuthToken = (): string | null => {
+  return sessionStorage.getItem('authToken');
+};
+
+export const clearAuthToken = () => {
+  sessionStorage.removeItem('authToken');
 };
 
 export const apiRequest = async <T>(
@@ -17,11 +30,19 @@ export const apiRequest = async <T>(
   query?: string
 ): Promise<T> => {
   const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ''}` : `${API_ENDPOINTS[endpoint]}${query || ''}`;
+  const token = getAuthToken();
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const options: RequestInit = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   };
 

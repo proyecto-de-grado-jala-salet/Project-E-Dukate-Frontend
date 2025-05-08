@@ -8,11 +8,14 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../stores/authStore';
+import { clearAuthToken } from '../../services/api';
 
 interface MenuItem {
   label: string;
   icon: React.ReactNode;
   value: string;
+  roles: string[];
 }
 
 interface SidebarProps {
@@ -22,17 +25,26 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const router = useRouter();
+  const { userRole, clearAuth } = useAuthStore();
 
   const menuItems: MenuItem[] = [
-    { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades' },
-    { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios' },
-    { label: 'Pacientes', icon: <RiUserHeartLine size={25} />, value: 'pacientes' },
-    { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos' },
-    { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios' },
-    { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas' },
+    { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades', roles: ['Administrator'] },
+    { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios', roles: ['Administrator'] },
+    { label: 'Pacientes', icon: <RiUserHeartLine size={25} />, value: 'pacientes', roles: ['Administrator'] },
+    { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos', roles: ['Administrator', 'Specialist'] },
+    { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios', roles: ['Administrator'] },
+    { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas', roles: ['Administrator'] },
   ];
 
-  const handleLogout = () => router.push('/login');
+  const handleLogout = () => {
+    clearAuthToken();
+    clearAuth();
+    router.push('/login');
+  };
+
+  const filteredMenuItems = menuItems.filter(item => 
+    userRole && item.roles.includes(userRole)
+  );
 
   return (
     <Box sx={{ width: 120, height: '100vh', bgcolor: '#013c28', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', ...sx }}>
@@ -41,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
           <img src="/E-Dukate_Logo.png" alt="E-Dukate Logo" style={{ width: 60 }} />
         </Box>
         <List>
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <Tooltip title={item.label} placement="right" key={item.value}>
               <ListItemButton
                 onClick={() => router.push(`/dashboard/${item.value}`)}
