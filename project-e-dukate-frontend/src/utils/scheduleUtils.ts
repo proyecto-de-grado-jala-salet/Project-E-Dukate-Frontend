@@ -12,11 +12,9 @@ export const dayTranslation: { [key: string]: string } = {
   Thursday: "Jueves",
   Friday: "Viernes",
   Saturday: "Sábado",
-  Sunday: "Domingo",
 };
 
 export const dayOfWeekMapping: { [key: number]: string } = {
-  0: "Sunday",
   1: "Monday",
   2: "Tuesday",
   3: "Wednesday",
@@ -32,7 +30,6 @@ export const daysOfWeek = [
   { value: "Thursday", label: "Jueves" },
   { value: "Friday", label: "Viernes" },
   { value: "Saturday", label: "Sábado" },
-  { value: "Sunday", label: "Domingo" },
 ];
 
 export const formatTimeSlot = (timeSlots: TimeSlot[]): string => {
@@ -45,20 +42,22 @@ export const formatTimeSlot = (timeSlots: TimeSlot[]): string => {
 export const mapBackendSchedules = (
   backendSchedules: import("@/types/schedule").BackendSchedule[]
 ): import("@/types/schedule").ScheduleDto[] => {
-  return backendSchedules.map((schedule) => {
-    const dayString = dayOfWeekMapping[schedule.dayOfWeek];
-    if (!dayString) {
-      throw new Error(`Invalid dayOfWeek value: ${schedule.dayOfWeek}`);
-    }
-    return {
-      dayOfWeek: dayString,
-      timeSlots: schedule.timeSlots.map((slot) => ({
-        startTime: slot.startTime.slice(0, 5),
-        endTime: slot.endTime.slice(0, 5),
-      })),
-      attends: schedule.attends,
-    };
-  });
+  return backendSchedules
+    .filter((schedule) => schedule.dayOfWeek !== 0)
+    .map((schedule) => {
+      const dayString = dayOfWeekMapping[schedule.dayOfWeek];
+      if (!dayString) {
+        throw new Error(`Invalid dayOfWeek value: ${schedule.dayOfWeek}`);
+      }
+      return {
+        dayOfWeek: dayString,
+        timeSlots: schedule.timeSlots.map((slot) => ({
+          startTime: slot.startTime.slice(0, 5),
+          endTime: slot.endTime.slice(0, 5),
+        })),
+        attends: schedule.attends,
+      };
+    });
 };
 
 export const initializeSchedules = (
