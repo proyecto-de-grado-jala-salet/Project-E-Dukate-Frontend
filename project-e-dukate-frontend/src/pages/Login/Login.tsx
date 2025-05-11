@@ -6,7 +6,6 @@ import { Box, Typography, CircularProgress } from '@mui/material';
 import { TextField } from '../../components/TextField';
 import { Button } from '../../components/Button';
 import { apiRequest, setAuthToken } from '../../services/api';
-import { showNotification } from '../../services/notificationService';
 import { useAuthStore } from '../../stores/authStore';
 import { useRouter } from 'next/navigation';
 
@@ -39,7 +38,6 @@ export const Login: React.FC = () => {
       const errorData = err.response?.data || {};
       const errorMessage = typeof errorData === 'string' ? errorData : (errorData.Error || 'Error al iniciar sesión');
       setError(errorMessage);
-      showNotification(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
