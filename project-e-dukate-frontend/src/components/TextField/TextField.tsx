@@ -53,7 +53,7 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
   return (
     <MuiTextField
       label={renderLabel()}
-      value={value}
+      value={value ?? ''}
       onChange={(e) => onChange(e.target.value)}
       error={error}
       helperText={helperText}

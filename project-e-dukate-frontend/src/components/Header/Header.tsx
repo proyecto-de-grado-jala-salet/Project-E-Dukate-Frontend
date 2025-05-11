@@ -3,20 +3,23 @@ import { Box, Typography, IconButton, Menu, MenuItem, SxProps } from '@mui/mater
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { FaRegUserCircle } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../stores/authStore';
+import { clearAuthToken } from '../../services/api';
 
 interface HeaderProps {
-  userName: string;
-  userRole: string;
   sx?: SxProps;
 }
 
-export const Header: React.FC<HeaderProps> = ({ userName, userRole, sx }) => {
+export const Header: React.FC<HeaderProps> = ({ sx }) => {
   const router = useRouter();
+  const { userName, userRole, clearAuth } = useAuthStore();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
   const handleLogout = () => {
+    clearAuthToken();
+    clearAuth();
     router.push('/login');
     handleMenuClose();
   };
@@ -28,8 +31,8 @@ export const Header: React.FC<HeaderProps> = ({ userName, userRole, sx }) => {
       </IconButton>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', mr: 1 }}>
-          <Typography variant="body1" sx={{ color: '#000000' }}>{userName}</Typography>
-          <Typography variant="body2" sx={{ color: '#000000' }}>{userRole}</Typography>
+          <Typography variant="body1" sx={{ color: '#000000' }}>{userName || 'Usuario'}</Typography>
+          <Typography variant="body2" sx={{ color: '#000000' }}>{userRole || 'Rol'}</Typography>
         </Box>
         <IconButton onClick={handleMenuOpen} sx={{ color: '#000000' }}>
           <ArrowDropDownIcon />
