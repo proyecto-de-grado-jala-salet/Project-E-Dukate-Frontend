@@ -37,9 +37,9 @@ export default function DashboardLayout({
             "horarios",
             "metricas",
           ]
-        : ["pagos"];
+        : ["pacientes", "pagos"];
 
-    const defaultTab = userRole === "Administrator" ? "especialidades" : "pagos";
+    const defaultTab = userRole === "Administrator" ? "especialidades" : "pacientes";
 
     if (currentTab === "dashboard" || !allowedTabs.includes(currentTab)) {
       router.push(`/dashboard/${defaultTab}`);
@@ -47,9 +47,9 @@ export default function DashboardLayout({
   }, [token, userRole, pathname, router]);
 
   const getSelectedTab = () => {
-    if (!pathname) return userRole === "Administrator" ? "especialidades" : "pagos";
+    if (!pathname) return userRole === "Administrator" ? "especialidades" : "pacientes";
     const path = pathname.split("/").pop();
-    return path || (userRole === "Administrator" ? "especialidades" : "pagos");
+    return path || (userRole === "Administrator" ? "especialidades" : "pacientes");
   };
 
   if (!token) {

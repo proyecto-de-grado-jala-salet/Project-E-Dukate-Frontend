@@ -30,7 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const menuItems: MenuItem[] = [
     { label: 'Especialidades', icon: <FaStethoscope size={20} />, value: 'especialidades', roles: ['Administrator'] },
     { label: 'Usuarios', icon: <PeopleAltOutlinedIcon />, value: 'usuarios', roles: ['Administrator'] },
-    { label: 'Pacientes', icon: <RiUserHeartLine size={25} />, value: 'pacientes', roles: ['Administrator'] },
+    { label: 'Pacientes', icon: <RiUserHeartLine size={25} />, value: 'pacientes', roles: ['Administrator', 'Specialist'] },
     { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos', roles: ['Administrator', 'Specialist'] },
     { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios', roles: ['Administrator'] },
     { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas', roles: ['Administrator'] },
