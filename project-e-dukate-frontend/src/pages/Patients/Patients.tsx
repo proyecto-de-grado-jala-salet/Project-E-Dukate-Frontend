@@ -86,12 +86,13 @@ export const Patients: React.FC = () => {
 
   const handleMedicalHistory = (item: Patient) => {
     try {
+      setEditData(item.id, '', 'patient');
       const patientNameSlug = `${item.names}-${item.lastNamePaternal}`
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '-')
         .replace(/-+/g, '-')
         .trim();
-      router.push(`/dashboard/pacientes/historial/${patientNameSlug}?id=${item.id}`);
+      router.push(`/dashboard/pacientes/historial/${patientNameSlug}`);
     } catch (err) {
       console.error('Error navigating to medical history page:', err);
       alert('Error al navegar a la página de historial médico');

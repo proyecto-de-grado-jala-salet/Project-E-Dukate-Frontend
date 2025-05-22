@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Divider, FormControl, Select, MenuItem, Button, Chip } from '@mui/material';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
+import { useEditStore } from '@/stores/editStore';
 import { Patient, Specialist } from '@/types/userTypes';
 import dayjs from 'dayjs';
 import { mapGenderToRadioValue } from '@/utils/formUtils';
@@ -21,8 +22,8 @@ const MenuProps = {
 
 export default function MedicalHistoryPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const patientId = searchParams ? searchParams.get('id') : null;
+  const { entityId, entityType } = useEditStore();
+  const patientId = entityId;
   
   const { data: patient, loading: patientLoading, error: patientError } = useApi<Patient>('patients');
   const { data: specialists, loading: specialistsLoading, error: specialistsError } = useApi<Specialist>('specialists');
@@ -46,7 +47,7 @@ export default function MedicalHistoryPage() {
   };
 
   useEffect(() => {
-    if (!searchParams || !patientId) {
+    if (!patientId || entityType !== 'patient') {
       router.push('/dashboard/pacientes');
       return;
     }
@@ -59,7 +60,7 @@ export default function MedicalHistoryPage() {
         router.push('/dashboard/pacientes');
       }
     }
-  }, [patientId, patient, router, searchParams]);
+  }, [patientId, entityType, patient, router]);
 
   const handleAddConsultation = () => {
     console.log('Añadir consulta:', {
@@ -193,7 +194,7 @@ export default function MedicalHistoryPage() {
                 >
                   {specialist.names} {specialist.lastNamePaternal}
                 </MenuItem>
-                ))}
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -266,7 +267,7 @@ export default function MedicalHistoryPage() {
 
           <Button
             variant="contained"
-            onChange={handleAddConsultation}
+            onClick={handleAddConsultation} // Corregimos onChange a onClick
             disabled={!selectedSpecialist.length || !selectedStatus}
             sx={{
               bgcolor: '#F4A601',
