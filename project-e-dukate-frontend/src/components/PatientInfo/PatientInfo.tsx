@@ -1,4 +1,3 @@
-// src/components/PatientInfo/PatientInfo.tsx
 import React from 'react';
 import { Box, Typography, Paper, Divider } from '@mui/material';
 import dayjs from 'dayjs';

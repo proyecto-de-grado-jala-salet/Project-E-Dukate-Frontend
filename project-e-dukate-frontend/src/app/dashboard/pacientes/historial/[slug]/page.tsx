@@ -1,5 +1,4 @@
-// src/app/dashboard/pacientes/historial/[slug]/page.tsx
-import { MedicalHistory } from '@/pages/Patients';
+import { MedicalHistory } from '@/pages/Patients/MedicalHistory';
 
 export default function MedicalHistoryPage() {
   return <MedicalHistory />;

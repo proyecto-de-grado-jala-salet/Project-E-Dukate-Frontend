@@ -1,22 +1,21 @@
-// src/components/SpecialistStatusForm/SpecialistStatusForm.tsx
 import React from 'react';
 import { Box, Typography, FormControl, Select, MenuItem, Button, Chip } from '@mui/material';
 import { Specialist } from '@/types/userTypes';
 import { MenuProps, statuses, statusColors } from '@/utils/medicalHistoryConstants';
 
 interface SpecialistStatusFormProps {
-  specialists: Specialist[] | null;
-  selectedSpecialist: string[];
-  setSelectedSpecialist: React.Dispatch<React.SetStateAction<string[]>>;
+  specialists: Specialist[];
+  selectedSpecialists: string[];
+  setSelectedSpecialists: (specialists: string[]) => void;
   selectedStatus: string;
-  setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+  setSelectedStatus: (status: string) => void;
   onAddConsultation: () => void;
 }
 
 export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
   specialists,
-  selectedSpecialist,
-  setSelectedSpecialist,
+  selectedSpecialists,
+  setSelectedSpecialists,
   selectedStatus,
   setSelectedStatus,
   onAddConsultation,
@@ -30,15 +29,15 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
         <FormControl sx={{ width: 290 }}>
           <Select
             multiple
-            value={selectedSpecialist}
+            value={selectedSpecialists}
             onChange={(e) => {
               const { target: { value } } = e;
-              setSelectedSpecialist(typeof value === 'string' ? value.split(',') : value);
+              setSelectedSpecialists(typeof value === 'string' ? value.split(',') : value as string[]);
             }}
             sx={{
               textTransform: 'none',
               color: '#000000',
-              borderRadius: "10px",
+              borderRadius: '10px',
               backgroundColor: 'white',
               '.MuiSelect-select': {
                 display: 'flex',
@@ -56,35 +55,31 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
               },
             }}
             displayEmpty
-            renderValue={(selected) => {
-              const displaySpecialists = selected.slice(0, 3);
-              const hasMore = selected.length > 3;
-              return (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {displaySpecialists.map((value) => {
-                    const specialist = specialists?.find(s => s.id === value);
-                    return (
-                      specialist && (
-                        <Chip
-                          key={value}
-                          label={`${specialist.names} ${specialist.lastNamePaternal}`}
-                          sx={{ color: '#fff', backgroundColor: '#013c28' }}
-                        />
-                      )
-                    );
-                  })}
-                  {hasMore && <Chip label="..." sx={{ color: '#ffffff', backgroundColor: '#013c28' }} />}
-                </Box>
-              );
-            }}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => {
+                  const specialist = specialists.find(s => s.id === value);
+                  return (
+                    specialist && (
+                      <Chip
+                        key={value}
+                        label={`${specialist.names} ${specialist.lastNamePaternal}`}
+                        sx={{ color: '#fff', backgroundColor: '#013c28' }}
+                      />
+                    )
+                  );
+                })}
+                {selected.length > 3 && <Chip label="..." sx={{ color: '#ffffff', backgroundColor: '#013c28' }} />}
+              </Box>
+            )}
             MenuProps={MenuProps}
           >
             <MenuItem value="" disabled>
-              <Typography sx={{ color: "#000000", fontWeight: 'bold', fontStyle: 'italic' }}>
+              <Typography sx={{ color: '#000000', fontWeight: 'bold', fontStyle: 'italic' }}>
                 Seleccione un especialista
               </Typography>
             </MenuItem>
-            {specialists?.map((specialist) => (
+            {specialists.map((specialist) => (
               <MenuItem
                 key={specialist.id}
                 value={specialist.id}
@@ -105,10 +100,10 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
           <FormControl sx={{ width: 250 }}>
             <Select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(e) => setSelectedStatus(e.target.value as string)}
               sx={{
                 textTransform: 'none',
-                borderRadius: "10px",
+                borderRadius: '10px',
                 backgroundColor: 'white',
                 '.MuiSelect-select': {
                   display: 'flex',
@@ -166,7 +161,7 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
         <Button
           variant="contained"
           onClick={onAddConsultation}
-          disabled={!selectedSpecialist.length || !selectedStatus}
+          disabled={!selectedSpecialists.length || !selectedStatus}
           sx={{
             bgcolor: '#F4A601',
             color: '#000000',

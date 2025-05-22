@@ -1,4 +1,3 @@
-// src/pages/Patients/MedicalHistory.tsx
 "use client"
 
 import React, { useEffect, useState } from 'react';
@@ -6,21 +5,21 @@ import { Box, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
 import { useEditStore } from '@/stores/editStore';
-import { Patient, Specialist } from '@/types/userTypes';
+import { MedicalHistoryDto, MedicalHistoryStatus } from '@/types/medicalHistory';
+import { Patient, Specialist} from '@/types/userTypes';
 import { PatientInfo } from '@/components/PatientInfo';
 import { SpecialistStatusForm } from '@/components/SpecialistStatusForm';
+import { getMedicalHistoryByPatientId, updatePermission, deletePermission, updateMedicalHistoryStatus } from '@/services/medicalHistoryService';
+import { apiRequest } from '@/services/api';
 
 export const MedicalHistory: React.FC = () => {
   const router = useRouter();
-  const { entityId, entityType } = useEditStore();
-  const patientId = entityId;
-
-  const { data: patient, loading: patientLoading, error: patientError } = useApi<Patient>('patients');
-  const { data: specialists, loading: specialistsLoading, error: specialistsError } = useApi<Specialist>('specialists');
-
+  const { entityId: patientId, entityType } = useEditStore();
+  const [medicalHistory, setMedicalHistory] = useState<MedicalHistoryDto | null>(null);
   const [patientData, setPatientData] = useState<Patient | null>(null);
-  const [selectedSpecialist, setSelectedSpecialist] = useState<string[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedSpecialists, setSelectedSpecialists] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<MedicalHistoryStatus>(MedicalHistoryStatus.ContinuaEnTratamiento);
+  const { data: specialists, loading: specialistsLoading, error: specialistsError } = useApi<Specialist>('specialists');
 
   useEffect(() => {
     if (!patientId || entityType !== 'patient') {
@@ -28,38 +27,92 @@ export const MedicalHistory: React.FC = () => {
       return;
     }
 
-    if (patient && patient.length > 0) {
-      const foundPatient = patient.find(p => p.id === patientId);
-      if (foundPatient) {
-        setPatientData(foundPatient);
-      } else {
+    const fetchMedicalHistory = async () => {
+      const history = await getMedicalHistoryByPatientId(patientId);
+      if (history) {
+        setMedicalHistory(history);
+        const initialSpecialists = history.permissions
+          .filter(p => p.canEdit)
+          .map(p => p.specialistId);
+        setSelectedSpecialists(initialSpecialists);
+        const initialStatus = history.permissions.length > 0 ? history.permissions[0].status : MedicalHistoryStatus.ContinuaEnTratamiento;
+        setSelectedStatus(initialStatus);
+      }
+    };
+
+    const fetchPatientData = async () => {
+      try {
+        const patient = await apiRequest<Patient>('patients', 'GET', undefined, patientId);
+        setPatientData(patient);
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
         router.push('/dashboard/pacientes');
       }
-    }
-  }, [patientId, entityType, patient, router]);
+    };
+
+    fetchMedicalHistory();
+    fetchPatientData();
+  }, [patientId, entityType, router]);
 
   const handleAddConsultation = () => {
     console.log('Añadir consulta:', {
       patientId,
-      specialistIds: selectedSpecialist,
+      specialistIds: selectedSpecialists,
       status: selectedStatus,
     });
   };
 
-  if (patientLoading || specialistsLoading) return <Typography variant="h6" sx={{ color: '#000000' }}>Cargando...</Typography>;
-  if (patientError) return <Typography variant="h6" sx={{ color: '#000000' }} color="error">{patientError}</Typography>;
+  const handleSpecialistChange = async (newSpecialists: string[]) => {
+    if (!medicalHistory || !patientId) return;
+
+    const addedSpecialists = newSpecialists.filter(s => !selectedSpecialists.includes(s));
+    const removedSpecialists = selectedSpecialists.filter(s => !newSpecialists.includes(s));
+    
+    for (const specialistId of addedSpecialists) {
+      await updatePermission({ medicalHistoryId: medicalHistory.id, specialistId, canEdit: true });
+    }
+
+    for (const specialistId of removedSpecialists) {
+      const permission = medicalHistory.permissions.find(p => p.specialistId === specialistId);
+      if (permission) {
+        await deletePermission(permission.id);
+      }
+    }
+
+    const updatedHistory = await getMedicalHistoryByPatientId(patientId);
+    if (updatedHistory) {
+      setMedicalHistory(updatedHistory);
+    }
+
+    setSelectedSpecialists(newSpecialists);
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!medicalHistory || !patientId || medicalHistory.permissions.length === 0) return;
+
+    const permission = medicalHistory.permissions[0];
+    await updateMedicalHistoryStatus(medicalHistory.id, permission.specialistId, newStatus);
+    setSelectedStatus(newStatus as MedicalHistoryStatus);
+
+    const updatedHistory = await getMedicalHistoryByPatientId(patientId);
+    if (updatedHistory) {
+      setMedicalHistory(updatedHistory);
+    }
+  };
+
+  if (specialistsLoading) return <Typography variant="h6" sx={{ color: '#000000' }}>Cargando...</Typography>;
   if (specialistsError) return <Typography variant="h6" sx={{ color: '#000000' }} color="error">{specialistsError}</Typography>;
-  if (!patientData) return <Typography variant="h6" sx={{ color: '#000000' }}>Paciente no encontrado</Typography>;
+  if (!medicalHistory || !patientData) return <Typography variant="h6" sx={{ color: '#000000' }}>Cargando...</Typography>;
 
   return (
     <Box sx={{ p: 3 }}>
       <PatientInfo patient={patientData} />
       <SpecialistStatusForm
-        specialists={specialists}
-        selectedSpecialist={selectedSpecialist}
-        setSelectedSpecialist={setSelectedSpecialist}
+        specialists={specialists || []}
+        selectedSpecialists={selectedSpecialists}
+        setSelectedSpecialists={handleSpecialistChange}
         selectedStatus={selectedStatus}
-        setSelectedStatus={setSelectedStatus}
+        setSelectedStatus={handleStatusChange}
         onAddConsultation={handleAddConsultation}
       />
       <Typography variant="body1" sx={{ mt: 3, color: '#000000' }}>
@@ -68,5 +121,3 @@ export const MedicalHistory: React.FC = () => {
     </Box>
   );
 };
-
-export default MedicalHistory;
