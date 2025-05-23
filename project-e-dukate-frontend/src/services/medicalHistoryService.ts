@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { apiRequest } from './api';
-import { showNotification } from './notificationService';
-import { MedicalHistoryDto, PermissionRequestDto, UpdateMedicalHistoryStatusDto } from '@/types/medicalHistory';
+import { apiRequest } from "./api";
+import { showNotification } from "./notificationService";
+import {
+  MedicalHistoryDto,
+  PermissionRequestDto,
+  UpdateMedicalHistoryStatusDto,
+} from "@/types/medicalHistory";
 
 interface Consultation {
   id: string;
@@ -27,32 +31,59 @@ interface BackendPaginatedResponse {
   totalPages: number;
 }
 
-export const getMedicalHistoryByPatientId = async (patientId: string): Promise<MedicalHistoryDto | null> => {
+export const getMedicalHistoryByPatientId = async (
+  patientId: string
+): Promise<MedicalHistoryDto | null> => {
   try {
-    const response = await apiRequest<MedicalHistoryDto>('medicalhistories', 'GET', undefined, `patient/${patientId}`);
+    const response = await apiRequest<MedicalHistoryDto>(
+      "medicalhistories",
+      "GET",
+      undefined,
+      `patient/${patientId}`
+    );
     return response;
   } catch (error) {
-    showNotification(error instanceof Error ? error.message : 'Error al obtener el historial médico', 'error');
+    showNotification(
+      error instanceof Error
+        ? error.message
+        : "Error al obtener el historial médico",
+      "error"
+    );
     return null;
   }
 };
 
-export const updatePermission = async (request: PermissionRequestDto): Promise<boolean> => {
+export const updatePermission = async (
+  request: PermissionRequestDto
+): Promise<boolean> => {
   try {
-    await apiRequest('medicalhistories', 'POST', request, 'permissions');
+    await apiRequest("medicalhistories", "POST", request, "permissions");
     return true;
   } catch (error) {
-    showNotification(error instanceof Error ? error.message : 'Error al actualizar el permiso', 'error');
+    showNotification(
+      error instanceof Error ? error.message : "Error al actualizar el permiso",
+      "error"
+    );
     return false;
   }
 };
 
-export const deletePermission = async (permissionId: string): Promise<boolean> => {
+export const deletePermission = async (
+  permissionId: string
+): Promise<boolean> => {
   try {
-    await apiRequest('medicalhistories', 'DELETE', undefined, `permissions/${permissionId}`);
+    await apiRequest(
+      "medicalhistories",
+      "DELETE",
+      undefined,
+      `permissions/${permissionId}`
+    );
     return true;
   } catch (error) {
-    showNotification(error instanceof Error ? error.message : 'Error al eliminar el permiso', 'error');
+    showNotification(
+      error instanceof Error ? error.message : "Error al eliminar el permiso",
+      "error"
+    );
     return false;
   }
 };
@@ -64,10 +95,18 @@ export const updateMedicalHistoryStatus = async (
 ): Promise<boolean> => {
   const request: UpdateMedicalHistoryStatusDto = { Status: status as any };
   try {
-    await apiRequest('medicalhistories', 'PUT', request, `histories/${medicalHistoryId}/specialists/${specialistId}/status`);
+    await apiRequest(
+      "medicalhistories",
+      "PUT",
+      request,
+      `histories/${medicalHistoryId}/specialists/${specialistId}/status`
+    );
     return true;
   } catch (error) {
-    showNotification(error instanceof Error ? error.message : 'Error al actualizar el estado', 'error');
+    showNotification(
+      error instanceof Error ? error.message : "Error al actualizar el estado",
+      "error"
+    );
     return false;
   }
 };
@@ -81,16 +120,18 @@ export const getSpecialistConsultations = async (
 ): Promise<PaginatedConsultations | null> => {
   try {
     const response = await apiRequest<BackendPaginatedResponse>(
-      'medicalconsultations',
-      'GET',
+      "medicalconsultations",
+      "GET",
       undefined,
       `histories/${medicalHistoryId}/specialists/${specialistId}/permissions/${permissionId}/consultations?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
 
     if (response && Object.keys(response).length > 0) {
-      const validConsultations = response.items.filter(item => item.specialistId === specialistId);
+      const validConsultations = response.items.filter(
+        (item) => item.specialistId === specialistId
+      );
       return {
-        Items: validConsultations.map(item => ({
+        Items: validConsultations.map((item) => ({
           id: item.id,
           reason: item.reason,
           consultationDate: item.consultationDate,
@@ -103,11 +144,14 @@ export const getSpecialistConsultations = async (
         TotalPages: response.totalPages || 1,
       };
     }
-    showNotification('No se encontraron consultas', 'error');
+    showNotification("No se encontraron consultas", "error");
     return null;
   } catch (error) {
-    console.error('Error in getSpecialistConsultations:', error);
-    showNotification(error instanceof Error ? error.message : 'Error al obtener las consultas', 'error');
+    console.error("Error in getSpecialistConsultations:", error);
+    showNotification(
+      error instanceof Error ? error.message : "Error al obtener las consultas",
+      "error"
+    );
     return null;
   }
 };

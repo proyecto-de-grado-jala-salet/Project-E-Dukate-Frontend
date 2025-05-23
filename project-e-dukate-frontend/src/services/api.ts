@@ -53,11 +53,10 @@ export const apiRequest = async <T>(
   if (!response.ok) {
     if (response.status === 401) {
       clearAuthToken();
-      window.location.href = '/login'; // Redirigir a la pantalla de inicio de sesión
+      window.location.href = '/login';
       throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     }
-
-    // Leer el cuerpo de la respuesta solo una vez
+    
     const contentType = response.headers.get('content-type');
     let errorData: any;
     try {
