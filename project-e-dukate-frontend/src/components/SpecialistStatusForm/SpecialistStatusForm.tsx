@@ -105,7 +105,7 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
           <Typography variant="body1" sx={{ color: '#000000', fontWeight: 'bold' }}>
             Ver consulta del Prof. Especialista:
           </Typography>
-          <FormControl sx={{ width: 290 }}>
+          <FormControl sx={{ width: 230 }}>
             <Select
               value={selectedConsultationSpecialist}
               onChange={(e) => {
@@ -133,18 +133,25 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
                 },
               }}
               displayEmpty
-              renderValue={(value) => {
-                const specialist = specialistsWithPermission.find(s => s.id === value);
-                return specialist ? (
-                  <Typography sx={{ color: '#000000' }}>
-                    {specialist.names} {specialist.lastNamePaternal}
-                  </Typography>
-                ) : (
-                  <Typography sx={{ color: '#000000', fontStyle: 'italic' }}>
-                    Seleccione un especialista
-                  </Typography>
-                );
-              }}
+              renderValue={(value) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {value ? (
+                    (() => {
+                      const specialist = specialistsWithPermission.find(s => s.id === value);
+                      return specialist ? (
+                        <Chip
+                          label={`${specialist.names} ${specialist.lastNamePaternal}`}
+                          sx={{ color: '#fff', backgroundColor: '#013c28' }}
+                        />
+                      ) : null;
+                    })()
+                  ) : (
+                    <Typography sx={{ color: '#000000', fontStyle: 'italic' }}>
+                      Seleccione un especialista
+                    </Typography>
+                  )}
+                </Box>
+              )}
             >
               <MenuItem value="" disabled>
                 <Typography sx={{ color: '#000000', fontWeight: 'bold', fontStyle: 'italic' }}>
