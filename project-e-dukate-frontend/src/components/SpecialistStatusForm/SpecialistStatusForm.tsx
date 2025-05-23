@@ -13,6 +13,7 @@ interface SpecialistStatusFormProps {
   specialistsWithPermission: Specialist[];
   selectedConsultationSpecialist: string;
   setSelectedConsultationSpecialist: (specialistId: string) => void;
+  isStatusDropdownDisabled: boolean;
 }
 
 export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
@@ -25,11 +26,11 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
   specialistsWithPermission,
   selectedConsultationSpecialist,
   setSelectedConsultationSpecialist,
+  isStatusDropdownDisabled,
 }) => {
   return (
     <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {/* Dropdown para permisos de edición */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="body1" sx={{ color: '#000000', fontWeight: 'bold' }}>
             Permisos para editar:
@@ -173,6 +174,7 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
             <Select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as string)}
+              disabled={isStatusDropdownDisabled}
               sx={{
                 textTransform: 'none',
                 borderRadius: '10px',
