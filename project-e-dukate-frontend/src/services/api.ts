@@ -49,13 +49,25 @@ export const apiRequest = async <T>(
   };
 
   const response = await fetch(url, options);
+
   if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = await response.text();
+    if (response.status === 401) {
+      clearAuthToken();
+      window.location.href = '/login'; // Redirigir a la pantalla de inicio de sesión
+      throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     }
+
+    // Leer el cuerpo de la respuesta solo una vez
+    const contentType = response.headers.get('content-type');
+    let errorData: any;
+    try {
+      errorData = contentType && contentType.includes('application/json')
+        ? await response.json()
+        : await response.text();
+    } catch (e) {
+      errorData = 'No se pudo leer la respuesta del servidor';
+    }
+
     const error = new Error(
       `Error en ${method} a ${url}: ${response.statusText}`
     );
