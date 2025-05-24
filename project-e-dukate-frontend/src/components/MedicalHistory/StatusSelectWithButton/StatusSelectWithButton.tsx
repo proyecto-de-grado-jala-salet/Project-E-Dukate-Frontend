@@ -21,6 +21,7 @@ interface StatusSelectWithButtonProps {
   isAddButtonDisabled: boolean;
   width?: number;
   sx?: SxProps<Theme>;
+  userRole: string | null;
 }
 
 export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
@@ -31,6 +32,7 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
   isAddButtonDisabled,
   width = 250,
   sx,
+  userRole,
 }) => {
   const handleChange = (e: SelectChangeEvent<string>) => {
     setSelectedStatus(e.target.value);
@@ -94,20 +96,22 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
           </Select>
         </FormControl>
       </Box>
-      <Button
-        variant="contained"
-        onClick={onAddConsultation}
-        disabled={isAddButtonDisabled}
-        sx={{
-          bgcolor: "#F4A601",
-          color: "#000000",
-          textTransform: "none",
-          px: 3,
-          py: 1,
-        }}
-      >
-        Añadir Consulta
-      </Button>
+      {userRole !== "Administrator" && (
+        <Button
+          variant="contained"
+          onClick={onAddConsultation}
+          disabled={isAddButtonDisabled}
+          sx={{
+            bgcolor: "#F4A601",
+            color: "#000000",
+            textTransform: "none",
+            px: 3,
+            py: 1,
+          }}
+        >
+          Añadir Consulta
+        </Button>
+      )}
     </Box>
   );
 };

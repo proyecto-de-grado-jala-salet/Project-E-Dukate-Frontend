@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import { Specialist } from "@/types/userTypes";
 import { SpecialistSelect } from "@/components/MedicalHistory/SpecialistSelect";
 import { StatusSelectWithButton } from "@/components/MedicalHistory/StatusSelectWithButton";
+import { useAuthStore } from "@/stores/authStore";
 
 interface SpecialistStatusFormProps {
   specialists: Specialist[];
@@ -29,6 +30,8 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
   setSelectedConsultationSpecialist,
   isStatusDropdownDisabled,
 }) => {
+  const { userRole } = useAuthStore();
+
   return (
     <Box
       sx={{
@@ -39,14 +42,16 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <SpecialistSelect<string[]>
-          label="Permisos para editar"
-          specialists={specialists}
-          value={selectedSpecialists}
-          onChange={setSelectedSpecialists}
-          multiple
-          width={290}
-        />
+        {userRole !== "Specialist" && (
+          <SpecialistSelect<string[]>
+            label="Permisos para editar"
+            specialists={specialists}
+            value={selectedSpecialists}
+            onChange={setSelectedSpecialists}
+            multiple
+            width={290}
+          />
+        )}
         <SpecialistSelect<string>
           label="Ver consulta del Prof. Especialista"
           specialists={specialistsWithPermission}
@@ -62,6 +67,7 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
         isStatusDropdownDisabled={isStatusDropdownDisabled}
         isAddButtonDisabled={!selectedSpecialists.length || !selectedStatus}
         width={250}
+        userRole={userRole}
       />
     </Box>
   );
