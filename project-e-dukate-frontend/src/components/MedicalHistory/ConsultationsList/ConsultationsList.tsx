@@ -279,20 +279,28 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
           )}
         </Box>
       ))}
-
-      {/* Paginación */}
-      {consultations.TotalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={3}>
+      {consultations && consultations.TotalPages > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            position: "sticky",
+            bottom: 16,
+            py: 2,
+            zIndex: 1,
+          }}
+        >
           <Pagination
             count={consultations.TotalPages}
             page={currentPage}
             onChange={(_, page) => onPageChange(page)}
+            color="primary"
             sx={{
               "& .MuiPaginationItem-root": {
-                color: "black",
+                color: "text.primary",
               },
             }}
-            size="large"
           />
         </Box>
       )}
