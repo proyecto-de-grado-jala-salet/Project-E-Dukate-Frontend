@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -51,27 +52,22 @@ interface UseMedicalHistoryReturn {
   setSelectedConsultationSpecialist: (specialistId: string) => void;
   setCurrentPage: (page: number) => void;
   handleAddConsultation: () => void;
+  refreshConsultations: () => void;
 }
 
 export const useMedicalHistory = (): UseMedicalHistoryReturn => {
   const router = useRouter();
   const { entityId: patientId, entityType } = useEditStore();
-  const [medicalHistory, setMedicalHistory] =
-    useState<MedicalHistoryDto | null>(null);
+  const [medicalHistory, setMedicalHistory] = useState<MedicalHistoryDto | null>(null);
   const [patientData, setPatientData] = useState<Patient | null>(null);
   const [selectedSpecialists, setSelectedSpecialists] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [selectedConsultationSpecialist, setSelectedConsultationSpecialist] =
-    useState<string>("");
-  const [isStatusDropdownDisabled, setIsStatusDropdownDisabled] =
-    useState<boolean>(true);
-  const [consultations, setConsultations] =
-    useState<PaginatedConsultations | null>(null);
+  const [selectedConsultationSpecialist, setSelectedConsultationSpecialist] = useState<string>("");
+  const [isStatusDropdownDisabled, setIsStatusDropdownDisabled] = useState<boolean>(true);
+  const [consultations, setConsultations] = useState<PaginatedConsultations | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingConsultations, setLoadingConsultations] = useState(false);
-  const [errorConsultations, setErrorConsultations] = useState<string | null>(
-    null
-  );
+  const [errorConsultations, setErrorConsultations] = useState<string | null>(null);
   const pageSize = 10;
   const {
     data: specialists,
@@ -135,7 +131,7 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
       )
     ) || [];
 
-  useEffect(() => {
+  const fetchConsultations = async () => {
     if (!selectedConsultationSpecialist || !medicalHistory) {
       setConsultations(null);
       setSelectedStatus("");
@@ -145,45 +141,49 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
       return;
     }
 
-    const fetchConsultations = async () => {
-      setLoadingConsultations(true);
-      setErrorConsultations(null);
+    setLoadingConsultations(true);
+    setErrorConsultations(null);
+    setConsultations(null);
+
+    const permission = medicalHistory.permissions.find(
+      (p) => p.specialistId === selectedConsultationSpecialist && p.canEdit
+    );
+    if (!permission) {
       setConsultations(null);
-
-      const permission = medicalHistory.permissions.find(
-        (p) => p.specialistId === selectedConsultationSpecialist && p.canEdit
+      setSelectedStatus("");
+      setIsStatusDropdownDisabled(true);
+      setErrorConsultations(
+        "No se encontraron permisos válidos para este especialista"
       );
-      if (!permission) {
-        setConsultations(null);
-        setSelectedStatus("");
-        setIsStatusDropdownDisabled(true);
-        setErrorConsultations(
-          "No se encontraron permisos válidos para este especialista"
-        );
-        setLoadingConsultations(false);
-        return;
-      }
-      setSelectedStatus(permission.status);
-      setIsStatusDropdownDisabled(false);
-
-      const response = await getSpecialistConsultations(
-        medicalHistory.id,
-        selectedConsultationSpecialist,
-        permission.id,
-        currentPage,
-        pageSize
-      );
-      if (!response) {
-        setErrorConsultations("No se pudieron cargar las consultas");
-        setConsultations(null);
-      } else {
-        setConsultations(response);
-      }
       setLoadingConsultations(false);
-    };
+      return;
+    }
+    setSelectedStatus(permission.status);
+    setIsStatusDropdownDisabled(false);
 
+    const response = await getSpecialistConsultations(
+      medicalHistory.id,
+      selectedConsultationSpecialist,
+      permission.id,
+      currentPage,
+      pageSize
+    );
+    if (!response) {
+      setErrorConsultations("No se pudieron cargar las consultas");
+      setConsultations(null);
+    } else {
+      setConsultations(response);
+    }
+    setLoadingConsultations(false);
+  };
+
+  useEffect(() => {
     fetchConsultations();
   }, [selectedConsultationSpecialist, medicalHistory, currentPage, patientId]);
+
+  const refreshConsultations = () => {
+    fetchConsultations();
+  };
 
   const handleAddConsultation = () => {
     console.log("Añadir consulta:");
@@ -263,5 +263,6 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
     setSelectedConsultationSpecialist,
     setCurrentPage,
     handleAddConsultation,
+    refreshConsultations,
   };
 };

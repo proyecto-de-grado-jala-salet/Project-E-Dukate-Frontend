@@ -29,6 +29,7 @@ export const MedicalHistory: React.FC = () => {
     setSelectedConsultationSpecialist,
     setCurrentPage,
     handleAddConsultation,
+    refreshConsultations,
   } = useMedicalHistory();
 
   if (specialistsLoading) {
@@ -72,15 +73,13 @@ export const MedicalHistory: React.FC = () => {
       />
       {selectedConsultationSpecialist && (
         <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" sx={{ color: "#000000", mb: 2 }}>
-            Consultas del Especialista
-          </Typography>
           <ConsultationsList
             consultations={consultations}
             loadingConsultations={loadingConsultations}
             errorConsultations={errorConsultations}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            onConsultationsUpdate={refreshConsultations}
           />
         </Box>
       )}
