@@ -51,7 +51,6 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
   >(null);
   const [editorContent, setEditorContent] = useState<string>("");
 
-  // Limpieza de elementos DeepL si existen
   useEffect(() => {
     const cleanupDeepL = () => {
       document
@@ -150,35 +149,43 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
         <Box
           key={consultation.id}
           sx={{
-            border: "1px solid #D8D8D8",
-            borderRadius: "8px",
-            backgroundColor: "#fff",
-            overflow: "hidden",
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            alignItems: "flex-start",
+            gap: 1,
+            width: "100%",
           }}
         >
-          {/* Encabezado de la consulta */}
           <Box
-            onClick={() => handleToggleExpand(consultation.id)}
             sx={{
-              py: 2,
-              px: 5,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              cursor: "pointer",
-              backgroundColor:
-                expandedConsultationId === consultation.id ? "#fff" : "#fff",
-              "&:hover": { backgroundColor: "#f9f9f9" },
+              border: "1px solid #D8D8D8",
+              borderRadius: "8px",
+              backgroundColor: "#fff",
+              overflow: "hidden",
+              width: "100%",
             }}
           >
-            <Typography
-              variant="subtitle1"
-              fontWeight="bold"
-              sx={{ color: "black" }}
+            <Box
+              onClick={() => handleToggleExpand(consultation.id)}
+              sx={{
+                py: 2,
+                px: 5,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
+                backgroundColor:
+                  expandedConsultationId === consultation.id ? "#fff" : "#fff",
+                "&:hover": { backgroundColor: "#f9f9f9" },
+              }}
             >
-              {`Consulta ${index + 1}`}
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2}>
+              <Typography
+                variant="subtitle1"
+                fontWeight="bold"
+                sx={{ color: "black" }}
+              >
+                {`Consulta ${index + 1}`}
+              </Typography>
               <Typography variant="body2" sx={{ color: "black" }}>
                 {new Date(consultation.consultationDate).toLocaleDateString(
                   "es-ES",
@@ -191,92 +198,101 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
                   }
                 )}
               </Typography>
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(consultation.id);
-                }}
-                size="small"
-                sx={{ "&:hover": { color: "error.main" } }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
             </Box>
-          </Box>
 
-          {expandedConsultationId === consultation.id && (
-            <Box sx={{ py: 2, px: 5 }}>
-              <TextField
-                label="Motivo de Consulta"
-                id={`reason-${consultation.id}`}
-                defaultValue={consultation.reason}
-                fullWidth
-                required
-                sx={{
-                  mb: 2,
-                  "& .MuiInputBase-input": {
-                    color: "black",
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "black",
-                  },
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "#D8D8D8",
+            {expandedConsultationId === consultation.id && (
+              <Box sx={{ py: 2, px: 5 }}>
+                <TextField
+                  label="Motivo de Consulta"
+                  id={`reason-${consultation.id}`}
+                  defaultValue={consultation.reason}
+                  fullWidth
+                  required
+                  sx={{
+                    mb: 2,
+                    "& .MuiInputBase-input": {
+                      color: "black",
                     },
-                  },
-                }}
-                variant="outlined"
-                size="small"
-              />
+                    "& .MuiInputLabel-root": {
+                      color: "black",
+                    },
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#D8D8D8",
+                      },
+                    },
+                  }}
+                  variant="outlined"
+                  size="small"
+                />
 
-              <Box
-                sx={{
-                  border: "1px solid #D8D8D8",
-                  borderRadius: "4px",
-                  overflow: "hidden",
-                  mb: 2,
-                }}
-              >
                 <Box
                   sx={{
-                    p: 1.5,
-                    backgroundColor: "#fff",
-                    borderBottom: "1px solid #D8D8D8",
+                    border: "1px solid #D8D8D8",
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                    mb: 2,
                   }}
                 >
-                  <Typography
-                    variant="subtitle2"
-                    fontWeight="bold"
-                    sx={{ color: "black" }}
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      backgroundColor: "#fff",
+                      borderBottom: "1px solid #D8D8D8",
+                    }}
                   >
-                    NOTAS DEL ENCUENTRO
-                  </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="bold"
+                      sx={{ color: "black" }}
+                    >
+                      NOTAS DEL ENCUENTRO
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ py: 1, px: 0, color: "#000" }}>
+                    <SimpleEditor
+                      content={editorContent}
+                      onUpdate={(content) => setEditorContent(content)}
+                    />
+                  </Box>
                 </Box>
 
-                <Box sx={{ py: 1, px: 0, color: "#000" }}>
-                  <SimpleEditor
-                    content={editorContent}
-                    onUpdate={(content) => setEditorContent(content)}
-                  />
-                </Box>
-              </Box>
-
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-                <Button
-                  variant="contained"
-                  onClick={() => handleSave(consultation.id)}
-                  sx={{
-                    backgroundColor: "#F4A601",
-                    color: "#000",
-                    "&:hover": { backgroundColor: "#e69500" },
-                  }}
+                <Box
+                  sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}
                 >
-                  Guardar Cambios
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleSave(consultation.id)}
+                    sx={{
+                      backgroundColor: "#F4A601",
+                      color: "#000",
+                      "&:hover": { backgroundColor: "#e69500" },
+                    }}
+                  >
+                    Guardar Cambios
+                  </Button>
+                </Box>
               </Box>
-            </Box>
-          )}
+            )}
+          </Box>
+
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(consultation.id);
+            }}
+            size="medium"
+            sx={{
+              ml: 1,
+              alignSelf: "flex-start",
+              margin: "10px 0px 0px 0px",
+              color: "#000",
+              "&:hover": { color: "error.main" },
+            }}
+          >
+            <DeleteIcon fontSize="medium" />
+          </IconButton>
         </Box>
       ))}
       {consultations && consultations.TotalPages > 0 && (
@@ -285,8 +301,7 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
             display: "flex",
             justifyContent: "center",
             width: "100%",
-            position: "sticky",
-            bottom: 16,
+            mt: 2,
             py: 2,
             zIndex: 1,
           }}
