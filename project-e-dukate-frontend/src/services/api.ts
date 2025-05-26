@@ -8,6 +8,8 @@ export const API_ENDPOINTS = {
   patients: 'http://localhost:5275/api/Patients',
   schedules: 'http://localhost:5275/api/Schedules',
   login: 'http://localhost:5275/api/auth/login',
+  medicalhistories: 'http://localhost:5275/api/MedicalHistories',
+  medicalconsultations: 'http://localhost:5275/api/MedicalConsultations',
 };
 
 export const setAuthToken = (token: string) => {
@@ -31,11 +33,11 @@ export const apiRequest = async <T>(
 ): Promise<T> => {
   const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ''}` : `${API_ENDPOINTS[endpoint]}${query || ''}`;
   const token = getAuthToken();
-  
+
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
-  
+
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -47,13 +49,24 @@ export const apiRequest = async <T>(
   };
 
   const response = await fetch(url, options);
+
   if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = await response.text();
+    if (response.status === 401) {
+      clearAuthToken();
+      window.location.href = '/login';
+      throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.');
     }
+    
+    const contentType = response.headers.get('content-type');
+    let errorData: any;
+    try {
+      errorData = contentType && contentType.includes('application/json')
+        ? await response.json()
+        : await response.text();
+    } catch (e) {
+      errorData = 'No se pudo leer la respuesta del servidor';
+    }
+
     const error = new Error(
       `Error en ${method} a ${url}: ${response.statusText}`
     );
@@ -61,5 +74,10 @@ export const apiRequest = async <T>(
     throw error;
   }
 
-  return response.status === 204 ? ({} as T) : response.json();
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return response.status === 204 ? ({} as T) : await response.json();
+  } else {
+    return (await response.text()) as unknown as T;
+  }
 };

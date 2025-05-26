@@ -10,6 +10,7 @@ import { useApi } from '../../hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
 import { useEditStore } from '../../stores/editStore';
+import { useAuthStore } from '../../stores/authStore';
 
 interface Patient {
   id: string;
@@ -25,6 +26,9 @@ export const Patients: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const { setEditData } = useEditStore();
+  const { userRole } = useAuthStore();
+  const isAdmin = userRole === 'Administrator';
+
   const {
     data: patients,
     error: patientsError,
@@ -80,6 +84,21 @@ export const Patients: React.FC = () => {
     }
   };
 
+  const handleMedicalHistory = (item: Patient) => {
+    try {
+      setEditData(item.id, '', 'patient');
+      const patientNameSlug = `${item.names}-${item.lastNamePaternal}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      router.push(`/dashboard/pacientes/historial/${patientNameSlug}`);
+    } catch (err) {
+      console.error('Error navigating to medical history page:', err);
+      alert('Error al navegar a la página de historial médico');
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -97,25 +116,31 @@ export const Patients: React.FC = () => {
               '& .MuiInputBase-input': { padding: '10px 14px' },
             }}
           />
-          <Button
-            label="Añadir Paciente"
-            variant="contained"
-            sx={{ bgcolor: '#f5c71a', color: 'black' }}
-            onClick={handleAddPatient}
-          />
+          {isAdmin && (
+            <Button
+              label="Añadir Paciente"
+              variant="contained"
+              sx={{ bgcolor: '#f5c71a', color: 'black' }}
+              onClick={handleAddPatient}
+            />
+          )}
         </Box>
       </Box>
       <Table
         items={patients ?? []}
         columns={patientColumns}
         error={patientsError}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+        onEdit={isAdmin ? handleEdit : undefined}
+        onDelete={isAdmin ? handleDelete : undefined}
+        onMedicalHistory={handleMedicalHistory}
         totalPages={patientsTotalPages}
         currentPage={patientsCurrentPage}
         pageSize={patientsPageSize}
         onPageChange={handlePageChange}
         loading={patientsLoading}
+        enableEdit={isAdmin}
+        enableDelete={isAdmin}
+        enableMedicalHistory={true}
       />
     </Box>
   );

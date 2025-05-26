@@ -6,6 +6,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { Pagination } from '../Pagination';
 import { GenericItem, ColumnConfig } from '../../types/table';
+import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
 
 interface TableProps<T extends GenericItem> {
   items?: T[];
@@ -13,6 +14,7 @@ interface TableProps<T extends GenericItem> {
   error: string | null;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onMedicalHistory?: (item: T) => void;
   totalPages: number;
   currentPage: number;
   pageSize: number;
@@ -21,6 +23,7 @@ interface TableProps<T extends GenericItem> {
   sx?: SxProps;
   enableEdit?: boolean;
   enableDelete?: boolean;
+  enableMedicalHistory?: boolean;
 }
 
 export const Table = <T extends GenericItem>({
@@ -29,6 +32,7 @@ export const Table = <T extends GenericItem>({
   error,
   onEdit,
   onDelete,
+  onMedicalHistory,
   totalPages,
   currentPage,
   pageSize,
@@ -37,6 +41,7 @@ export const Table = <T extends GenericItem>({
   sx,
   enableEdit = true,
   enableDelete = true,
+  enableMedicalHistory = true,
 }: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
@@ -52,6 +57,12 @@ export const Table = <T extends GenericItem>({
   const handleEdit = (item: T) => {
     if (onEdit) {
       onEdit(item);
+    }
+  };
+
+  const handleMedicalHistory = (item: T) => {
+    if (onMedicalHistory) {
+      onMedicalHistory(item);
     }
   };
 
@@ -104,24 +115,31 @@ export const Table = <T extends GenericItem>({
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
-                  {enableEdit && onEdit && (
-                    <IconButton onClick={() => handleEdit(item)}>
-                      <FaRegEdit />
-                    </IconButton>
-                  )}
-                  {enableDelete && onDelete && (
-                    <IconButton onClick={() => {
-                      setItemToDelete(item);
-                      setOpenDeleteDialog(true);
-                    }}>
-                      <DeleteOutlineIcon sx={{ color: "red" }} />
-                    </IconButton>
-                  )}
-                  {(!enableEdit || !onEdit) && (!enableDelete || !onDelete) && (
-                    <Typography variant="body2" color="textSecondary">
-                      -
-                    </Typography>
-                  )}
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                    {enableEdit && onEdit && (
+                      <IconButton onClick={() => handleEdit(item)}>
+                        <FaRegEdit />
+                      </IconButton>
+                    )}
+                    {enableDelete && onDelete && (
+                      <IconButton onClick={() => {
+                        setItemToDelete(item);
+                        setOpenDeleteDialog(true);
+                      }}>
+                        <DeleteOutlineIcon sx={{ color: "red" }} />
+                      </IconButton>
+                    )}
+                    {enableMedicalHistory && onMedicalHistory && (
+                      <IconButton onClick={() => handleMedicalHistory(item)}>
+                        <FolderCopyOutlinedIcon />
+                      </IconButton>
+                    )}
+                    {(!enableEdit || !onEdit) && (!enableDelete || !onDelete) && (!enableMedicalHistory || !onMedicalHistory) && (
+                      <Typography variant="body2" color="textSecondary">
+                        -
+                      </Typography>
+                    )}
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
