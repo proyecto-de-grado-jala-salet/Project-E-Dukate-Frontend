@@ -16,6 +16,7 @@ interface SpecialistStatusFormProps {
   selectedConsultationSpecialist: string;
   setSelectedConsultationSpecialist: (specialistId: string) => void;
   isStatusDropdownDisabled: boolean;
+  canEditSelectedSpecialist: boolean;
 }
 
 export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
@@ -29,6 +30,7 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
   selectedConsultationSpecialist,
   setSelectedConsultationSpecialist,
   isStatusDropdownDisabled,
+  canEditSelectedSpecialist,
 }) => {
   const { userRole } = useAuthStore();
 
@@ -68,6 +70,7 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
         isAddButtonDisabled={!selectedSpecialists.length || !selectedStatus}
         width={250}
         userRole={userRole}
+        canEditSelectedSpecialist={canEditSelectedSpecialist}
       />
     </Box>
   );

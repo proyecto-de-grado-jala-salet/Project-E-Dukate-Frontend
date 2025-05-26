@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { useEditStore } from "@/stores/editStore";
+import { useAuthStore } from "@/stores/authStore";
 import { MedicalHistoryDto } from "@/types/medicalHistory";
 import { Patient, Specialist } from "@/types/userTypes";
 import {
@@ -41,6 +42,7 @@ interface UseMedicalHistoryReturn {
   selectedStatus: string;
   selectedConsultationSpecialist: string;
   isStatusDropdownDisabled: boolean;
+  canEditSelectedSpecialist: boolean;
   consultations: PaginatedConsultations | null;
   currentPage: number;
   loadingConsultations: boolean;
@@ -58,12 +60,14 @@ interface UseMedicalHistoryReturn {
 export const useMedicalHistory = (): UseMedicalHistoryReturn => {
   const router = useRouter();
   const { entityId: patientId, entityType } = useEditStore();
+  const { userId } = useAuthStore();
   const [medicalHistory, setMedicalHistory] = useState<MedicalHistoryDto | null>(null);
   const [patientData, setPatientData] = useState<Patient | null>(null);
   const [selectedSpecialists, setSelectedSpecialists] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [selectedConsultationSpecialist, setSelectedConsultationSpecialist] = useState<string>("");
   const [isStatusDropdownDisabled, setIsStatusDropdownDisabled] = useState<boolean>(true);
+  const [canEditSelectedSpecialist, setCanEditSelectedSpecialist] = useState<boolean>(false);
   const [consultations, setConsultations] = useState<PaginatedConsultations | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingConsultations, setLoadingConsultations] = useState(false);
@@ -136,6 +140,7 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
       setConsultations(null);
       setSelectedStatus("");
       setIsStatusDropdownDisabled(true);
+      setCanEditSelectedSpecialist(false);
       setErrorConsultations(null);
       setCurrentPage(1);
       return;
@@ -152,12 +157,16 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
       setConsultations(null);
       setSelectedStatus("");
       setIsStatusDropdownDisabled(true);
+      setCanEditSelectedSpecialist(false);
       setErrorConsultations(
         "No se encontraron permisos válidos para este especialista"
       );
       setLoadingConsultations(false);
       return;
     }
+
+    const canEdit = userId === selectedConsultationSpecialist && permission.canEdit;
+    setCanEditSelectedSpecialist(canEdit);
     setSelectedStatus(permission.status);
     setIsStatusDropdownDisabled(false);
 
@@ -252,6 +261,7 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
     selectedStatus,
     selectedConsultationSpecialist,
     isStatusDropdownDisabled,
+    canEditSelectedSpecialist,
     consultations,
     currentPage,
     loadingConsultations,

@@ -18,6 +18,7 @@ export const MedicalHistory: React.FC = () => {
     selectedStatus,
     selectedConsultationSpecialist,
     isStatusDropdownDisabled,
+    canEditSelectedSpecialist,
     consultations,
     currentPage,
     loadingConsultations,
@@ -70,6 +71,7 @@ export const MedicalHistory: React.FC = () => {
         selectedConsultationSpecialist={selectedConsultationSpecialist}
         setSelectedConsultationSpecialist={setSelectedConsultationSpecialist}
         isStatusDropdownDisabled={isStatusDropdownDisabled}
+        canEditSelectedSpecialist={canEditSelectedSpecialist}
       />
       {selectedConsultationSpecialist && (
         <Box sx={{ mt: 3 }}>

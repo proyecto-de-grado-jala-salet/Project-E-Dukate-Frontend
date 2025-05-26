@@ -22,6 +22,7 @@ interface StatusSelectWithButtonProps {
   width?: number;
   sx?: SxProps<Theme>;
   userRole: string | null;
+  canEditSelectedSpecialist: boolean;
 }
 
 export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
@@ -33,10 +34,14 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
   width = 250,
   sx,
   userRole,
+  canEditSelectedSpecialist,
 }) => {
   const handleChange = (e: SelectChangeEvent<string>) => {
     setSelectedStatus(e.target.value);
   };
+
+  const isStatusSelectDisabled = isStatusDropdownDisabled || !canEditSelectedSpecialist;
+  const isAddConsultationDisabled = isAddButtonDisabled || !canEditSelectedSpecialist;
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -51,7 +56,7 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
           <Select
             value={selectedStatus}
             onChange={handleChange}
-            disabled={isStatusDropdownDisabled}
+            disabled={isStatusSelectDisabled}
             sx={{ ...baseSelectStyles, ...sx }}
             displayEmpty
             renderValue={(value) =>
@@ -100,7 +105,7 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
         <Button
           variant="contained"
           onClick={onAddConsultation}
-          disabled={isAddButtonDisabled}
+          disabled={isAddConsultationDisabled}
           sx={{
             bgcolor: "#F4A601",
             color: "#000000",
