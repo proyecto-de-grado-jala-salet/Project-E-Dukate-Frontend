@@ -9,6 +9,7 @@ import {
   SxProps,
   Theme,
   SelectChangeEvent,
+  Tooltip,
 } from "@mui/material";
 import { statuses, statusColors } from "@/utils/medicalHistoryConstants";
 import { baseSelectStyles } from "@/utils/theme";
@@ -102,20 +103,24 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
         </FormControl>
       </Box>
       {userRole !== "Administrator" && (
-        <Button
-          variant="contained"
-          onClick={onAddConsultation}
-          disabled={isAddConsultationDisabled}
-          sx={{
-            bgcolor: "#F4A601",
-            color: "#000000",
-            textTransform: "none",
-            px: 3,
-            py: 1,
-          }}
-        >
-          Añadir Consulta
-        </Button>
+        <Tooltip title={isAddConsultationDisabled ? "No tienes permisos para añadir consultas" : ""}>
+          <span>
+            <Button
+              variant="contained"
+              onClick={onAddConsultation}
+              disabled={isAddConsultationDisabled}
+              sx={{
+                bgcolor: "#F4A601",
+                color: "#000000",
+                textTransform: "none",
+                px: 3,
+                py: 1,
+              }}
+            >
+              Añadir Consulta
+            </Button>
+          </span>
+        </Tooltip>
       )}
     </Box>
   );

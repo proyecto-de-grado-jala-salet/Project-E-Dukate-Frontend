@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -39,6 +41,7 @@ interface ConsultationsListProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   onConsultationsUpdate: () => void;
+  newConsultationId?: string | null;
 }
 
 export const ConsultationsList: React.FC<ConsultationsListProps> = ({
@@ -48,11 +51,19 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
   currentPage,
   onPageChange,
   onConsultationsUpdate,
+  newConsultationId,
 }) => {
   const [expandedConsultationId, setExpandedConsultationId] = useState<string | null>(null);
   const [editorContent, setEditorContent] = useState<string>("");
   const { userRole, userId } = useAuthStore();
   const { medicalHistory } = useMedicalHistory();
+
+  useEffect(() => {
+    if (newConsultationId) {
+      setExpandedConsultationId(newConsultationId);
+      setEditorContent("");
+    }
+  }, [newConsultationId]);
 
   useEffect(() => {
     const cleanupDeepL = () => {
@@ -110,8 +121,11 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
         consultationId
       );
       onConsultationsUpdate();
+      if (expandedConsultationId === consultationId) {
+        setExpandedConsultationId(null);
+        setEditorContent("");
+      }
     } catch (error) {
-      console.error("Error deleting consultation:", error);
       showNotification("Error al eliminar la consulta", "error");
     }
   };
@@ -140,7 +154,6 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
       setEditorContent(updatedNotes);
       onConsultationsUpdate();
     } catch (error) {
-      console.error("Error updating consultation:", error);
       showNotification("Error al actualizar la consulta", "error");
     }
   };
@@ -284,20 +297,6 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
                         }}
                       >
                         Guardar Cambios
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        onClick={() => {
-                          setExpandedConsultationId(null);
-                          setEditorContent("");
-                        }}
-                        sx={{
-                          borderColor: "#D8D8D8",
-                          color: "#000",
-                          "&:hover": { borderColor: "#000" },
-                        }}
-                      >
-                        Cerrar
                       </Button>
                     </Box>
                   )}

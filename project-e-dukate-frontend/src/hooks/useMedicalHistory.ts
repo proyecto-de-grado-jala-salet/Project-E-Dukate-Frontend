@@ -53,7 +53,7 @@ interface UseMedicalHistoryReturn {
   setSelectedStatus: (status: string) => void;
   setSelectedConsultationSpecialist: (specialistId: string) => void;
   setCurrentPage: (page: number) => void;
-  handleAddConsultation: () => void;
+  handleAddConsultation: () => Promise<string | null>;
   refreshConsultations: () => void;
 }
 
@@ -194,8 +194,38 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
     fetchConsultations();
   };
 
-  const handleAddConsultation = () => {
-    console.log("Añadir consulta:");
+  const handleAddConsultation = async (): Promise<string | null> => {
+    if (!medicalHistory || !selectedConsultationSpecialist || !userId) {
+      showNotification("No se puede añadir la consulta", "error");
+      return null;
+    }
+
+    const permission = medicalHistory.permissions.find(
+      (p) => p.specialistId === selectedConsultationSpecialist && p.canEdit
+    );
+    if (!permission) {
+      showNotification("No tienes permisos para añadir consultas", "error");
+      return null;
+    }
+
+    try {
+      const response = await apiRequest<{ id: string }>(
+        "medicalconsultations",
+        "POST",
+        {
+          reason: "Nueva consulta",
+          consultationDate: new Date().toISOString(),
+          notes: "",
+        },
+        `histories/${medicalHistory.id}/specialists/${selectedConsultationSpecialist}/permissions/${permission.id}/consultation`
+      );
+
+      await refreshConsultations();
+      return response.id;
+    } catch (error) {
+      showNotification("Error al añadir la consulta", "error");
+      return null;
+    }
   };
 
   const handleSpecialistChange = async (newSpecialists: string[]) => {

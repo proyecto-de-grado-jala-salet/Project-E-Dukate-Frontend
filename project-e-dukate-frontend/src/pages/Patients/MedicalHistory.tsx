@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { PatientInfo } from "@/components/MedicalHistory/PatientInfo";
 import { SpecialistStatusForm } from "@/components/MedicalHistory/SpecialistStatusForm";
@@ -9,6 +9,7 @@ import { ConsultationsList } from "@/components/MedicalHistory/ConsultationsList
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 
 export const MedicalHistory: React.FC = () => {
+  const [newConsultationId, setNewConsultationId] = useState<string | null>(null);
   const {
     medicalHistory,
     patientData,
@@ -32,6 +33,13 @@ export const MedicalHistory: React.FC = () => {
     handleAddConsultation,
     refreshConsultations,
   } = useMedicalHistory();
+
+  const handleAddConsultationWithId = async () => {
+    const consultationId = await handleAddConsultation();
+    if (consultationId) {
+      setNewConsultationId(consultationId);
+    }
+  };
 
   if (specialistsLoading) {
     return (
@@ -66,7 +74,7 @@ export const MedicalHistory: React.FC = () => {
         setSelectedSpecialists={setSelectedSpecialists}
         selectedStatus={selectedStatus}
         setSelectedStatus={setSelectedStatus}
-        onAddConsultation={handleAddConsultation}
+        onAddConsultation={handleAddConsultationWithId}
         specialistsWithPermission={specialistsWithPermission}
         selectedConsultationSpecialist={selectedConsultationSpecialist}
         setSelectedConsultationSpecialist={setSelectedConsultationSpecialist}
@@ -82,6 +90,7 @@ export const MedicalHistory: React.FC = () => {
             currentPage={currentPage}
             onPageChange={setCurrentPage}
             onConsultationsUpdate={refreshConsultations}
+            newConsultationId={newConsultationId}
           />
         </Box>
       )}
