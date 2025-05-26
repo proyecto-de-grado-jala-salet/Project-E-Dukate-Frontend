@@ -1,3 +1,9 @@
+/*
+ * Este archivo utiliza la plantilla Simple Editor de Tiptap, que está bajo la licencia MIT.
+ * Copyright (c) 2021-present, ueberdosis and contributors
+ * Ver THIRD-PARTY-LICENSES.md para el texto completo de la licencia.
+ */
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
@@ -12,7 +18,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+import { SimpleEditor } from "@/components/tiptap/tiptap-templates/simple/simple-editor";
 import { apiRequest } from "@/services/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
