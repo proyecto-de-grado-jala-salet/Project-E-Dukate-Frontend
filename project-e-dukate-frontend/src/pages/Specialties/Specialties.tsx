@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Button } from '../../components/Button';
@@ -9,6 +9,7 @@ import { Modal } from '../../components/Modal';
 import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
 import { Specialty, ColumnConfig } from '../../types/table';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export const Specialties: React.FC = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
@@ -16,6 +17,7 @@ export const Specialties: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Specialty | null>(null);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [editError, setEditError] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const {
@@ -36,6 +38,10 @@ export const Specialties: React.FC = () => {
     { header: 'Especialidad', key: 'typeOfSpecialty', width: '5%' },
     { header: '', key: 'spacerRight', width: '65%' },
   ];
+
+  useEffect(() => {
+    fetchSpecialties(1, debouncedSearchTerm);
+  }, [debouncedSearchTerm, fetchSpecialties]);
 
   const handleOpenAddModal = () => setOpenAddModal(true);
 
@@ -81,7 +87,7 @@ export const Specialties: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    fetchSpecialties(page);
+    fetchSpecialties(page, debouncedSearchTerm);
   };
 
   const handleDelete = async (item: Specialty) => {
@@ -92,6 +98,10 @@ export const Specialties: React.FC = () => {
     }
   };
 
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   return (
     <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -100,7 +110,7 @@ export const Specialties: React.FC = () => {
           <TextField
             placeholder="Buscar especialidad"
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={handleSearchTermChange}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
             sx={{
               width: '300px',

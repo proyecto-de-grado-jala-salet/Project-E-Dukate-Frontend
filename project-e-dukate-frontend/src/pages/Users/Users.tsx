@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Button } from '../../components/Button';
@@ -10,6 +10,7 @@ import { useApi } from '../../hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
 import { useEditStore } from '../../stores/editStore';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ interface User {
 export const Users: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const {
     data: users,
@@ -66,12 +68,16 @@ export const Users: React.FC = () => {
     { header: 'Celular', key: 'mobileNumber', width: '20%' },
   ];
 
+  useEffect(() => {
+    fetchUsers(1, debouncedSearchTerm);
+  }, [debouncedSearchTerm, fetchUsers]);
+
   const handleAddUser = () => {
     router.push('/dashboard/usuarios/agregar');
   };
 
   const handlePageChange = (page: number) => {
-    fetchUsers(page);
+    fetchUsers(page, debouncedSearchTerm);
   };
 
   const handleDelete = async (item: User) => {
@@ -97,6 +103,10 @@ export const Users: React.FC = () => {
     }
   };
 
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   return (
     <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -105,7 +115,7 @@ export const Users: React.FC = () => {
           <TextField
             placeholder="Buscar usuario"
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={handleSearchTermChange}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
             sx={{
               width: '300px',

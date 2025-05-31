@@ -21,29 +21,46 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const fetchData = useCallback(async (page: number = 1) => {
-    setLoading(true);
-    try {
-      const queryParams = new URLSearchParams({
-        "pagination.PageNumber": page.toString(),
-        "pagination.PageSize": pageSize.toString(),
-      });
-      const result = await apiRequest<PagedResponse<T>>(endpoint, "GET", undefined, undefined, `?${queryParams}`);
-      if (!result || !result.items) {
-        throw new Error("Formato de respuesta inválido: items no encontrado");
+  const fetchData = useCallback(
+    async (page: number = 1, searchTerm: string = "") => {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams({
+          "pagination.PageNumber": page.toString(),
+          "pagination.PageSize": pageSize.toString(),
+        });
+        if (searchTerm) {
+          queryParams.append("searchTerm", searchTerm);
+        }
+        const searchPath = searchTerm ? "/search" : "";
+        const result = await apiRequest<PagedResponse<T>>(
+          endpoint,
+          "GET",
+          undefined,
+          undefined,
+          `${searchPath}?${queryParams}`
+        );
+        if (!result || !result.items) {
+          throw new Error("No se encontraron resultados");
+        }
+        setData(result.items);
+        setTotalCount(result.totalCount);
+        setTotalPages(result.totalPages);
+        setCurrentPage(result.pageNumber);
+        setError(null);
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Error al cargar los datos";
+        setError(errorMessage);
+        if (!searchTerm) {
+          showNotification(errorMessage, "error");
+        }
+      } finally {
+        setLoading(false);
       }
-      setData(result.items);
-      setTotalCount(result.totalCount);
-      setTotalPages(result.totalPages);
-      setCurrentPage(result.pageNumber);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Error al cargar los datos";
-      setError(errorMessage);
-      showNotification(errorMessage, "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [endpoint, pageSize]);
+    },
+    [endpoint, pageSize]
+  );
 
   useEffect(() => {
     fetchData();
