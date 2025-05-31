@@ -28,6 +28,7 @@ export const updateSchedules = async (
       dayOfWeek: sched.dayOfWeek,
       timeSlots: sched.attends
         ? sched.timeSlots.map((slot) => ({
+            id: slot.id,
             startTime: `${slot.startTime}:00`,
             endTime: `${slot.endTime}:00`,
           }))
