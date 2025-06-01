@@ -41,8 +41,8 @@ export const Modal: React.FC<ModalProps> = ({
       <Typography variant="h6" mb={2}>{title}</Typography>
       {children}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-        <Button label={cancelLabel} onClick={onClose} variant="outlined" />
-        {onSubmit && <Button label={submitLabel} onClick={onSubmit} variant="contained" color="primary" />}
+        <Button label={cancelLabel} onClick={onClose} variant="outlined" color="error"/>
+        {onSubmit && <Button label={submitLabel} onClick={onSubmit} variant="contained" sx={{ bgcolor: '#f5a623', color: 'black' }} />}
       </Box>
     </Box>
   </MuiModal>

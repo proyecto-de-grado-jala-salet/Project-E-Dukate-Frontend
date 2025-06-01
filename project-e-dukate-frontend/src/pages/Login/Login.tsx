@@ -8,6 +8,7 @@ import { Button } from '../../components/Button';
 import { apiRequest, setAuthToken } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface LoginResponse {
   token: string;
@@ -70,10 +71,11 @@ export const Login: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <img
+        <Image
           src="/E-Dukate_Logo_Auth.png"
           alt="E-Dukate Logo"
-          style={{ width: 250 }}
+          width={250}
+          height={80}
         />
       </Box>
 

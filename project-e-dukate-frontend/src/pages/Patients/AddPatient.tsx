@@ -83,7 +83,7 @@ const handleSubmit = async () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#f5f5f5', p: 3, minHeight: '100vh' }}>
+    <Box sx={{ p: 3, minHeight: '100vh' }}>
       <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
         Registro de Paciente
       </Typography>

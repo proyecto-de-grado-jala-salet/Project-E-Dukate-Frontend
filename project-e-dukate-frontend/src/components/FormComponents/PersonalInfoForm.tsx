@@ -112,6 +112,23 @@ export const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ formData, ha
                       ),
                       error: !!errors.dateOfBirth || !!errors.birthDate,
                       helperText: errors.dateOfBirth || errors.birthDate,
+                      sx: {
+                        "& .MuiInputBase-root": {
+                          borderRadius: "10px",
+                          height: "56px",
+                        },
+                        "& .MuiOutlinedInput-root": {
+                          "& fieldset": {
+                            borderRadius: "10px"
+                          },
+                          "&:hover fieldset": {
+                            borderRadius: "10px"
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderRadius: "10px"
+                          },
+                        },
+                      },
                     },
                   }}
                 />

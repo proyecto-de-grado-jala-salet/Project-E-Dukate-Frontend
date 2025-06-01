@@ -17,6 +17,7 @@ export interface BaseUser {
 export type Administrator = BaseUser;
 
 export interface TimeSlot {
+  id: string;
   startTime: string;
   endTime: string;
 }

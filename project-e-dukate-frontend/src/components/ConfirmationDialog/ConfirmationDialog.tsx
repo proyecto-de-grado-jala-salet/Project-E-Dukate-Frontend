@@ -23,14 +23,36 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   cancelLabel = "Cancelar",
   sx,
 }) => (
-  <Dialog open={open} onClose={onClose} sx={sx}>
+  <Dialog
+    open={open}
+    onClose={onClose}
+    sx={{
+      "& .MuiDialog-paper": {
+        borderRadius: "10px",
+        padding: "16px",
+        margin: "24px",
+      },
+      ...sx,
+    }}
+  >
     <DialogTitle>{title}</DialogTitle>
     <DialogContent>
       <DialogContentText>{message}</DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button label={cancelLabel} onClick={onClose} color="error" variant="outlined" />
-      <Button label={confirmLabel} onClick={onConfirm} color="primary" variant="contained" />
+      <Button
+        label={cancelLabel}
+        onClick={onClose}
+        color="error"
+        variant="outlined"
+      />
+      <Button
+        label={confirmLabel}
+        onClick={onConfirm}
+        color="primary"
+        variant="contained"
+        sx={{ bgcolor: "#f5a623", color: "black" }}
+      />
     </DialogActions>
   </Dialog>
 );

@@ -7,6 +7,7 @@ import { ConfirmationDialog } from '../ConfirmationDialog';
 import { Pagination } from '../Pagination';
 import { GenericItem, ColumnConfig } from '../../types/table';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
+import { Tooltip } from '@mui/material';
 
 interface TableProps<T extends GenericItem> {
   items?: T[];
@@ -115,30 +116,42 @@ export const Table = <T extends GenericItem>({
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", gap: 1 }}
+                  >
                     {enableEdit && onEdit && (
-                      <IconButton onClick={() => handleEdit(item)}>
-                        <FaRegEdit />
-                      </IconButton>
+                      <Tooltip title="Editar" placement="bottom">
+                        <IconButton onClick={() => handleEdit(item)}>
+                          <FaRegEdit />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {enableDelete && onDelete && (
-                      <IconButton onClick={() => {
-                        setItemToDelete(item);
-                        setOpenDeleteDialog(true);
-                      }}>
-                        <DeleteOutlineIcon sx={{ color: "red" }} />
-                      </IconButton>
+                      <Tooltip title="Eliminar" placement="bottom">
+                        <IconButton
+                          onClick={() => {
+                            setItemToDelete(item);
+                            setOpenDeleteDialog(true);
+                          }}
+                        >
+                          <DeleteOutlineIcon sx={{ color: "red" }} />
+                        </IconButton>
+                      </Tooltip>
                     )}
                     {enableMedicalHistory && onMedicalHistory && (
-                      <IconButton onClick={() => handleMedicalHistory(item)}>
-                        <FolderCopyOutlinedIcon />
-                      </IconButton>
+                      <Tooltip title="Historial Médico" placement="bottom">
+                        <IconButton onClick={() => handleMedicalHistory(item)}>
+                          <FolderCopyOutlinedIcon />
+                        </IconButton>
+                      </Tooltip>
                     )}
-                    {(!enableEdit || !onEdit) && (!enableDelete || !onDelete) && (!enableMedicalHistory || !onMedicalHistory) && (
-                      <Typography variant="body2" color="textSecondary">
-                        -
-                      </Typography>
-                    )}
+                    {(!enableEdit || !onEdit) &&
+                      (!enableDelete || !onDelete) &&
+                      (!enableMedicalHistory || !onMedicalHistory) && (
+                        <Typography variant="body2" color="textSecondary">
+                          -
+                        </Typography>
+                      )}
                   </Box>
                 </TableCell>
               </TableRow>
@@ -155,7 +168,7 @@ export const Table = <T extends GenericItem>({
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
         onConfirm={handleConfirmDelete}
-        title="Confirmar Eliminación"
+        title="🗑️ Confirmar Eliminación"
         message={`¿Estás segura de eliminar "${(itemToDelete as any)?.typeOfSpecialty || (itemToDelete as any)?.names || 'este elemento'}"?`}
       />
     </Box>

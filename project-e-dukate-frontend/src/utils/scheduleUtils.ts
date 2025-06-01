@@ -2,6 +2,7 @@ import { TimeSlot } from "@/types/userTypes";
 import { TimeSlotDto } from "@/types/schedule";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
+import { showNotification } from "@/services/notificationService";
 
 dayjs.extend(isBetween);
 
@@ -12,9 +13,11 @@ export const dayTranslation: { [key: string]: string } = {
   Thursday: "Jueves",
   Friday: "Viernes",
   Saturday: "Sábado",
+  Sunday: "Domingo",
 };
 
 export const dayOfWeekMapping: { [key: number]: string } = {
+  0: "Sunday",
   1: "Monday",
   2: "Tuesday",
   3: "Wednesday",
@@ -45,13 +48,22 @@ export const mapBackendSchedules = (
   return backendSchedules
     .filter((schedule) => schedule.dayOfWeek !== 0)
     .map((schedule) => {
-      const dayString = dayOfWeekMapping[schedule.dayOfWeek];
-      if (!dayString) {
-        throw new Error(`Invalid dayOfWeek value: ${schedule.dayOfWeek}`);
+      let dayString: string;
+      if (typeof schedule.dayOfWeek === "number") {
+        dayString = dayOfWeekMapping[schedule.dayOfWeek];
+        if (!dayString) {
+          showNotification("Número de día de la semana no válido", "error");
+        }
+      } else {
+        dayString = schedule.dayOfWeek;
+        if (!Object.keys(dayTranslation).includes(dayString)) {
+          showNotification("Día de la semana no válido", "error");
+        }
       }
       return {
         dayOfWeek: dayString,
         timeSlots: schedule.timeSlots.map((slot) => ({
+          id: slot.id,
           startTime: slot.startTime.slice(0, 5),
           endTime: slot.endTime.slice(0, 5),
         })),
@@ -75,7 +87,7 @@ export const calculateNextTimeSlot = (
   existingSlots: TimeSlotDto[]
 ): TimeSlotDto => {
   if (existingSlots.length === 0) {
-    return { startTime: "08:00", endTime: "12:00" };
+    return { startTime: "08:00", endTime: "08:45" };
   }
 
   const sortedSlots = [...existingSlots].sort((a, b) =>
@@ -85,8 +97,8 @@ export const calculateNextTimeSlot = (
   const lastSlot = sortedSlots[sortedSlots.length - 1];
   const lastEndTime = dayjs(lastSlot.endTime, "HH:mm");
 
-  const nextStartTime = lastEndTime.add(15, "minute");
-  const nextEndTime = nextStartTime.add(4, "hour");
+  const nextStartTime = lastEndTime.add(45, "minute");
+  const nextEndTime = nextStartTime.add(45, "minute");
 
   const maxEndTime = dayjs("22:00", "HH:mm");
   if (nextStartTime.isAfter(maxEndTime) || nextEndTime.isAfter(maxEndTime)) {
@@ -125,8 +137,8 @@ export const canAddTimeSlot = (existingSlots: TimeSlotDto[]): boolean => {
   const lastSlot = sortedSlots[sortedSlots.length - 1];
   const lastEndTime = dayjs(lastSlot.endTime, "HH:mm");
 
-  const nextStartTime = lastEndTime.add(15, "minute");
-  const nextEndTime = nextStartTime.add(4, "hour");
+  const nextStartTime = lastEndTime.add(45, "minute");
+  const nextEndTime = nextStartTime.add(45, "minute");
 
   const maxEndTime = dayjs("22:00", "HH:mm");
   return !(

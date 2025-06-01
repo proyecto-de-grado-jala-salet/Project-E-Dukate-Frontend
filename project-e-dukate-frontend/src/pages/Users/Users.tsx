@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Button } from '../../components/Button';
@@ -10,6 +10,7 @@ import { useApi } from '../../hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
 import { useEditStore } from '../../stores/editStore';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ interface User {
 export const Users: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const {
     data: users,
@@ -36,42 +38,65 @@ export const Users: React.FC = () => {
   } = useApi<User>("users");
 
   const userColumns: ColumnConfig<User>[] = [
-    { header: 'Nombre(s)', key: 'names', width: '20%' },
+    { header: "Nombre(s)", key: "names", width: "20%" },
     {
-      header: 'Apellido',
-      key: 'lastName',
-      width: '20%',
-      render: (item) => `${item.lastNamePaternal} ${item.lastNameMaternal || ''}`.trim(),
+      header: "Apellido",
+      key: "lastName",
+      width: "20%",
+      render: (item) =>
+        `${item.lastNamePaternal} ${item.lastNameMaternal || ""}`.trim(),
     },
     {
-      header: 'Rol',
-      key: 'role',
-      width: '20%',
-      render: (item) => (
-        <span
-          style={{
-            backgroundColor:
-              item.role === 'Administrator' ? '#d1c4e9' :
-              item.role === 'Specialist' ? '#f8bbd0' : '#b3e5fc',
-            color: '#000',
-            padding: '5px 10px',
-            borderRadius: '15px',
-            display: 'inline-block',
-          }}
-        >
-          {item.role}
-        </span>
-      ),
+      header: "Rol",
+      key: "role",
+      width: "20%",
+      render: (item) => {
+        const roleInSpanish =
+          item.role === "Administrator"
+            ? "Administrador"
+            : item.role === "Specialist"
+              ? "Especialista"
+              : item.role;
+
+        return (
+          <span
+            style={{
+              backgroundColor:
+                item.role === "Administrator"
+                  ? "#d1c4e9"
+                  : item.role === "Specialist"
+                    ? "#f8bbd0"
+                    : "#b3e5fc",
+              color: "#000",
+              border:
+                item.role === "Administrator"
+                  ? "1px solid #7078A1"
+                  : item.role === "Specialist"
+                    ? "1px solid #C99C9C"
+                    : "1px solid #202224",
+              padding: "5px 10px",
+              borderRadius: "10px",
+              display: "inline-block",
+            }}
+          >
+            {roleInSpanish}
+          </span>
+        );
+      },
     },
-    { header: 'Celular', key: 'mobileNumber', width: '20%' },
+    { header: "Celular", key: "mobileNumber", width: "20%" },
   ];
+
+  useEffect(() => {
+    fetchUsers(1, debouncedSearchTerm);
+  }, [debouncedSearchTerm, fetchUsers]);
 
   const handleAddUser = () => {
     router.push('/dashboard/usuarios/agregar');
   };
 
   const handlePageChange = (page: number) => {
-    fetchUsers(page);
+    fetchUsers(page, debouncedSearchTerm);
   };
 
   const handleDelete = async (item: User) => {
@@ -97,25 +122,53 @@ export const Users: React.FC = () => {
     }
   };
 
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Usuarios</Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "black" }}>
+          Usuarios
+        </Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             placeholder="Buscar usuario"
             value={searchTerm}
-            onChange={setSearchTerm}
-            startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
+            onChange={handleSearchTermChange}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ color: "gray" }} />,
+            }}
             sx={{
-              width: '300px',
-              '& .MuiInputBase-input': { padding: '10px 14px' },
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
             }}
           />
           <Button
             label="Añadir Usuario"
             variant="contained"
-            sx={{ bgcolor: '#f5c71a', color: 'black' }}
+            sx={{
+              bgcolor: "#f5a623",
+              color: "black",
+              height: "45px",
+              padding: "10px 14px",
+            }}
             onClick={handleAddUser}
           />
         </Box>

@@ -24,6 +24,10 @@ export const Header: React.FC<HeaderProps> = ({ sx }) => {
     handleMenuClose();
   };
 
+  const roleInSpanish =
+    userRole === 'Administrator' ? 'Administrador' :
+    userRole === 'Specialist' ? 'Especialista' : userRole || 'Rol';
+    
   return (
     <Box sx={{ height: 75, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: 4, ...sx }}>
       <IconButton sx={{ color: '#000000' }}>
@@ -32,13 +36,13 @@ export const Header: React.FC<HeaderProps> = ({ sx }) => {
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', mr: 1 }}>
           <Typography variant="body1" sx={{ color: '#000000' }}>{userName || 'Usuario'}</Typography>
-          <Typography variant="body2" sx={{ color: '#000000' }}>{userRole || 'Rol'}</Typography>
+          <Typography variant="body2" sx={{ color: '#000000' }}>{roleInSpanish}</Typography>
         </Box>
         <IconButton onClick={handleMenuOpen} sx={{ color: '#000000' }}>
           <ArrowDropDownIcon />
         </IconButton>
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          <MenuItem onClick={handleLogout}>Cerrar Sesion</MenuItem>
         </Menu>
       </Box>
     </Box>
