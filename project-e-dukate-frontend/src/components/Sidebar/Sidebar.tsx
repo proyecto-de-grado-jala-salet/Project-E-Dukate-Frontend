@@ -7,6 +7,7 @@ import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../stores/authStore';
 import { clearAuthToken } from '../../services/api';
@@ -35,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
     { label: 'Pagos', icon: <PaymentsOutlinedIcon />, value: 'pagos', roles: ['Administrator', 'Specialist'] },
     { label: 'Horarios', icon: <CalendarMonthOutlinedIcon />, value: 'horarios', roles: ['Administrator'] },
     { label: 'Metricas', icon: <BarChartIcon />, value: 'metricas', roles: ['Administrator'] },
+    { label: 'Preguntas Frecuentes', icon: <HelpOutlineOutlinedIcon />, value: 'faq', roles: ['Administrator'] },
   ];
 
   const handleLogout = () => {
