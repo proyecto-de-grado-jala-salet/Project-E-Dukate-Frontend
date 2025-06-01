@@ -122,15 +122,28 @@ export const Patients: React.FC = () => {
             onChange={handleSearchTermChange}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
             sx={{
-              width: '300px',
-              '& .MuiInputBase-input': { padding: '10px 14px' },
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
             }}
           />
           {isAdmin && (
             <Button
               label="Añadir Paciente"
               variant="contained"
-              sx={{ bgcolor: '#f5c71a', color: 'black' }}
+              sx={{
+              bgcolor: "#f5a623",
+              color: "black",
+              height: "45px",
+              padding: "10px 14px",
+            }}
               onClick={handleAddPatient}
             />
           )}

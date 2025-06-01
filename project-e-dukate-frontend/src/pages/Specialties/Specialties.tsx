@@ -104,23 +104,48 @@ export const Specialties: React.FC = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Especialidades</Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "black" }}>
+          Especialidades
+        </Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             placeholder="Buscar especialidad"
             value={searchTerm}
             onChange={handleSearchTermChange}
-            startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ color: "gray" }} />,
+            }}
             sx={{
-              width: '300px',
-              '& .MuiInputBase-input': { padding: '10px 14px' },
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
+
             }}
           />
           <Button
             label="Añadir Especialidad"
             variant="contained"
-            sx={{ bgcolor: '#f5c71a', color: 'black' }}
+            sx={{
+              bgcolor: "#f5a623",
+              color: "black",
+              height: "45px",
+              padding: "10px 14px",
+            }}
             onClick={handleOpenAddModal}
           />
         </Box>

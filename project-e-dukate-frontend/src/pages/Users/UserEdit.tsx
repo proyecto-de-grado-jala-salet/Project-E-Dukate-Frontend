@@ -143,6 +143,8 @@ export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, set
           variant="outlined"
           onClick={handleCancel}
           disabled={isSubmitting}
+          color="error"
+          sx={{ borderRadius: 3 }}
         >
           Cancelar
         </Button>
@@ -150,7 +152,7 @@ export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, set
           variant="contained"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          sx={{ bgcolor: '#f5c71a', color: 'black' }}
+          sx={{ bgcolor: '#f5a623', color: 'black', borderRadius: 3 }}
         >
           Actualizar
         </Button>

@@ -67,6 +67,13 @@ export const MedicalHistory: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      <Typography
+        variant="h4"
+        align="left"
+        sx={{ fontWeight: "bold", mb: 2, color: "#000000" }}
+      >
+        Historial Medico {patientData.names} {patientData.lastNamePaternal} 
+      </Typography>
       <PatientInfo patient={patientData} />
       <SpecialistStatusForm
         specialists={specialists || []}

@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ sx }) => {
           <ArrowDropDownIcon />
         </IconButton>
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          <MenuItem onClick={handleLogout}>Cerrar Sesion</MenuItem>
         </Menu>
       </Box>
     </Box>

@@ -53,7 +53,7 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
   return (
     <MuiTextField
       label={renderLabel()}
-      value={value ?? ''}
+      value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
       error={error}
       helperText={helperText}
@@ -62,7 +62,25 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
       autoComplete={autoComplete}
       select={select}
       placeholder={placeholder}
-      sx={{ ...sx }}
+      sx={{
+        "& .MuiInputBase-root": {
+          backgroundColor: "#ffffff",
+          borderRadius: "10px",
+          height: "56px",
+        },
+        "& .MuiOutlinedInput-root": {
+          "& fieldset": {
+            borderRadius: "10px",
+          },
+          "&:hover fieldset": {
+            borderRadius: "10px",
+          },
+          "&.Mui-focused fieldset": {
+            borderRadius: "10px",
+          },
+        },
+        ...sx,
+      }}
       InputProps={{
         startAdornment: startAdornment ? (
           <InputAdornment position="start">{startAdornment}</InputAdornment>

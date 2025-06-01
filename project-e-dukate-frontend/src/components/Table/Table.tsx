@@ -168,7 +168,7 @@ export const Table = <T extends GenericItem>({
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
         onConfirm={handleConfirmDelete}
-        title="Confirmar Eliminación"
+        title="🗑️ Confirmar Eliminación"
         message={`¿Estás segura de eliminar "${(itemToDelete as any)?.typeOfSpecialty || (itemToDelete as any)?.names || 'este elemento'}"?`}
       />
     </Box>

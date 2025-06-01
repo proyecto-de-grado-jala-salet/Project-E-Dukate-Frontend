@@ -77,13 +77,14 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           label="Cancelar"
           onClick={() => router.push("/dashboard/horarios")}
           variant="outlined"
+          color="error"
         />
         <Button
           label="Aceptar"
           onClick={onSubmit}
           variant="contained"
           color="primary"
-          sx={{ bgcolor: "#f5a623", "&:hover": { bgcolor: "#e69520" } }}
+          sx={{ color: "#000000", bgcolor: "#f5a623", "&:hover": { bgcolor: "#e69520" } }}
         />
       </Box>
     </Box>

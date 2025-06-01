@@ -105,9 +105,17 @@ export const Schedules: React.FC = () => {
           onChange={handleSearchTermChange}
           startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
           sx={{
-            width: '300px',
-            '& .MuiInputBase-input': { padding: '10px 14px' },
-          }}
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
+            }}
         />
         </Box>
       </Box>

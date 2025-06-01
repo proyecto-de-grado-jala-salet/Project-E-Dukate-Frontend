@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
         </List>
       </Box>
       <List>
-        <Tooltip title="Logout" placement="right">
+        <Tooltip title="Cerrar Sesion" placement="right">
           <ListItemButton
             onClick={handleLogout}
             sx={{
