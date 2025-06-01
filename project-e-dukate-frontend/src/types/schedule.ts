@@ -5,15 +5,18 @@ export interface ScheduleDto {
 }
 
 export interface TimeSlotDto {
+  id?: string;
   startTime: string;
   endTime: string;
 }
 
 export interface BackendSchedule {
+  id: string;
   specialistId: string;
   specialist: null;
   dayOfWeek: number;
-  timeSlots: { startTime: string; endTime: string }[];
+  timeSlots: {
+    id: string; startTime: string; endTime: string 
+}[];
   attends: boolean;
-  id: string;
 }

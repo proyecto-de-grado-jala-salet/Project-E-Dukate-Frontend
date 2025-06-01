@@ -43,6 +43,10 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         if (!result || !result.items) {
           throw new Error("No se encontraron resultados");
         }
+        const normalizedData = result.items.map(item => ({
+        ...item,
+        schedules: Array.isArray(item.schedules) ? item.schedules : [],
+      }));
         setData(result.items);
         setTotalCount(result.totalCount);
         setTotalPages(result.totalPages);

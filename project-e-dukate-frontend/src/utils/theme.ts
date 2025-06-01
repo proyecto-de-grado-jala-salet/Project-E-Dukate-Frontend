@@ -10,6 +10,29 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: { root: { textTransform: 'none' } },
     },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: '10px',
+          backgroundColor: 'white',
+          '& .MuiSelect-select': {
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px 32px 8px 8px',
+          },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#D8D8D8',
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#D8D8D8',
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#D8D8D8',
+          },
+        },
+      },
+    },
   },
 });
 

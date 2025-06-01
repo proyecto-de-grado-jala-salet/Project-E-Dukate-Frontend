@@ -24,9 +24,8 @@ export default function DashboardLayout({
 
     if (!pathname || !userRole) return;
 
-    const pathSegments = pathname.split("/");
-    const currentTab = pathSegments.length > 2 ? pathSegments[2] : "dashboard";
-
+    const pathSegments = pathname.split("/").filter(Boolean);
+    const currentTab = pathSegments[1] || "dashboard";
     const allowedTabs =
       userRole === "Administrator"
         ? [
@@ -48,8 +47,14 @@ export default function DashboardLayout({
 
   const getSelectedTab = () => {
     if (!pathname) return userRole === "Administrator" ? "especialidades" : "pacientes";
-    const path = pathname.split("/").pop();
-    return path || (userRole === "Administrator" ? "especialidades" : "pacientes");
+    const pathSegments = pathname.split("/").filter(Boolean);
+    const mainTab = pathSegments[1];
+    const validTabs =
+      userRole === "Administrator"
+        ? ["especialidades", "usuarios", "pacientes", "pagos", "horarios", "metricas"]
+        : ["pacientes", "pagos"];
+    
+    return validTabs.includes(mainTab) ? mainTab : (userRole === "Administrator" ? "especialidades" : "pacientes");
   };
 
   if (!token) {

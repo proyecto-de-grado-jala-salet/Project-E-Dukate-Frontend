@@ -10,6 +10,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../stores/authStore';
 import { clearAuthToken } from '../../services/api';
+import Image from 'next/image';
 
 interface MenuItem {
   label: string;
@@ -50,7 +51,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
     <Box sx={{ width: 120, height: '100vh', bgcolor: '#013c28', color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', ...sx }}>
       <Box>
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
-          <img src="/E-Dukate_Logo.png" alt="E-Dukate Logo" style={{ width: 60 }} />
+          <Image
+            src="/E-Dukate_Logo.png"
+            alt="E-Dukate Logo"
+            width={70}
+            height={60}
+          />
         </Box>
         <List>
           {filteredMenuItems.map((item) => (

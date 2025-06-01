@@ -38,34 +38,47 @@ export const Users: React.FC = () => {
   } = useApi<User>("users");
 
   const userColumns: ColumnConfig<User>[] = [
-    { header: 'Nombre(s)', key: 'names', width: '20%' },
+    { header: "Nombre(s)", key: "names", width: "20%" },
     {
-      header: 'Apellido',
-      key: 'lastName',
-      width: '20%',
-      render: (item) => `${item.lastNamePaternal} ${item.lastNameMaternal || ''}`.trim(),
+      header: "Apellido",
+      key: "lastName",
+      width: "20%",
+      render: (item) =>
+        `${item.lastNamePaternal} ${item.lastNameMaternal || ""}`.trim(),
     },
     {
-      header: 'Rol',
-      key: 'role',
-      width: '20%',
-      render: (item) => (
-        <span
-          style={{
-            backgroundColor:
-              item.role === 'Administrator' ? '#d1c4e9' :
-              item.role === 'Specialist' ? '#f8bbd0' : '#b3e5fc',
-            color: '#000',
-            padding: '5px 10px',
-            borderRadius: '15px',
-            display: 'inline-block',
-          }}
-        >
-          {item.role}
-        </span>
-      ),
+      header: "Rol",
+      key: "role",
+      width: "20%",
+      render: (item) => {
+        const roleInSpanish =
+          item.role === "Administrator"
+            ? "Administrador"
+            : item.role === "Specialist"
+              ? "Especialista"
+              : item.role;
+
+        return (
+          <span
+            style={{
+              backgroundColor:
+                item.role === "Administrator"
+                  ? "#d1c4e9"
+                  : item.role === "Specialist"
+                    ? "#f8bbd0"
+                    : "#b3e5fc",
+              color: "#000",
+              padding: "5px 10px",
+              borderRadius: "15px",
+              display: "inline-block",
+            }}
+          >
+            {roleInSpanish}
+          </span>
+        );
+      },
     },
-    { header: 'Celular', key: 'mobileNumber', width: '20%' },
+    { header: "Celular", key: "mobileNumber", width: "20%" },
   ];
 
   useEffect(() => {
