@@ -14,7 +14,9 @@ export interface BackendSchedule {
   id: string;
   specialistId: string;
   specialist: null;
-  dayOfWeek: number | string;
-  timeSlots: { id: string; startTime: string; endTime: string }[];
+  dayOfWeek: number;
+  timeSlots: {
+    id: string; startTime: string; endTime: string 
+}[];
   attends: boolean;
 }

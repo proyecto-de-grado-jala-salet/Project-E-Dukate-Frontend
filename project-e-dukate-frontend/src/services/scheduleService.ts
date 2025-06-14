@@ -37,7 +37,7 @@ export const updateSchedules = async (
     }));
     await apiRequest("schedules", "PUT", payload, `specialist/${specialistId}`);
   } catch (error: any) {
-    let errorMessage = "Error al actualizar los horarios";
+    let errorMessage = "Error al actualizar los horarios. Por favor, intenta de nuevo.";
     if (error.response?.data) {
       if (error.response.data.errors) {
         errorMessage = error.response.data.errors.join(", ");
@@ -47,7 +47,9 @@ export const updateSchedules = async (
         errorMessage = JSON.stringify(error.response.data) || error.message;
       }
     } else if (error.message) {
-      errorMessage = error.message;
+      errorMessage = error.message.includes("Collection was modified")
+        ? "Error en el servidor: No se pudo actualizar los horarios debido a un conflicto interno."
+        : error.message;
     }
     showNotification(errorMessage, "error");
     throw new Error(errorMessage);

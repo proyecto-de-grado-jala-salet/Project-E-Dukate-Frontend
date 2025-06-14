@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Button } from '../../components/Button';
@@ -9,6 +9,7 @@ import { Modal } from '../../components/Modal';
 import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
 import { Specialty, ColumnConfig } from '../../types/table';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export const Specialties: React.FC = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
@@ -16,6 +17,7 @@ export const Specialties: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Specialty | null>(null);
   const [newItem, setNewItem] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [editError, setEditError] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const {
@@ -36,6 +38,10 @@ export const Specialties: React.FC = () => {
     { header: 'Especialidad', key: 'typeOfSpecialty', width: '5%' },
     { header: '', key: 'spacerRight', width: '65%' },
   ];
+
+  useEffect(() => {
+    fetchSpecialties(1, debouncedSearchTerm);
+  }, [debouncedSearchTerm, fetchSpecialties]);
 
   const handleOpenAddModal = () => setOpenAddModal(true);
 
@@ -81,7 +87,7 @@ export const Specialties: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    fetchSpecialties(page);
+    fetchSpecialties(page, debouncedSearchTerm);
   };
 
   const handleDelete = async (item: Specialty) => {
@@ -92,25 +98,54 @@ export const Specialties: React.FC = () => {
     }
   };
 
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>Especialidades</Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "black" }}>
+          Especialidades
+        </Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <TextField
             placeholder="Buscar especialidad"
             value={searchTerm}
-            onChange={setSearchTerm}
-            startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
+            onChange={handleSearchTermChange}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ color: "gray" }} />,
+            }}
             sx={{
-              width: '300px',
-              '& .MuiInputBase-input': { padding: '10px 14px' },
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
+
             }}
           />
           <Button
             label="Añadir Especialidad"
             variant="contained"
-            sx={{ bgcolor: '#f5c71a', color: 'black' }}
+            sx={{
+              bgcolor: "#f5a623",
+              color: "black",
+              height: "45px",
+              padding: "10px 14px",
+            }}
             onClick={handleOpenAddModal}
           />
         </Box>

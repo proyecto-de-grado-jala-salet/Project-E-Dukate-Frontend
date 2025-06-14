@@ -21,7 +21,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
         position: "relative",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2, p: "0px 0px 40px 0px" }}>
+      <Typography variant="h6" sx={{ mb: 2, p: "0px 0px 40px 0px", fontWeight: 'bold' }}>
         {title}
       </Typography>
       <Box
@@ -30,7 +30,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
           left: 0,
           right: 0,
           top: "100px",
-          borderBottom: "1px solid #e0e0e0",
+          borderBottom: "1px solid #D0D0D0",
           mb: 2,
         }}
       />

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Button } from '../../components/Button';
@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '../../types/table';
 import { useEditStore } from '../../stores/editStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useDebounce } from '../../hooks/useDebounce';
 
 interface Patient {
   id: string;
@@ -25,6 +26,7 @@ interface Patient {
 export const Patients: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const { userRole } = useAuthStore();
   const isAdmin = userRole === 'Administrator';
@@ -53,8 +55,12 @@ export const Patients: React.FC = () => {
     { header: 'Edad', key: 'age', width: '10%' },
   ];
 
+  useEffect(() => {
+    fetchPatients(1, debouncedSearchTerm);
+  }, [debouncedSearchTerm, fetchPatients]);
+
   const handlePageChange = (page: number) => {
-    fetchPatients(page);
+    fetchPatients(page, debouncedSearchTerm);
   };
 
   const handleDelete = async (item: Patient) => {
@@ -99,6 +105,10 @@ export const Patients: React.FC = () => {
     }
   };
 
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -109,18 +119,31 @@ export const Patients: React.FC = () => {
           <TextField
             placeholder="Buscar paciente"
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={handleSearchTermChange}
             startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
             sx={{
-              width: '300px',
-              '& .MuiInputBase-input': { padding: '10px 14px' },
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
             }}
           />
           {isAdmin && (
             <Button
               label="Añadir Paciente"
               variant="contained"
-              sx={{ bgcolor: '#f5c71a', color: 'black' }}
+              sx={{
+              bgcolor: "#f5a623",
+              color: "black",
+              height: "45px",
+              padding: "10px 14px",
+            }}
               onClick={handleAddPatient}
             />
           )}

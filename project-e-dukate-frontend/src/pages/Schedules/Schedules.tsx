@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import { Table } from '@/components/Table';
 import { useApi } from '@/hooks/useApi';
@@ -12,12 +12,14 @@ import { TextField } from '../../components/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import { dayTranslation, formatTimeSlot } from '@/utils/scheduleUtils';
 import slugify from 'slugify';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string => {
   const dayInEnglish = Object.keys(dayTranslation).find(
     key => dayTranslation[key] === dayInSpanish
   );
   if (!dayInEnglish) return '-';
+  if (!Array.isArray(schedules)) return '-'; // Verificación para evitar el error
 
   const schedule = schedules.find(s => s.dayOfWeek.toLowerCase() === dayInEnglish.toLowerCase());
   if (!schedule || !schedule.attends) return '-';
@@ -27,6 +29,7 @@ const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string 
 export const Schedules: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const { data, error, totalPages, currentPage, loading, fetchData } = useApi<Specialist>('specialists');
 
@@ -68,6 +71,18 @@ export const Schedules: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+      fetchData(1, debouncedSearchTerm);
+    }, [debouncedSearchTerm, fetchData]);
+
+  const handlePageChange = (page: number) => {
+    fetchData(page, debouncedSearchTerm);
+  };
+
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
   const handleEdit = true
     ? (item: Specialist) => {
         setEditData(item.id, 'Specialist', 'user');
@@ -87,24 +102,32 @@ export const Schedules: React.FC = () => {
         <TextField
           placeholder="Buscar especialista"
           value={searchTerm}
-          onChange={setSearchTerm}
+          onChange={handleSearchTermChange}
           startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
           sx={{
-            width: '300px',
-            '& .MuiInputBase-input': { padding: '10px 14px' },
-          }}
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
+                height: "45px",
+                padding: "10px 14px",
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
+            }}
         />
         </Box>
       </Box>
       <Table
-        items={data}
+        items={loading ? [] : data}
         columns={columns}
         error={error}
         onEdit={handleEdit}
         totalPages={totalPages}
         currentPage={currentPage}
         pageSize={10}
-        onPageChange={(page) => fetchData(page)}
+        onPageChange={handlePageChange}
         loading={loading}
         enableEdit={true}
         enableDelete={false}

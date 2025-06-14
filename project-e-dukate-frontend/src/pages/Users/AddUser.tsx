@@ -160,11 +160,11 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
         </Typography>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-        <Button label="Cancelar" variant="outlined" onClick={handleCancel} />
+        <Button label="Cancelar" variant="outlined" onClick={handleCancel} color="error"/>
         <Button
           label="Guardar"
           variant="contained"
-          sx={{ bgcolor: '#f5c71a', color: 'black' }}
+          sx={{ bgcolor: '#f5a623', color: 'black' }}
           onClick={handleSubmit}
         />
       </Box>
