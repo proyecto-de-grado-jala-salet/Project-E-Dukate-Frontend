@@ -19,7 +19,7 @@ const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string 
     key => dayTranslation[key] === dayInSpanish
   );
   if (!dayInEnglish) return '-';
-  if (!Array.isArray(schedules)) return '-'; // Verificación para evitar el error
+  if (!Array.isArray(schedules)) return '-';
 
   const schedule = schedules.find(s => s.dayOfWeek.toLowerCase() === dayInEnglish.toLowerCase());
   if (!schedule || !schedule.attends) return '-';

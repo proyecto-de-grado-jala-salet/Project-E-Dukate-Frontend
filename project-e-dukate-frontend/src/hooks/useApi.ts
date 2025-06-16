@@ -22,31 +22,24 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchData = useCallback(
-    async (page: number = 1, searchTerm: string = "") => {
+    async (page: number = 1, queryParams: string = "") => {
       setLoading(true);
       try {
-        const queryParams = new URLSearchParams({
-          "pagination.PageNumber": page.toString(),
-          "pagination.PageSize": pageSize.toString(),
-        });
-        if (searchTerm) {
-          queryParams.append("searchTerm", searchTerm);
-        }
-        const searchPath = searchTerm ? "/search" : "";
+        const fullQuery = queryParams ? `?${queryParams}` : "";
         const result = await apiRequest<PagedResponse<T>>(
           endpoint,
           "GET",
           undefined,
           undefined,
-          `${searchPath}?${queryParams}`
+          fullQuery
         );
         if (!result || !result.items) {
           throw new Error("No se encontraron resultados");
         }
         const normalizedData = result.items.map(item => ({
-        ...item,
-        schedules: Array.isArray(item.schedules) ? item.schedules : [],
-      }));
+          ...item,
+          schedules: Array.isArray(item.schedules) ? item.schedules : [],
+        }));
         setData(result.items);
         setTotalCount(result.totalCount);
         setTotalPages(result.totalPages);
@@ -56,7 +49,7 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         const errorMessage =
           err instanceof Error ? err.message : "Error al cargar los datos";
         setError(errorMessage);
-        if (!searchTerm) {
+        if (!queryParams) {
           showNotification(errorMessage, "error");
         }
       } finally {
@@ -113,11 +106,11 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
       const query = role ? `?role=${role}` : "";
       await apiRequest<T>(endpoint, "DELETE", undefined, id, query);
       const queryParams = new URLSearchParams({
-        "pagination.PageNumber": currentPage.toString(),
-        "pagination.PageSize": pageSize.toString(),
+        "PageNumber": currentPage.toString(),
+        "PageSize": pageSize.toString(),
       });
       const result = await apiRequest<PagedResponse<T>>(endpoint, "GET", undefined, undefined, `?${queryParams}`);
-      
+
       setData(result.items);
       setTotalCount(result.totalCount);
       setTotalPages(result.totalPages);
