@@ -57,7 +57,6 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
   const handleMonthChange = (date: dayjs.Dayjs | null) => {
     if (date) {
       setSelectedMonth(date);
-      // Agregar 1 porque dayjs usa 0-11 y necesitamos 1-12
       onChange((date.month() + 1).toString().padStart(2, "0"));
       handleClose();
     }
