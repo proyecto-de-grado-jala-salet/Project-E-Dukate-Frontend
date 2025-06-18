@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
   login: 'http://localhost:5275/api/auth/login',
   medicalhistories: 'http://localhost:5275/api/MedicalHistories',
   medicalconsultations: 'http://localhost:5275/api/MedicalConsultations',
+  paymentsFilter: 'http://localhost:5275/api/payments/filter',
+  payments: 'http://localhost:5275/api/payments',
 };
 
 export const setAuthToken = (token: string) => {
