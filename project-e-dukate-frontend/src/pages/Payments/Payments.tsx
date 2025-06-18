@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { PaymentTable } from "../../components/Payments/PaymentTable";

@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { fetchSchedules, updateSchedules } from "@/services/scheduleService";
-import { mapBackendSchedules, initializeSchedules } from "@/utils/scheduleUtils";
+import { fetchSchedules } from "@/services/scheduleService";
+import { updateSchedules } from "@/services/scheduleService";
+import { initializeSchedules } from "@/utils/scheduleUtils";
+import { mapBackendSchedules } from "@/utils/scheduleUtils";
 import { ScheduleDto } from "@/types/schedule";
 import { useEditStore } from "@/stores/editStore";
 

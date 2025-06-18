@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiRequest } from "./api";
 import { showNotification } from "./notificationService";
-import {
-  MedicalHistoryDto,
-  PermissionRequestDto,
-  UpdateMedicalHistoryStatusDto,
-} from "@/types/medicalHistory";
+import { MedicalHistoryDto } from "@/types/medicalHistory";
+import { PermissionRequestDto } from "@/types/medicalHistory";
+import { UpdateMedicalHistoryStatusDto } from "@/types/medicalHistory";
 
 interface Consultation {
   id: string;

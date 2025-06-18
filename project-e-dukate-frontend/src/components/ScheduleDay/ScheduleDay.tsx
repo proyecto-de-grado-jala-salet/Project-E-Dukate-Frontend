@@ -1,5 +1,9 @@
 import React from "react";
-import { Box, Typography, FormControlLabel, Checkbox, IconButton } from "@mui/material";
+import { Box } from "@mui/material";
+import { Typography } from "@mui/material";
+import { FormControlLabel } from "@mui/material";
+import { Checkbox } from "@mui/material";
+import { IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { TimeSlotEditor } from "../TimeSlotEditor";
 import { ScheduleDto } from "@/types/schedule";

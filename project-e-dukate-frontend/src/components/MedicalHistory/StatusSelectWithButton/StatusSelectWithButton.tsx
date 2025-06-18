@@ -1,17 +1,16 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  Button,
-  SxProps,
-  Theme,
-  SelectChangeEvent,
-  Tooltip,
-} from "@mui/material";
-import { statuses, statusColors } from "@/utils/medicalHistoryConstants";
+import { Box } from "@mui/material";
+import { Typography } from "@mui/material";
+import { FormControl } from "@mui/material";
+import { Select } from "@mui/material";
+import { MenuItem } from "@mui/material";
+import { Button } from "@mui/material";
+import { SxProps } from "@mui/material";
+import { Theme } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material";
+import { Tooltip } from "@mui/material";
+import { statuses } from "@/utils/medicalHistoryConstants";
+import { statusColors } from "@/utils/medicalHistoryConstants";
 import { baseSelectStyles } from "@/utils/theme";
 
 interface StatusSelectWithButtonProps {

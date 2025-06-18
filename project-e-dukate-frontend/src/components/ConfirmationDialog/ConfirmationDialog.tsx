@@ -1,5 +1,10 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, SxProps } from '@mui/material';
+import { Dialog} from '@mui/material';
+import { DialogTitle } from '@mui/material';
+import { DialogContent } from '@mui/material';
+import { DialogContentText } from '@mui/material';
+import { DialogActions } from '@mui/material';
+import { SxProps } from '@mui/material';
 import { Button } from '../Button';
 
 interface ConfirmationDialogProps {

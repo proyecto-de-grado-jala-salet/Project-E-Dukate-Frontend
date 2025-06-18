@@ -1,4 +1,6 @@
-import { AdministratorDto, PatientDto, SpecialistDto } from '../types/user';
+import { AdministratorDto } from '../types/user';
+import { PatientDto } from '../types/user';
+import { SpecialistDto } from '../types/user';
 
 interface ValidationErrors {
   [key: string]: string;

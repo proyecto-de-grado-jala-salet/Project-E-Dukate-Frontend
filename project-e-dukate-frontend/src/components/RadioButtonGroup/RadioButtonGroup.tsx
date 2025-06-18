@@ -1,5 +1,9 @@
 import React from 'react';
-import { RadioGroup, FormControlLabel, Radio, FormControl, FormLabel } from '@mui/material';
+import { RadioGroup } from '@mui/material';
+import { FormControlLabel } from '@mui/material';
+import { Radio } from '@mui/material';
+import { FormControl } from '@mui/material';
+import { FormLabel } from '@mui/material';
 
 interface RadioOption {
   value: string;

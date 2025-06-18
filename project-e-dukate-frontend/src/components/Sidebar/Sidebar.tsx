@@ -1,5 +1,10 @@
 import React from 'react';
-import { Box, List, ListItemButton, ListItemIcon, SxProps, Tooltip } from '@mui/material';
+import { Box } from '@mui/material';
+import { List } from '@mui/material';
+import { ListItemButton } from '@mui/material';
+import { ListItemIcon } from '@mui/material';
+import { SxProps } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import { FaStethoscope } from "react-icons/fa";
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import { RiUserHeartLine } from "react-icons/ri";

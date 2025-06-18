@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { use } from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
+import { Typography } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSearchParams } from "next/navigation";
 import { useUserEdit } from "@/hooks/useUserEdit";
 import { UserEdit } from "@/pages/Users";
-import { User, UserRole } from "@/types/userTypes";
+import { User } from "@/types/userTypes";
+import { UserRole } from "@/types/userTypes";
 import { useEditStore } from "@/stores/editStore";
 
 interface UserEditPageProps {
