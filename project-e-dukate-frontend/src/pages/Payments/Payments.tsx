@@ -1,9 +1,23 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Box, Typography, TableCell, TableRow, TableHead, TableBody, Paper, TableContainer } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TableCell,
+  TableRow,
+  TableHead,
+  TableBody,
+  Paper,
+  TableContainer,
+  Table,
+} from "@mui/material";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 import { Button } from "../../components/Button";
-import { Dropdown } from "../../components/Dropdown";
 import { TextField } from "../../components/TextField";
 import { Pagination } from "../../components/Pagination";
 import { useApi } from "../../hooks/useApi";
@@ -11,6 +25,11 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { GenericItem } from "../../types/table";
 import { apiRequest } from "../../services/api";
 import { showNotification } from "../../services/notificationService";
+import { HiOutlineFilter } from "react-icons/hi";
+import { FilterButton } from "./FilterButton";
+import ReplayOutlinedIcon from "@mui/icons-material/ReplayOutlined";
+
+dayjs.locale("es");
 
 const formatDate = (date: string | null): string => {
   if (!date) return "-";
@@ -84,33 +103,25 @@ const Payments: React.FC = () => {
   } = useApi<Patient>("patients");
 
   const specialists = specialistsData
-    ? specialistsData.map((spec) => ({
-        value: spec.id,
-        label: `${spec.names} ${spec.lastNamePaternal} ${spec.lastNameMaternal || ""}`.trim(),
-      }))
-    : [];
+    ? [
+        { value: "", label: "Especialistas" },
+        ...specialistsData.map((spec) => ({
+          value: spec.id,
+          label:
+            `${spec.names} ${spec.lastNamePaternal} ${spec.lastNameMaternal || ""}`.trim(),
+        })),
+      ]
+    : [{ value: "", label: "Especialistas" }];
 
   const patients = patientsData
     ? patientsData.map((patient) => ({
         value: patient.id,
-        label: `${patient.names} ${patient.lastNamePaternal} ${patient.lastNameMaternal || ""}`.trim(),
+        label:
+          `${patient.names} ${patient.lastNamePaternal} ${patient.lastNameMaternal || ""}`.trim(),
       }))
     : [];
 
-  const years = Array.from({ length: 10 }, (_, i) => ({
-    value: (new Date().getFullYear() - i).toString(),
-    label: (new Date().getFullYear() - i).toString(),
-  }));
-  const months = Array.from({ length: 12 }, (_, i) => ({
-    value: (i + 1).toString().padStart(2, "0"),
-    label: (i + 1).toString().padStart(2, "0"),
-  }));
-  const days = Array.from({ length: 31 }, (_, i) => ({
-    value: (i + 1).toString().padStart(2, "0"),
-    label: (i + 1).toString().padStart(2, "0"),
-  }));
   const statuses = [
-    { value: "", label: "Seleccione una opción" },
     { value: "Pending", label: "Pendiente" },
     { value: "Completed", label: "Completado" },
   ];
@@ -122,13 +133,16 @@ const Payments: React.FC = () => {
 
   useEffect(() => {
     if (payments) {
-      const initialValues = payments.reduce((acc, payment) => ({
-        ...acc,
-        [payment.id]: {
-          sessionCost: payment.sessionCost.toString(),
-          amountPaid: payment.amountPaid.toString(),
-        },
-      }), {});
+      const initialValues = payments.reduce(
+        (acc, payment) => ({
+          ...acc,
+          [payment.id]: {
+            sessionCost: payment.sessionCost.toString(),
+            amountPaid: payment.amountPaid.toString(),
+          },
+        }),
+        {}
+      );
       setEditedValues(initialValues);
     }
   }, [payments]);
@@ -136,7 +150,11 @@ const Payments: React.FC = () => {
   const debouncedEditedValues = useDebounce(editedValues, 500);
 
   useEffect(() => {
-    const updatePayment = async (id: string, sessionCost: string, amountPaid: string) => {
+    const updatePayment = async (
+      id: string,
+      sessionCost: string,
+      amountPaid: string
+    ) => {
       try {
         const sessionCostNum = parseFloat(sessionCost);
         const amountPaidNum = parseFloat(amountPaid);
@@ -144,23 +162,20 @@ const Payments: React.FC = () => {
           throw new Error("Valores inválidos");
         }
 
-        await apiRequest("payments", "PUT", {
-          sessionCost: sessionCostNum,
-          amountPaid: amountPaidNum,
-        }, id);
+        await apiRequest(
+          "payments",
+          "PUT",
+          {
+            sessionCost: sessionCostNum,
+            amountPaid: amountPaidNum,
+          },
+          id
+        );
 
-        const queryParams = new URLSearchParams({
-          SpecialistId: specialistId,
-          Year: year,
-          Month: month,
-          Day: day,
-          Status: status,
-          PageNumber: currentPage.toString(),
-          PageSize: pageSize.toString(),
-        }).toString();
-        fetchData(currentPage, `?${queryParams}`);
+        fetchDataWithCurrentFilters();
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Error al actualizar el pago";
+        const errorMessage = "Error al actualizar el pago";
+
         showNotification(errorMessage, "error");
       }
     };
@@ -175,9 +190,37 @@ const Payments: React.FC = () => {
         updatePayment(id, values.sessionCost, values.amountPaid);
       }
     });
-  }, [debouncedEditedValues, payments, specialistId, year, month, day, status, currentPage, pageSize, fetchData]);
+  }, [debouncedEditedValues, payments]);
 
-  const handleValueChange = (id: string, field: "sessionCost" | "amountPaid", value: string) => {
+  const buildQueryParams = (page: number = currentPage) => {
+    const params = new URLSearchParams({
+      PageNumber: page.toString(),
+      PageSize: pageSize.toString(),
+    });
+
+    if (specialistId) params.append("SpecialistId", specialistId);
+    if (year) params.append("Year", year);
+    if (month) params.append("Month", month);
+    if (day) params.append("Day", day);
+    if (status) params.append("Status", status);
+
+    return params.toString();
+  };
+
+  const fetchDataWithCurrentFilters = (page: number = currentPage) => {
+    const queryString = buildQueryParams(page);
+    fetchData(page, `?${queryString}`);
+  };
+
+  useEffect(() => {
+    fetchDataWithCurrentFilters();
+  }, [specialistId, year, month, day, status, currentPage, pageSize]);
+
+  const handleValueChange = (
+    id: string,
+    field: "sessionCost" | "amountPaid",
+    value: string
+  ) => {
     setEditedValues((prev) => ({
       ...prev,
       [id]: {
@@ -186,19 +229,6 @@ const Payments: React.FC = () => {
       },
     }));
   };
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams({
-      SpecialistId: specialistId,
-      Year: year,
-      Month: month,
-      Day: day,
-      Status: status,
-      PageNumber: currentPage.toString(),
-      PageSize: pageSize.toString(),
-    }).toString();
-    fetchData(currentPage, `?${queryParams}`);
-  }, [specialistId, year, month, day, status, currentPage, fetchData, pageSize]);
 
   const handleResetFilter = () => {
     setSpecialistId("");
@@ -212,57 +242,129 @@ const Payments: React.FC = () => {
   if (loading || specialistsLoading || patientsLoading)
     return <Typography variant="h6">Cargando...</Typography>;
   if (error || specialistsError || patientsError)
-    return <Typography variant="h6" color="error">{error || specialistsError || patientsError}</Typography>;
-  if (!payments || payments.length === 0)
-    return <Typography variant="h6">No se encontraron elementos</Typography>;
+    return (
+      <Typography variant="h6" color="error">
+        {error || specialistsError || patientsError}
+      </Typography>
+    );
 
   return (
     <Box sx={{ p: 3, bgcolor: "#EDEDED", height: "100%" }}>
-      <Typography variant="h5" sx={{ mb: 2, color: "#013c28" }}>
+      <Typography
+        variant="h4"
+        sx={{ mb: 2, fontWeight: "bold", color: "black" }}
+      >
         Pagos
       </Typography>
-      <Box sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center" }}>
-        <Typography variant="body2">Filter By</Typography>
-        <Dropdown
+      <Box
+        sx={{
+          mb: 2,
+          display: "flex",
+          alignItems: "center",
+          bgcolor: "#fff",
+          p: 0.5,
+          borderRadius: "8px",
+          border: "1px solid #e0e0e0",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+          width: "56%",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            px: 1,
+            py: 0.5,
+            borderRight: "1px solid #e0e0e0",
+          }}
+        >
+          <HiOutlineFilter size={20} color="#000" />
+          <Typography
+            variant="body2"
+            sx={{ ml: 2.5, color: "#000", fontWeight: 500 }}
+          >
+            Filtrar por
+          </Typography>
+        </Box>
+
+        <FilterButton
           label="Especialista"
           value={specialistId}
           onChange={setSpecialistId}
           options={specialists}
+          type="dropdown"
         />
-        <Dropdown
-          label="Año"
+
+        <FilterButton
+          label="Años"
           value={year}
           onChange={setYear}
-          options={years}
+          type="year"
         />
-        <Dropdown
-          label="Mes"
+
+        <FilterButton
+          label="Meses"
           value={month}
           onChange={setMonth}
-          options={months}
+          type="month"
         />
-        <Dropdown
+
+        <FilterButton
           label="Día"
           value={day}
           onChange={setDay}
-          options={days}
+          options={[
+            { value: "", label: "Días" },
+            ...Array.from({ length: 31 }, (_, i) => ({
+              value: (i + 1).toString().padStart(2, "0"),
+              label: (i + 1).toString().padStart(2, "0"),
+            })),
+          ]}
+          type="dropdown"
         />
-        <Dropdown
+
+        <FilterButton
           label="Estado"
           value={status}
           onChange={setStatus}
           options={statuses}
+          type="dropdown"
         />
-        <Button
-          label="Reset Filter"
-          color="error"
-          variant="outlined"
-          sx={{ borderRadius: "12px" }}
-          onClick={handleResetFilter}
-        />
+
+        <Box
+          sx={{
+            px: 0.5,
+            py: 0.5,
+            borderLeft: "1px solid #e0e0e0",
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<ReplayOutlinedIcon fontSize="small" />}
+            sx={{
+              borderRadius: "8px",
+              minWidth: "100px",
+              height: "32px",
+              fontSize: "14px",
+              textTransform: "none",
+              borderColor: "transparent",
+              color: "red",
+            }}
+            onClick={handleResetFilter}
+            label={"Restablecer filtro"}
+          ></Button>
+        </Box>
       </Box>
-      <TableContainer component={Paper} sx={{ boxShadow: "none", border: "1px solid #e0e0e0", borderRadius: "12px", overflow: "hidden" }}>
-        <Box sx={{ display: "table", width: "100%" }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          boxShadow: "none",
+          border: "1px solid #e0e0e0",
+          borderRadius: "12px",
+          overflow: "hidden",
+        }}
+      >
+        <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow>
               <TableCell
@@ -400,109 +502,198 @@ const Payments: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {payments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {getPatientName(payment.patientId)}
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {formatDate(payment.firstPaymentDate)}
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {formatDate(payment.lastPaymentDate)}
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {payment.sessionCount}
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-                    <TextField
-                      value={editedValues[payment.id]?.sessionCost || ""}
-                      onChange={(value) => handleValueChange(payment.id, "sessionCost", value)}
-                      sx={{
-                        "& .MuiInputBase-root": { height: "auto" },
-                        width: "70px",
-                      }}
-                      type="number"
-                      placeholder="0"
-                    />
-                    <Typography sx={{ color: "black" }}>bs.</Typography>
-                  </Box>
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-                    <TextField
-                      value={editedValues[payment.id]?.amountPaid || ""}
-                      onChange={(value) => handleValueChange(payment.id, "amountPaid", value)}
-                      sx={{
-                        "& .MuiInputBase-root": { height: "auto" },
-                        width: "70px",
-                      }}
-                      type="number"
-                      placeholder="0"
-                    />
-                    <Typography sx={{ color: "black" }}>bs.</Typography>
-                  </Box>
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {payment.pendingAmount} bs.
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {payment.specialistAmount} bs.
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  {payment.institutionAmount} bs.
-                </TableCell>
-                <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
-                >
-                  <Box
+            {payments && payments.length > 0 ? (
+              payments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell
                     sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: payment.status === "Completed" ? "#d4edda" : "#fff3cd",
-                      color: payment.status === "Completed" ? "#155724" : "#856404",
-                      borderRadius: "12px",
-                      padding: "4px 8px",
+                      color: "black",
+                      padding: "6px",
+                      textAlign: "center",
                     }}
                   >
-                    {payment.status === "Completed" ? "Completado" : "Pendiente"}
-                  </Box>
-                </TableCell>
+                    {getPatientName(payment.patientId)}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {formatDate(payment.firstPaymentDate)}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {formatDate(payment.lastPaymentDate)}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {payment.sessionCount}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <TextField
+                        value={editedValues[payment.id]?.sessionCost || ""}
+                        onChange={(value) =>
+                          handleValueChange(payment.id, "sessionCost", value)
+                        }
+                        sx={{
+                          "& .MuiInputBase-root": { height: "auto" },
+                          width: "70px",
+                        }}
+                        type="number"
+                        placeholder="0"
+                      />
+                      <Typography sx={{ color: "black" }}>bs.</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <TextField
+                        value={editedValues[payment.id]?.amountPaid || ""}
+                        onChange={(value) =>
+                          handleValueChange(payment.id, "amountPaid", value)
+                        }
+                        sx={{
+                          "& .MuiInputBase-root": { height: "auto" },
+                          width: "70px",
+                        }}
+                        type="number"
+                        placeholder="0"
+                      />
+                      <Typography sx={{ color: "black" }}>bs.</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {payment.pendingAmount} bs.
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {payment.specialistAmount} bs.
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {payment.institutionAmount} bs.
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor:
+                          payment.status === "Completed"
+                            ? "#d4edda"
+                            : "#fff3cd",
+                        color:
+                          payment.status === "Completed"
+                            ? "#155724"
+                            : "#856404",
+                        borderRadius: "12px",
+                        padding: "4px 8px",
+                      }}
+                    >
+                      {payment.status === "Completed"
+                        ? "Completado"
+                        : "Pendiente"}
+                    </Box>
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: "black",
+                      padding: "16px 24px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {payment.totalAmount} bs.
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
                 <TableCell
-                  sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}
+                  colSpan={12}
+                  sx={{
+                    color: "black",
+                    padding: "32px 24px",
+                    textAlign: "center",
+                    fontSize: "1.1rem",
+                    fontWeight: "medium",
+                  }}
                 >
-                  {payment.totalAmount} bs.
+                  No se encontraron elementos
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
-        </Box>
+        </Table>
       </TableContainer>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={(page) => fetchData(page, `?PageNumber=${page}&PageSize=${pageSize}`)}
-      />
+      {payments && payments.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => fetchDataWithCurrentFilters(page)}
+        />
+      )}
     </Box>
   );
 };
