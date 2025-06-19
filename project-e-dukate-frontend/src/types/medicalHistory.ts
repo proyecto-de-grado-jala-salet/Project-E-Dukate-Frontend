@@ -42,3 +42,20 @@ export interface UpdateMedicalConsultationDto {
   consultationDate: string;
   notes: string;
 }
+
+export interface MedicalHistoryFilterDto {
+  Year?: number;
+  Month?: number;
+  Day?: number;
+  Statuses?: string[];
+}
+
+export interface MedicalHistoryStatusMetricDto {
+  status: string;
+  count: number;
+}
+
+export interface MedicalHistoryMetricsDto {
+  metrics: MedicalHistoryStatusMetricDto[];
+  total: number;
+}
