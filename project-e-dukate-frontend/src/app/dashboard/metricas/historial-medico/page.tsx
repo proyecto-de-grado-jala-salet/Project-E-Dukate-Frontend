@@ -1,4 +1,4 @@
-import { Metrics } from '../../../pages/Metrics';
+import { Metrics } from '../../../../pages/Metrics';
 
 export default function MetricsPage() {
   return <Metrics />;
