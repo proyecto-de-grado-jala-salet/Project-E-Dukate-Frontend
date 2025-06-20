@@ -1,14 +1,16 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { GenericEChart } from '@/components/GenericCharts';
+import { GenericEChart } from '@/components/Metrics/GenericCharts';
 import { DemographicMetricsDto } from '@/types/metricas';
-import { genderColors, ageRangeColors, formatGenderLabel } from '@/utils/demographicConstants';
+import { genderColors } from '@/utils/demographicConstants';
+import { ageRangeColors } from '@/utils/demographicConstants';
+import { formatGenderLabel } from '@/utils/demographicConstants';
 
-interface MetricasDemograficasChartsProps {
+interface DemographicMetricsChartsProps {
   metricsData: DemographicMetricsDto;
 }
 
-export const MetricasDemograficasCharts: React.FC<MetricasDemograficasChartsProps> = ({ metricsData }) => {
+export const DemographicMetricsCharts: React.FC<DemographicMetricsChartsProps> = ({ metricsData }) => {
   const genderChartData = metricsData.genderMetrics.map(metric => ({
     status: metric.gender,
     count: metric.count,

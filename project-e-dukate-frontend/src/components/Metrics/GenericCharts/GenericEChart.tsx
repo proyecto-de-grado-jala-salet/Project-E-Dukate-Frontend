@@ -2,7 +2,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import * as echarts from 'echarts';
-import { statusColors, formatStatusLabel } from '@/utils/medicalHistoryConstants';
+import { statusColors } from '@/utils/medicalHistoryConstants';
+import { formatStatusLabel } from '@/utils/medicalHistoryConstants';
 
 interface ChartData {
   status: string;

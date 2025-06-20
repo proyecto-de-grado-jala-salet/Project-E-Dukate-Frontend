@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
+import { Typography } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { GenericFilterContainer } from '@/components/GenericFilters';
-import { MetricasDemograficasCharts } from '@/components/MetricasDemograficas';
+import { DemographicMetricsCharts } from '@/components/Metrics/DemographicMetrics';
 import { fetchDemographicMetrics } from '@/services/demographicMetricsService';
-import { DemographicFilterDto, DemographicMetricsDto } from '@/types/metricas';
+import { DemographicFilterDto } from '@/types/metricas';
+import { DemographicMetricsDto } from '@/types/metricas';
 import { FilterOption } from '@/types/filterOption';
 
-export const MetricasDemograficas: React.FC = () => {
+export const DemographicMetrics: React.FC = () => {
   const [filter, setFilter] = useState<DemographicFilterDto>({});
   const [metricsData, setMetricsData] = useState<DemographicMetricsDto | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -99,10 +102,10 @@ export const MetricasDemograficas: React.FC = () => {
         </Typography>
       )}
       {!loading && !error && metricsData && (
-        <MetricasDemograficasCharts metricsData={metricsData} />
+        <DemographicMetricsCharts metricsData={metricsData} />
       )}
     </Box>
   );
 };
 
-export default MetricasDemograficas;
+export default DemographicMetrics;
