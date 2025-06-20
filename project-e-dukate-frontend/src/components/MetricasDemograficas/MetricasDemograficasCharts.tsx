@@ -41,9 +41,17 @@ export const MetricasDemograficasCharts: React.FC<MetricasDemograficasChartsProp
             No hay datos disponibles para mostrar.
           </Typography>
         )}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 3,
+            flexWrap: 'wrap',
+            justifyContent: 'space-around',
+          }}
+        >
           {genderPieData.length > 0 && (
-            <Box>
+            <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
               <GenericEChart
                 type="pie"
                 data={genderPieData}
@@ -55,7 +63,7 @@ export const MetricasDemograficasCharts: React.FC<MetricasDemograficasChartsProp
             </Box>
           )}
           {agePieData.length > 0 && (
-            <Box>
+            <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
               <GenericEChart
                 type="pie"
                 data={agePieData}
