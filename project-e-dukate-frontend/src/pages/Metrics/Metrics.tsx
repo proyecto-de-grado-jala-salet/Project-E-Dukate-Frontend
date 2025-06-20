@@ -8,6 +8,7 @@ import { MetricsCharts } from '@/components/Metrics';
 import { fetchMedicalHistoryMetrics } from '@/services/metricsService';
 import { MedicalHistoryFilterDto, MedicalHistoryMetricsDto } from '@/types/medicalHistory';
 import { statuses } from '@/utils/medicalHistoryConstants';
+import { formatStatusLabel } from '@/utils/medicalHistoryConstants';
 import { HiOutlineFilter } from 'react-icons/hi';
 import { Button } from '@mui/material';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
@@ -20,11 +21,7 @@ export const Metrics: React.FC = () => {
 
   const statusOptions = statuses.map(status => ({
     value: status,
-    label: status
-      .replace('ContinuaEnTratamiento', 'Continúa en Tratamiento')
-      .replace('AltaDefinitiva', 'Alta Definitiva')
-      .replace('AltaTemporal', 'Alta Temporal')
-      .replace('AltaAbandono', 'Alta por Abandono')
+    label: formatStatusLabel(status)
   }));
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import { SelectChangeEvent } from "@mui/material";
 import { Tooltip } from "@mui/material";
 import { statuses } from "@/utils/medicalHistoryConstants";
 import { statusColors } from "@/utils/medicalHistoryConstants";
+import { formatStatusLabel } from "@/utils/medicalHistoryConstants";
 import { baseSelectStyles } from "@/utils/theme";
 
 interface StatusSelectWithButtonProps {
@@ -72,7 +73,7 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
                     }}
                   />
                   <Typography variant="body1" sx={{ color: "#000000" }}>
-                    {value}
+                    {formatStatusLabel(value)}
                   </Typography>
                 </Box>
               ) : (
@@ -93,7 +94,7 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
                     }}
                   />
                   <Typography variant="body1" sx={{ color: "#000000" }}>
-                    {status}
+                    {formatStatusLabel(status)}
                   </Typography>
                 </Box>
               </MenuItem>
