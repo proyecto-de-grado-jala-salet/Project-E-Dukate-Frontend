@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   paymentsFilter: 'http://localhost:5275/api/payments/filter',
   payments: 'http://localhost:5275/api/payments',
   medicalHistoryMetrics: 'http://localhost:5275/api/metrics/medical-histories',
+  demographicMetrics: 'http://localhost:5275/api/metrics/demographics/',
 };
 
 export const setAuthToken = (token: string) => {
