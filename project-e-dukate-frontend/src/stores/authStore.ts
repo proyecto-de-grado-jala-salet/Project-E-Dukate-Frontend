@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage, PersistOptions } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
+import { createJSONStorage } from 'zustand/middleware';
+import { PersistOptions } from 'zustand/middleware';
 import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {

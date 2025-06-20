@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from "react";
+import { useState } from "react";
 import { fetchSpecialties } from '@/services/specialtyService';
 
 interface Specialty {

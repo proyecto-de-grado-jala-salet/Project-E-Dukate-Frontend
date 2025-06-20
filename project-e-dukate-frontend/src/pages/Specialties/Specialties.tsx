@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
+import { Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Button } from '../../components/Button';
 import { TextField } from '../../components/TextField';
 import { Modal } from '../../components/Modal';
 import { Table } from '../../components/Table';
 import { useApi } from '../../hooks/useApi';
-import { Specialty, ColumnConfig } from '../../types/table';
+import { Specialty } from '../../types/table';
+import { ColumnConfig } from '../../types/table';
 import { useDebounce } from '../../hooks/useDebounce';
 
 export const Specialties: React.FC = () => {

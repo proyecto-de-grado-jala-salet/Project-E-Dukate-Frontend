@@ -23,3 +23,10 @@ export const statusColors = {
   AltaTemporal: '#FFA719',
   AltaAbandono: '#F24B4B',
 } as const;
+
+export const formatStatusLabel = (status: string): string =>
+  status
+    .replace('ContinuaEnTratamiento', 'Continúa en Tratamiento')
+    .replace('AltaDefinitiva', 'Alta Definitiva')
+    .replace('AltaTemporal', 'Alta Temporal')
+    .replace('AltaAbandono', 'Alta por Abandono');

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   medicalconsultations: 'http://localhost:5275/api/MedicalConsultations',
   paymentsFilter: 'http://localhost:5275/api/payments/filter',
   payments: 'http://localhost:5275/api/payments',
+  medicalHistoryMetrics: 'http://localhost:5275/api/metrics/medical-histories',
 };
 
 export const setAuthToken = (token: string) => {

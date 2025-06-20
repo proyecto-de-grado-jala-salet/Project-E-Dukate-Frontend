@@ -1,6 +1,7 @@
 import { apiRequest } from './api';
 import { showNotification } from './notificationService';
-import { AdministratorDto, SpecialistDto } from '@/types/user';
+import { SpecialistDto } from '@/types/user';
+import { AdministratorDto } from '@/types/user';
 
 export const addAdministrator = async (data: AdministratorDto) => {
   try {

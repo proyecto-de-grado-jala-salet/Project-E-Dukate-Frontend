@@ -1,12 +1,15 @@
 "use client";
 
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Button } from '@mui/material';
+import { Box } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { PersonalInfoForm } from '@/components/FormComponents/PersonalInfoForm';
 import { GeneralInfoForm } from '@/components/FormComponents/GeneralInfoForm';
 import { Patient } from '@/types/userTypes';
-import { mapGenderToRadioValue, mapRadioValueToGender } from '@/utils/formUtils';
+import { mapGenderToRadioValue } from '@/utils/formUtils';
+import { mapRadioValueToGender } from '@/utils/formUtils';
 
 interface PatientEditProps {
   formData: Patient | null;

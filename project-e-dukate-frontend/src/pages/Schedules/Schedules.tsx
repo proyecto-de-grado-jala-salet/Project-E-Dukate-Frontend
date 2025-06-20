@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { Table } from '@/components/Table';
 import { useApi } from '@/hooks/useApi';
 import { ColumnConfig } from '@/types/table';
-import { Specialist, Schedule } from '@/types/userTypes';
+import { Specialist } from '@/types/userTypes';
+import { Schedule } from '@/types/userTypes';
 import { useRouter } from 'next/navigation';
 import { useEditStore } from '@/stores/editStore';
 import { TextField } from '../../components/TextField';
 import SearchIcon from '@mui/icons-material/Search';
-import { dayTranslation, formatTimeSlot } from '@/utils/scheduleUtils';
+import { dayTranslation } from '@/utils/scheduleUtils';
+import { formatTimeSlot } from '@/utils/scheduleUtils';
 import slugify from 'slugify';
 import { useDebounce } from '../../hooks/useDebounce';
 

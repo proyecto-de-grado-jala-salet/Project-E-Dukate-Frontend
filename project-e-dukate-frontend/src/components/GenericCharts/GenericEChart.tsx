@@ -1,0 +1,108 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useRef } from 'react';
+import { Box } from '@mui/material';
+import * as echarts from 'echarts';
+import { statusColors, formatStatusLabel } from '@/utils/medicalHistoryConstants';
+
+interface ChartData {
+  status: string;
+  count: number;
+}
+
+interface GenericEChartProps {
+  type: 'bar' | 'pie';
+  data: ChartData[] | null;
+  title: string;
+  height?: string;
+}
+
+export const GenericEChart: React.FC<GenericEChartProps> = ({
+  type,
+  data,
+  title,
+  height = '400px',
+}) => {
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!chartRef.current || !data) return;
+
+    const chart = echarts.init(chartRef.current);
+    const statuses = data.map(m => m.status);
+    const formattedStatuses = statuses.map(formatStatusLabel);
+    const counts = data.map(m => m.count);
+    const colors = statuses.map(status => statusColors[status as keyof typeof statusColors] || '#999999');
+
+    const baseOption = {
+      title: {
+        text: title,
+        left: 'center',
+        textStyle: { color: '#000000', fontSize: 20 },
+      },
+      tooltip: {
+        trigger: type === 'bar' ? 'axis' : 'item',
+        formatter: (params: any) => {
+          const param = Array.isArray(params) ? params[0] : params;
+          const index = param.dataIndex;
+          const value = type === 'bar' ? param.value : `${param.value} (${param.percent}%)`;
+          return `${formattedStatuses[index]}: ${value}`;
+        },
+      },
+    };
+
+    const option = type === 'bar' ? {
+      ...baseOption,
+      xAxis: {
+        type: 'category',
+        data: formattedStatuses,
+        axisLabel: { color: '#000000', fontSize: 15 },
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Cantidad',
+        nameTextStyle: { color: '#000000', fontSize: 15 },
+        axisLabel: { color: '#000000', fontSize: 15 },
+      },
+      series: [
+        {
+          data: counts,
+          type: 'bar',
+          itemStyle: { color: (params: any) => colors[params.dataIndex] },
+        },
+      ],
+    } : {
+      ...baseOption,
+      series: [
+        {
+          type: 'pie',
+          radius: '80%',
+          data: statuses.map((status, index) => ({
+            value: counts[index],
+            name: formattedStatuses[index],
+          })),
+          itemStyle: { color: (params: any) => colors[params.dataIndex] },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+          label: {
+            show: true,
+            textStyle: { fontSize: 14 },
+            formatter: (params: any) => `${formattedStatuses[params.dataIndex]}: ${params.value}`,
+          },
+        },
+      ],
+    };
+
+    chart.setOption(option);
+
+    return () => {
+      chart.dispose();
+    };
+  }, [data, type, title]);
+
+  return <Box ref={chartRef} sx={{ height, width: '100%' }} />;
+};

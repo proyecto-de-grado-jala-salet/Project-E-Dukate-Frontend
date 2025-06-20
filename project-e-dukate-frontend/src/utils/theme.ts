@@ -1,4 +1,6 @@
-import { createTheme, SxProps, Theme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
+import { SxProps } from '@mui/material/styles';
+import { Theme } from '@mui/material/styles';
 
 export const theme = createTheme({
   palette: {
