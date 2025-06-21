@@ -46,14 +46,14 @@ export const DemographicMetricsCharts: React.FC<DemographicMetricsChartsProps> =
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: { xs: 'column', xl: 'row' },
             gap: 3,
             flexWrap: 'wrap',
             justifyContent: 'space-around',
           }}
         >
           {genderPieData.length > 0 && (
-            <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
+            <Box sx={{ flex: { xs: '1 1 100%', xl: '1 1 45%' }, minWidth: { xs: '100%', xl: '300px' } }}>
               <GenericEChart
                 type="pie"
                 data={genderPieData}
@@ -65,7 +65,7 @@ export const DemographicMetricsCharts: React.FC<DemographicMetricsChartsProps> =
             </Box>
           )}
           {agePieData.length > 0 && (
-            <Box sx={{ flex: '1 1 45%', minWidth: '300px' }}>
+            <Box sx={{ flex: { xs: '1 1 100%', xl: '1 1 45%' }, minWidth: { xs: '100%', xl: '300px' } }}>
               <GenericEChart
                 type="pie"
                 data={agePieData}

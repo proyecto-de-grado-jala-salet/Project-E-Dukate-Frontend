@@ -20,8 +20,7 @@ export const fetchDemographicMetrics = async (
       undefined,
       `filter?${queryParams.toString()}`
     );
-
-    console.log('Demographic metrics response:', response);
+    
     if (!response || !response.genderMetrics || !response.ageMetrics) {
       console.warn('Invalid demographic metrics response:', response);
       return null;

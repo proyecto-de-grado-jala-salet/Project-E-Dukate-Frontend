@@ -20,8 +20,7 @@ export const fetchMedicalHistoryMetrics = async (
       undefined,
       `filter?${queryParams.toString()}`
     );
-
-    console.log('Metrics response:', response);
+    
     if (!response || !response.metrics) {
       console.warn('Invalid metrics response:', response);
       return null;
