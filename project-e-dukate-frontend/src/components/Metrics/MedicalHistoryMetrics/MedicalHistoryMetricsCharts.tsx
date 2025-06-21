@@ -3,11 +3,11 @@ import { Box, Typography } from '@mui/material';
 import { GenericEChart } from '../GenericCharts';
 import { MedicalHistoryMetricsDto } from '@/types/medicalHistory';
 
-interface MetricasHistorialMedicoChartsProps {
+interface MedicalHistoryMetricsChartsProps {
   metricsData: MedicalHistoryMetricsDto | null;
 }
 
-export const MetricasHistorialMedicoCharts: React.FC<MetricasHistorialMedicoChartsProps> = ({
+export const MedicalHistoryMetricsCharts: React.FC<MedicalHistoryMetricsChartsProps> = ({
   metricsData,
 }) => {
   return (

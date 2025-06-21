@@ -2,7 +2,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import * as echarts from 'echarts';
-import { statusColors, formatStatusLabel } from '@/utils/medicalHistoryConstants';
+import { statusColors } from '@/utils/medicalHistoryConstants';
+import { formatStatusLabel } from '@/utils/medicalHistoryConstants';
 
 interface ChartData {
   status: string;
@@ -14,6 +15,8 @@ interface GenericEChartProps {
   data: ChartData[] | null;
   title: string;
   height?: string;
+  formatLabel?: (status: string) => string;
+  colors?: { [key: string]: string };
 }
 
 export const GenericEChart: React.FC<GenericEChartProps> = ({
@@ -21,6 +24,8 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
   data,
   title,
   height = '400px',
+  formatLabel = formatStatusLabel,
+  colors = statusColors,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -29,9 +34,9 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
 
     const chart = echarts.init(chartRef.current);
     const statuses = data.map(m => m.status);
-    const formattedStatuses = statuses.map(formatStatusLabel);
+    const formattedStatuses = statuses.map(formatLabel);
     const counts = data.map(m => m.count);
-    const colors = statuses.map(status => statusColors[status as keyof typeof statusColors] || '#999999');
+    const chartColors = statuses.map(status => (colors as { [key: string]: string })[status] ?? '#999999');
 
     const baseOption = {
       title: {
@@ -67,7 +72,7 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
         {
           data: counts,
           type: 'bar',
-          itemStyle: { color: (params: any) => colors[params.dataIndex] },
+          itemStyle: { color: (params: any) => chartColors[params.dataIndex] },
         },
       ],
     } : {
@@ -80,7 +85,7 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
             value: counts[index],
             name: formattedStatuses[index],
           })),
-          itemStyle: { color: (params: any) => colors[params.dataIndex] },
+          itemStyle: { color: (params: any) => chartColors[params.dataIndex] },
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -102,7 +107,7 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
     return () => {
       chart.dispose();
     };
-  }, [data, type, title]);
+  }, [data, type, title, formatLabel, colors]);
 
   return <Box ref={chartRef} sx={{ height, width: '100%' }} />;
 };

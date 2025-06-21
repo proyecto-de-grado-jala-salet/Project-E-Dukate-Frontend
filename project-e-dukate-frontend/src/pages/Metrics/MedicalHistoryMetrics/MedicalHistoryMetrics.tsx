@@ -1,14 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
+import { Typography } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { GenericFilterContainer } from '@/components/GenericFilters';
-import { MetricasHistorialMedicoCharts } from '@/components/MetricasHistorialMedico';
+import { MedicalHistoryMetricsCharts } from '@/components/Metrics/MedicalHistoryMetrics';
 import { fetchMedicalHistoryMetrics } from '@/services/metricsService';
-import { MedicalHistoryFilterDto, MedicalHistoryMetricsDto } from '@/types/medicalHistory';
-import { statuses, formatStatusLabel } from '@/utils/medicalHistoryConstants';
+import { MedicalHistoryFilterDto } from '@/types/medicalHistory';
+import { MedicalHistoryMetricsDto } from '@/types/medicalHistory';
+import { statuses } from '@/utils/medicalHistoryConstants';
+import { formatStatusLabel } from '@/utils/medicalHistoryConstants';
 
-export const MetricasHistorialMedico: React.FC = () => {
+export const MedicalHistoryMetrics: React.FC = () => {
   const [filter, setFilter] = useState<MedicalHistoryFilterDto>({});
   const [metricsData, setMetricsData] = useState<MedicalHistoryMetricsDto | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -89,10 +93,10 @@ export const MetricasHistorialMedico: React.FC = () => {
         </Typography>
       )}
       {!loading && !error && metricsData && (
-        <MetricasHistorialMedicoCharts metricsData={metricsData} />
+        <MedicalHistoryMetricsCharts metricsData={metricsData} />
       )}
     </Box>
   );
 };
 
-export default MetricasHistorialMedico;
+export default MedicalHistoryMetrics;
