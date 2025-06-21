@@ -1,1 +1,1 @@
-export { default as MetricasDemograficas } from './DemographicMetrics';
+export { default as DemographicMetrics } from './DemographicMetrics';

@@ -1,5 +1,5 @@
-import { MetricasDemograficas } from '@/pages/Metrics/DemographicMetrics';
+import { DemographicMetrics } from '@/pages/Metrics/DemographicMetrics';
 
-export default function MetricasDemograficasPage() {
-  return <MetricasDemograficas />;
+export default function DemographicMetricsPage() {
+  return <DemographicMetrics />;
 }
