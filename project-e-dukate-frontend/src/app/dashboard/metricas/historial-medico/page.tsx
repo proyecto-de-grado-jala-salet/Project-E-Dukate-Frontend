@@ -1,5 +1,5 @@
-import { MetricasHistorialMedico } from '@/pages/Metrics/MedicalHistoryMetrics';
+import { MedicalHistoryMetrics } from '@/pages/Metrics/MedicalHistoryMetrics';
 
-export default function MetricasHistorialMedicoPage() {
-  return <MetricasHistorialMedico />;
+export default function MedicalHistoryMetricsPage() {
+  return <MedicalHistoryMetrics />;
 }

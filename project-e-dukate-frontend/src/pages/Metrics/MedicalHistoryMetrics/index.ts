@@ -1,1 +1,1 @@
-export { default as MetricasHistorialMedico }  from './MedicalHistoryMetrics';
+export { default as MedicalHistoryMetrics }  from './MedicalHistoryMetrics';
