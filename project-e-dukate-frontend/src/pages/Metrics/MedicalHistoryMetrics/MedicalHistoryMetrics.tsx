@@ -23,6 +23,11 @@ export const MedicalHistoryMetrics: React.FC = () => {
     label: formatStatusLabel(status),
   }));
 
+  const dayOptions = Array.from({ length: 31 }, (_, index) => ({
+    value: (index + 1).toString(),
+    label: (index + 1).toString(),
+  }));
+
   useEffect(() => {
     const fetchMetrics = async () => {
       setLoading(true);
@@ -59,10 +64,11 @@ export const MedicalHistoryMetrics: React.FC = () => {
       onChange: handleFilterChange('Month'),
     },
     {
-      type: 'month' as const,
+      type: 'dropdown' as const,
       label: 'Día',
       value: filter.Day?.toString() || '',
       onChange: handleFilterChange('Day'),
+      options: dayOptions,
     },
     {
       type: 'multi-select' as const,

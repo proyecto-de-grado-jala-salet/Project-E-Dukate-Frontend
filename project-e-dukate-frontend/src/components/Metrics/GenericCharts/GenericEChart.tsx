@@ -11,7 +11,7 @@ interface ChartData {
 }
 
 interface GenericEChartProps {
-  type: 'bar' | 'pie';
+  type: 'bar' | 'pie' | 'line';
   data: ChartData[] | null;
   title: string;
   height?: string;
@@ -45,37 +45,17 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
         textStyle: { color: '#000000', fontSize: 20 },
       },
       tooltip: {
-        trigger: type === 'bar' ? 'axis' : 'item',
+        trigger: type === 'pie' ? 'item' : 'axis',
         formatter: (params: any) => {
           const param = Array.isArray(params) ? params[0] : params;
           const index = param.dataIndex;
-          const value = type === 'bar' ? param.value : `${param.value} (${param.percent}%)`;
+          const value = type === 'pie' ? `${param.value} (${param.percent}%)` : param.value;
           return `${formattedStatuses[index]}: ${value}`;
         },
       },
     };
 
-    const option = type === 'bar' ? {
-      ...baseOption,
-      xAxis: {
-        type: 'category',
-        data: formattedStatuses,
-        axisLabel: { color: '#000000', fontSize: 15 },
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Cantidad',
-        nameTextStyle: { color: '#000000', fontSize: 15 },
-        axisLabel: { color: '#000000', fontSize: 15 },
-      },
-      series: [
-        {
-          data: counts,
-          type: 'bar',
-          itemStyle: { color: (params: any) => chartColors[params.dataIndex] },
-        },
-      ],
-    } : {
+    const option = type === 'pie' ? {
       ...baseOption,
       series: [
         {
@@ -98,6 +78,29 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
             textStyle: { fontSize: 14 },
             formatter: (params: any) => `${formattedStatuses[params.dataIndex]}: ${params.value}`,
           },
+        },
+      ],
+    } : {
+      ...baseOption,
+      xAxis: {
+        type: 'category',
+        data: formattedStatuses,
+        axisLabel: { color: '#000000', fontSize: 15 },
+      },
+      yAxis: {
+        type: 'value',
+        name: type === 'bar' ? 'Cantidad' : 'Ingresos ($)',
+        nameTextStyle: { color: '#000000', fontSize: 15 },
+        axisLabel: { color: '#000000', fontSize: 15 },
+      },
+      series: [
+        {
+          data: counts,
+          type: type,
+          itemStyle: { color: (params: any) => chartColors[params.dataIndex] },
+          smooth: type === 'line' ? true : undefined,
+          lineStyle: type === 'line' ? { width: 2 } : undefined,
+          areaStyle: type === 'line' ? { opacity: 0.2 } : undefined,
         },
       ],
     };

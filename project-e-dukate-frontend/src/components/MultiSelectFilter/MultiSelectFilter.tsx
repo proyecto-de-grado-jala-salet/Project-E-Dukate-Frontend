@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { FormControl, InputLabel, Select, SelectChangeEvent, MenuItem, Checkbox, ListItemText, OutlinedInput } from '@mui/material';
 import { Box } from '@mui/material';
