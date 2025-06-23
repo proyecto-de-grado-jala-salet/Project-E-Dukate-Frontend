@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiRequest } from "./api";
 import { showNotification } from "./notificationService";
-import { BackendSchedule, ScheduleDto } from "@/types/schedule";
+import { ScheduleDto } from "@/types/schedule";
+import { BackendSchedule } from "@/types/schedule";
 
 export const fetchSchedules = async (specialistId: string): Promise<BackendSchedule[]> => {
   try {

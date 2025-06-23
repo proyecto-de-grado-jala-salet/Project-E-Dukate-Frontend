@@ -8,14 +8,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Pagination,
-  TextField,
-  Button,
-  IconButton,
-} from "@mui/material";
+import { Box } from "@mui/material";
+import { Typography } from "@mui/material";
+import { Pagination } from "@mui/material";
+import { TextField } from "@mui/material";
+import { Button } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { SimpleEditor } from "@/components/tiptap/tiptap-templates/simple/simple-editor";
 import { apiRequest } from "@/services/api";

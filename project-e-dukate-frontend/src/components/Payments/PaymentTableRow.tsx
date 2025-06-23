@@ -1,5 +1,7 @@
 import React from "react";
-import { TableCell, TableRow, Box } from "@mui/material";
+import { TableRow } from "@mui/material";
+import { TableCell } from "@mui/material";
+import { Box } from "@mui/material";
 import { EditableCurrencyField } from "./EditableCurrencyField";
 import { Payment } from "../../types/payments";
 

@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { PatientInfo } from "@/components/MedicalHistory/PatientInfo";
 import { SpecialistStatusForm } from "@/components/MedicalHistory/SpecialistStatusForm";
 import { ConsultationsList } from "@/components/MedicalHistory/ConsultationsList";

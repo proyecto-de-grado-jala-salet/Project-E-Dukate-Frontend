@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from 'react';
+import { useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/services/api';
 import { showNotification } from '@/services/notificationService';
-import { BaseUser, UserRole, SpecialistResponse, Administrator, Specialist } from '@/types/userTypes';
+import { BaseUser } from '@/types/userTypes';
+import { UserRole } from '@/types/userTypes';
+import { SpecialistResponse } from '@/types/userTypes';
+import { Administrator } from '@/types/userTypes';
+import { Specialist } from '@/types/userTypes';
 import { useEditStore } from '@/stores/editStore';
 
 interface UseUserEditProps<T extends BaseUser> {

@@ -6,14 +6,13 @@ import { useApi } from "@/hooks/useApi";
 import { useEditStore } from "@/stores/editStore";
 import { useAuthStore } from "@/stores/authStore";
 import { MedicalHistoryDto } from "@/types/medicalHistory";
-import { Patient, Specialist } from "@/types/userTypes";
-import {
-  getMedicalHistoryByPatientId,
-  updatePermission,
-  deletePermission,
-  updateMedicalHistoryStatus,
-  getSpecialistConsultations,
-} from "@/services/medicalHistoryService";
+import { Patient } from "@/types/userTypes";
+import { Specialist } from "@/types/userTypes";
+import { getMedicalHistoryByPatientId } from "@/services/medicalHistoryService";
+import { updatePermission } from "@/services/medicalHistoryService";
+import { deletePermission } from "@/services/medicalHistoryService";
+import { updateMedicalHistoryStatus } from "@/services/medicalHistoryService";
+import { getSpecialistConsultations } from "@/services/medicalHistoryService";
 import { apiRequest } from "@/services/api";
 import { showNotification } from "@/services/notificationService";
 

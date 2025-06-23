@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState} from "react";
+import { useEffect } from "react";
 import { useApi } from "./useApi";
 import { useDebounce } from "./useDebounce";
 import { apiRequest } from "../services/api";
 import { showNotification } from "../services/notificationService";
 import { Payment } from "../types/payments";
-import { Specialist, Patient } from "../types/userTypes";
+import { Specialist } from "../types/userTypes";
+import { Patient } from "../types/userTypes";
 
 export const usePayments = () => {
   const [specialistId, setSpecialistId] = useState("");

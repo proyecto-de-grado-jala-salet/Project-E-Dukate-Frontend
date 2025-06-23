@@ -17,9 +17,16 @@ export const statuses = [
   'AltaAbandono',
 ] as const;
 
-export const statusColors = {
+export const statusColors: { [key: string]: string } = {
   ContinuaEnTratamiento: '#76CAFF',
   AltaDefinitiva: '#009F1D',
   AltaTemporal: '#FFA719',
   AltaAbandono: '#F24B4B',
-} as const;
+};
+
+export const formatStatusLabel = (status: string): string =>
+  status
+    .replace('ContinuaEnTratamiento', 'Continúa en Tratamiento')
+    .replace('AltaDefinitiva', 'Alta Definitiva')
+    .replace('AltaTemporal', 'Alta Temporal')
+    .replace('AltaAbandono', 'Alta por Abandono');
