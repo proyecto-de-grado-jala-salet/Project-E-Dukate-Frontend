@@ -1,14 +1,11 @@
 import React, { useState } from "react";
-import { Box } from "@mui/material";
-import { Button } from "@mui/material";
-import { Menu } from "@mui/material";
-import { MenuItem } from "@mui/material";
-import { Popover } from "@mui/material";
+import { Box, Button, Menu, MenuItem, Popover } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { YearCalendar } from "@mui/x-date-pickers/YearCalendar";
 import { MonthCalendar } from "@mui/x-date-pickers/MonthCalendar";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
@@ -19,7 +16,8 @@ interface FilterButtonProps {
   value: string;
   onChange: (value: string) => void;
   options?: { value: string; label: string }[];
-  type?: "dropdown" | "year" | "month";
+  type?: "dropdown" | "year" | "month" | "date";
+  minDate?: string;
 }
 
 export const FilterButton: React.FC<FilterButtonProps> = ({
@@ -28,6 +26,7 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
   onChange,
   options = [],
   type = "dropdown",
+  minDate,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedYear, setSelectedYear] = useState<dayjs.Dayjs | null>(
@@ -35,6 +34,9 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
   );
   const [selectedMonth, setSelectedMonth] = useState<dayjs.Dayjs | null>(
     value && type === "month" ? dayjs().month(parseInt(value) - 1) : null
+  );
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(
+    value && type === "date" ? dayjs(value) : null
   );
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -66,6 +68,14 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
     }
   };
 
+  const handleDateChange = (date: dayjs.Dayjs | null) => {
+    if (date) {
+      setSelectedDate(date);
+      onChange(date.format('YYYY-MM-DD'));
+      handleClose();
+    }
+  };
+
   const getDisplayValue = () => {
     switch (type) {
       case "year":
@@ -74,6 +84,8 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         if (!value) return "Meses";
         const monthIndex = parseInt(value) - 1;
         return dayjs().month(monthIndex).format("MMMM");
+      case "date":
+        return value ? dayjs(value).format('DD/MM/YYYY') : label;
       default:
         return options.find((opt) => opt.value === value)?.label || label;
     }
@@ -100,6 +112,23 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
           <Box sx={{ p: 2 }}>
             <MonthCalendar value={selectedMonth} onChange={handleMonthChange} />
+          </Box>
+        </LocalizationProvider>
+      );
+    }
+
+    if (type === "date") {
+      return (
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+          <Box sx={{ p: 2 }}>
+            <DatePicker
+              value={selectedDate}
+              onChange={handleDateChange}
+              minDate={minDate ? dayjs(minDate) : undefined}
+              slotProps={{
+                textField: { size: 'small', fullWidth: true },
+              }}
+            />
           </Box>
         </LocalizationProvider>
       );
@@ -142,14 +171,14 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         }}
       >
         {displayValue}
-        {type === "year" || type === "month" ? (
+        {type === "year" || type === "month" || type === "date" ? (
           <CalendarTodayIcon sx={{ fontSize: 16, ml: 1 }} />
         ) : (
           <span style={{ marginLeft: "8px" }}>▼</span>
         )}
       </Button>
 
-      {type === "year" || type === "month" ? (
+      {type === "year" || type === "month" || type === "date" ? (
         <Popover
           open={Boolean(anchorEl)}
           anchorEl={anchorEl}

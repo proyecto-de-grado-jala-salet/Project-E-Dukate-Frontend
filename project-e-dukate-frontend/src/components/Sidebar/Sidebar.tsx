@@ -57,7 +57,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
       roles: ['Administrator'],
       subItems: [
         { label: 'Historial médico', value: 'metricas/historial-medico' },
-        { label: 'Demografía', value: 'metricas/demografia' }
+        { label: 'Demografía', value: 'metricas/demografia' },
+        { label: 'Pagos', value: 'metricas/pagos' }
       ]
     },
   ];
