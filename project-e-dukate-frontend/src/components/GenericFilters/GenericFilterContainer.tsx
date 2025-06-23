@@ -1,44 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import React, { useState } from 'react';
 import { Box, Typography, Button, Popover } from '@mui/material';
 import { HiOutlineFilter } from 'react-icons/hi';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import { FilterButton } from '../FilterButton';
 import { MultiSelectFilter } from '../MultiSelectFilter';
-import { FilterOption } from '@/types/filterOption';
+import { Filter } from '@/types/filterOption';
 import { DateRangePicker } from 'react-date-range';
-import { startOfWeek, endOfWeek, format } from 'date-fns';
+import { startOfWeek } from 'date-fns';
+import { endOfWeek } from 'date-fns';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
-
-interface BaseFilterConfig {
-  label: string;
-}
-
-interface SingleSelectFilterConfig extends BaseFilterConfig {
-  type: 'dropdown' | 'year' | 'month' | 'date';
-  value: string;
-  onChange: (value: string) => void;
-  options?: FilterOption[];
-}
-
-interface MultiSelectFilterConfig extends BaseFilterConfig {
-  type: 'multi-select';
-  value: string[];
-  onChange: (value: string[]) => void;
-  options: FilterOption[];
-}
-
-interface WeekRangeFilterConfig extends BaseFilterConfig {
-  type: 'week-range';
-  value: { startDate: Date; endDate: Date } | null;
-  onChange: (value: { startDate: Date; endDate: Date }) => void;
-}
-
-type FilterConfig = SingleSelectFilterConfig | MultiSelectFilterConfig | WeekRangeFilterConfig;
+import { staticRanges } from '@/utils/dateRangeConstants'
+import { inputRanges } from '@/utils/dateRangeConstants'
 
 interface GenericFilterContainerProps {
-  filters: FilterConfig[];
+  filters: Filter[];
   onResetFilters: () => void;
 }
 
@@ -61,9 +42,12 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
 
   const handleWeekSelect = (ranges: any) => {
     if (currentWeekFilterIndex !== null) {
-      const filter = filters[currentWeekFilterIndex] as WeekRangeFilterConfig;
-      const startDate = startOfWeek(ranges.selection.startDate, { weekStartsOn: 1 }); // Lunes
-      const endDate = endOfWeek(ranges.selection.endDate, { weekStartsOn: 1 }); // Domingo
+      const filter = filters[currentWeekFilterIndex] as Filter & {
+        type: 'week-range';
+        value: { startDate: Date; endDate: Date } | null;
+      };
+      const startDate = startOfWeek(ranges.selection.startDate, { weekStartsOn: 1, locale: es });
+      const endDate = endOfWeek(ranges.selection.endDate, { weekStartsOn: 1, locale: es });
       filter.onChange({ startDate, endDate });
       handleClose();
     }
@@ -86,6 +70,7 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
             color: #ffffff !important;
           }
           .rdrDateRangePickerWrapper .rdrDayToday .rdrDayNumber span:after {
+            color: #ffffff !important;
             background: #013c28 !important;
           }
           .rdrDateRangePickerWrapper .rdrDateDisplayItemActive {
@@ -108,6 +93,16 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
             border-bottom: 1px solid #013c28 !important;
             border-left: none !important;
             border-right: none !important;
+          }
+          .rdrInputRanges {
+            font-size: 12px !important;
+            padding: 8px 12px !important;
+          }
+          .rdrInputRangeInput {
+            border-radius: 4px !important;
+            border: 1px solid #e0e0e0 !important;
+            padding: 4px !important;
+            margin-left: 8px !important;
           }
         `}
       </style>
@@ -165,7 +160,11 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
                 onClick={(event) => handleClick(event, index)}
               >
                 {filter.value
-                  ? `${format(filter.value.startDate, 'dd/MM/yyyy')} - ${format(filter.value.endDate, 'dd/MM/yyyy')}`
+                  ? `${format(filter.value.startDate, 'dd/MM/yyyy', { locale: es })} - ${format(
+                      filter.value.endDate,
+                      'dd/MM/yyyy',
+                      { locale: es }
+                    )}`
                   : filter.label}
               </Button>
             ) : (
@@ -175,6 +174,7 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
                 onChange={filter.onChange}
                 options={filter.options}
                 type={filter.type}
+                minDate={filter.minDate}
               />
             )}
           </React.Fragment>
@@ -208,19 +208,26 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
         >
           <DateRangePicker
             ranges={
-              currentWeekFilterIndex !== null && filters[currentWeekFilterIndex].type === 'week-range' && (filters[currentWeekFilterIndex] as WeekRangeFilterConfig).value
-                ? [{
-                    startDate: (filters[currentWeekFilterIndex] as WeekRangeFilterConfig).value!.startDate,
-                    endDate: (filters[currentWeekFilterIndex] as WeekRangeFilterConfig).value!.endDate,
-                    key: 'selection',
-                  }]
+              currentWeekFilterIndex !== null &&
+              filters[currentWeekFilterIndex]?.type === 'week-range' &&
+              filters[currentWeekFilterIndex].value
+                ? [
+                    {
+                      startDate: (filters[currentWeekFilterIndex] as any).value!.startDate,
+                      endDate: (filters[currentWeekFilterIndex] as any).value!.endDate,
+                      key: 'selection',
+                    },
+                  ]
                 : [{ startDate: new Date(), endDate: new Date(), key: 'selection' }]
             }
             onChange={handleWeekSelect}
             moveRangeOnFirstSelection={false}
             months={2}
             direction="horizontal"
-            weekStartsOn={1} // Lunes
+            weekStartsOn={1}
+            locale={es}
+            staticRanges={staticRanges}
+            inputRanges={inputRanges}
           />
         </Popover>
       </Box>

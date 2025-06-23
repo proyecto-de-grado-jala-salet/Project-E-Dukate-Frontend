@@ -1,10 +1,5 @@
-'use client';
+import { PaymentMetrics } from '@/pages/Metrics/PaymentsMetrics';
 
-import React from 'react';
-import { PaymentMetricsCharts } from '@/components/Metrics/PaymentMetrics';
-
-const PaymentsMetricsPage: React.FC = () => {
-  return <PaymentMetricsCharts />;
-};
-
-export default PaymentsMetricsPage;
+export default function PaymentMetricsPage() {
+  return <PaymentMetrics />;
+}

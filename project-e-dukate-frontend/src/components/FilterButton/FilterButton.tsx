@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Box, Button, Menu, MenuItem, Popover } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
