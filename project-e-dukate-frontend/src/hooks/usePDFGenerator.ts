@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { showNotification } from '../services/notificationService';
 
 interface PDFGeneratorProps {
-  contentRef: React.RefObject<HTMLElement| null>;
+  contentRef: React.RefObject<HTMLElement | null>;
   fileName?: string;
 }
 
@@ -12,7 +14,7 @@ interface PDFGeneratorResult {
   previewImage: string | null;
   isCapturing: boolean;
   handleGeneratePDF: () => Promise<void>;
-  handleConfirmDownload: () => void;
+  handleConfirmDownload: () => Promise<void>;
   handleClosePreview: () => void;
 }
 
@@ -23,11 +25,9 @@ export const usePDFGenerator = ({ contentRef, fileName = 'Report' }: PDFGenerato
 
   const handleGeneratePDF = useCallback(async () => {
     if (!contentRef.current) {
-      console.error('Error: contentRef is not defined');
-      alert('Error: No se pudo generar la vista previa. El contenedor de PDF no está disponible.');
+      showNotification('No se pudo generar la vista previa.', 'error');
       return;
     }
-    
 
     setIsCapturing(true);
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -48,20 +48,18 @@ export const usePDFGenerator = ({ contentRef, fileName = 'Report' }: PDFGenerato
         setPreviewImage(imgData);
         setPreviewOpen(true);
       } else {
-        alert('Error: No se pudo generar la imagen.');
+        showNotification('No se pudo generar la imagen.', 'error');
       }
     } catch (error) {
-      console.error('Error generando vista previa:', error);
-      alert('Error al generar la vista previa. Revisa la consola para más detalles.');
+      showNotification('Error al generar la vista previa.', 'error');
     } finally {
       setIsCapturing(false);
     }
   }, [contentRef]);
 
-  const handleConfirmDownload = useCallback(() => {
+  const handleConfirmDownload = useCallback(async () => {
     if (!previewImage) {
-      console.error('Error: No hay imagen para generar el PDF');
-      alert('Error: No hay imagen disponible para generar el PDF.');
+      showNotification('No hay imagen disponible para generar el PDF.', 'error');
       return;
     }
 
@@ -105,11 +103,43 @@ export const usePDFGenerator = ({ contentRef, fileName = 'Report' }: PDFGenerato
         scaledHeight -= (pdfHeight - 2 * margin);
       }
 
-      pdf.save(`${fileName}.pdf`);
-      setPreviewOpen(false);
+      const pdfBlob = pdf.output('blob');
+
+      if ('showSaveFilePicker' in window) {
+        try {
+          const fileHandle = await window.showSaveFilePicker({
+            suggestedName: `${fileName}.pdf`,
+            types: [
+              {
+                description: 'PDF Files',
+                accept: {
+                  'application/pdf': ['.pdf'],
+                },
+              },
+            ],
+          });
+
+          const writableStream = await fileHandle.createWritable();
+          await writableStream.write(pdfBlob);
+          await writableStream.close();
+          setPreviewOpen(false);
+          showNotification('PDF guardado exitosamente.', 'success');
+        } catch (error) {
+          if (error instanceof DOMException && error.name === 'AbortError') {
+            return;
+          }
+          showNotification('Error al guardar el archivo. Se descargará automáticamente.', 'error');
+          pdf.save(`${fileName}.pdf`);
+          setPreviewOpen(false);
+        }
+      } else {
+        pdf.save(`${fileName}.pdf`);
+        setPreviewOpen(false);
+        showNotification('PDF descargado automáticamente.', 'success');
+      }
     } catch (error) {
-      console.error('Error generando PDF:', error);
-      alert('Error al generar el PDF. Revisa la consola para más detalles.');
+      showNotification('Error al generar el PDF.', 'error');
+      setPreviewOpen(false);
     }
   }, [fileName, previewImage]);
 

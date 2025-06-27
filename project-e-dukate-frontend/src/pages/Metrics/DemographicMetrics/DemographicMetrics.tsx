@@ -24,7 +24,7 @@ export const DemographicMetrics: React.FC = () => {
     handleGeneratePDF,
     handleConfirmDownload,
     handleClosePreview,
-  } = usePDFGenerator({ contentRef: pdfContentRef });
+  } = usePDFGenerator({ contentRef: pdfContentRef, fileName: 'Informe_de_métricas_demográficas' });
 
   const genderOptions: FilterOption[] = [
     { value: 'M', label: 'Masculino' },

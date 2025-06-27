@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { usePaymentMetrics } from '@/hooks/usePaymentMetrics';
 import {
@@ -40,7 +40,7 @@ export const PaymentMetrics: React.FC = () => {
     handleGeneratePDF,
     handleConfirmDownload,
     handleClosePreview,
-  } = usePDFGenerator({ contentRef: pdfContentRef, fileName: 'PaymentMetrics_Report' });
+  } = usePDFGenerator({ contentRef: pdfContentRef, fileName: 'Informe_de_métricas_de_pago' });
 
   const chartDataPendingVsCompleted = pendingVsCompletedData
     ? [
@@ -62,12 +62,6 @@ export const PaymentMetrics: React.FC = () => {
         count: item.totalIncome,
       }))
     : [];
-
-  useEffect(() => {
-    if (pdfContentRef.current) {
-      console.log('Contenido de pdfContentRef:', pdfContentRef.current.innerHTML);
-    }
-  }, [availableYears, pendingVsCompletedData, institutionEarningsData]);
 
   return (
     <>

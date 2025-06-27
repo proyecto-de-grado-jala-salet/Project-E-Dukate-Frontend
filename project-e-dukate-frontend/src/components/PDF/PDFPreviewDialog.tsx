@@ -8,6 +8,7 @@ interface PDFPreviewDialogProps {
   previewImage: string | null;
   onClose: () => void;
   onConfirm: () => void;
+  dialogWidth?: string;
 }
 
 export const PDFPreviewDialog: React.FC<PDFPreviewDialogProps> = ({
@@ -15,6 +16,7 @@ export const PDFPreviewDialog: React.FC<PDFPreviewDialogProps> = ({
   previewImage,
   onClose,
   onConfirm,
+  dialogWidth = '612px',
 }) => {
   return (
     <Dialog
@@ -24,7 +26,7 @@ export const PDFPreviewDialog: React.FC<PDFPreviewDialogProps> = ({
       disableEnforceFocus
       sx={{
         '& .MuiDialog-paper': {
-          width: '612px',
+          width: dialogWidth,
           maxHeight: '90vh',
           bgcolor: '#fff',
         },
