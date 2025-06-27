@@ -19,10 +19,22 @@ export const MedicalHistoryMetricsCharts: React.FC<MedicalHistoryMetricsChartsPr
           borderRadius: '12px',
           p: 2,
           boxShadow: 1,
+          margin: '30px 0 0 0',
+          whiteSpace: 'pre-wrap',
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'black', m: 3 }}>
-          Gráfico de Barras
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 'bold', 
+            color: 'black', 
+            m: 3,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'keep-all',
+            fontFamily: 'Arial, sans-serif', 
+          }}
+        >
+          Métricas{' '}de{' '}Estado{' '}de{' '}Consulta
         </Typography>
         {metricsData && !metricsData.metrics && (
           <Typography color="textSecondary" align="center">
@@ -30,38 +42,19 @@ export const MedicalHistoryMetricsCharts: React.FC<MedicalHistoryMetricsChartsPr
           </Typography>
         )}
         {metricsData?.metrics && (
-          <GenericEChart
+          <>
+            <GenericEChart
             type="bar"
             data={metricsData.metrics}
-            title="Métricas de Historiales Médicos"
+            title=""
             height="500px"
           />
-        )}
-      </Box>
-      <Box
-        sx={{
-          width: '100%',
-          bgcolor: '#ffffff',
-          borderRadius: '12px',
-          p: 2,
-          margin: '30px 0 0 0',
-          boxShadow: 1,
-        }}
-      >
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'black', m: 3 }}>
-          Gráfico Circular
-        </Typography>
-        {metricsData && !metricsData.metrics && (
-          <Typography color="textSecondary" align="center">
-            No hay datos disponibles para mostrar.
-          </Typography>
-        )}
-        {metricsData?.metrics && (
           <GenericEChart
             type="pie"
             data={metricsData.metrics}
-            title="Métricas de Historiales Médicos"
+            title=""
           />
+          </>
         )}
       </Box>
     </>

@@ -1,21 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import { CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { GenericFilterContainer } from '@/components/GenericFilters';
 import { DemographicMetricsCharts } from '@/components/Metrics/DemographicMetrics';
 import { fetchDemographicMetrics } from '@/services/demographicMetricsService';
-import { DemographicFilterDto } from '@/types/metricas';
-import { DemographicMetricsDto } from '@/types/metricas';
 import { FilterOption } from '@/types/filterOption';
+import { DemographicFilterDto, DemographicMetricsDto } from '@/types/metricas';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import { PDFPreviewDialog } from '@/components/PDF';
 
 export const DemographicMetrics: React.FC = () => {
   const [filter, setFilter] = useState<DemographicFilterDto>({});
   const [metricsData, setMetricsData] = useState<DemographicMetricsDto | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const componentRef = useRef<HTMLDivElement>(null);
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const {
+    previewOpen,
+    previewImage,
+    isCapturing,
+    handleGeneratePDF,
+    handleConfirmDownload,
+    handleClosePreview,
+  } = usePDFGenerator({ contentRef: pdfContentRef });
 
   const genderOptions: FilterOption[] = [
     { value: 'M', label: 'Masculino' },
@@ -83,28 +92,71 @@ export const DemographicMetrics: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
-        Métricas Demográficas
-      </Typography>
-      <GenericFilterContainer
-        filters={filterConfig}
-        onResetFilters={() => setFilter({})}
-      />
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-          <CircularProgress />
+    <>
+      <Box sx={{ p: 3 }} ref={componentRef}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3,
+          }}
+        >
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
+            Métricas Demográficas
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={handleGeneratePDF}
+            sx={{ bgcolor: '#f5a623', color: 'black', borderRadius: '10px' }}
+          >
+            Descargar en PDF
+          </Button>
         </Box>
-      )}
-      {error && (
-        <Typography color="error" sx={{ my: 2 }}>
-          {error}
-        </Typography>
-      )}
-      {!loading && !error && metricsData && (
-        <DemographicMetricsCharts metricsData={metricsData} />
-      )}
-    </Box>
+        <GenericFilterContainer
+          filters={filterConfig}
+          onResetFilters={() => setFilter({})}
+        />
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
+        {error && (
+          <Typography color="error" sx={{ my: 2 }}>
+            {error}
+          </Typography>
+        )}
+        {!loading && !error && metricsData && (
+          <DemographicMetricsCharts metricsData={metricsData} />
+        )}
+      </Box>
+      <Box
+        ref={pdfContentRef}
+        sx={{
+          display: isCapturing ? 'block' : 'none',
+          position: isCapturing ? 'absolute' : 'static',
+          left: isCapturing ? '-9999px' : 'auto',
+          top: isCapturing ? '-9999px' : 'auto',
+          width: isCapturing ? '1612px' : 'auto',
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
+            Métricas Demográficas
+          </Typography>
+          {!loading && !error && metricsData && (
+            <DemographicMetricsCharts metricsData={metricsData} />
+          )}
+        </Box>
+      </Box>
+      <PDFPreviewDialog
+        open={previewOpen}
+        previewImage={previewImage}
+        onClose={handleClosePreview}
+        onConfirm={handleConfirmDownload}
+      />
+    </>
   );
 };
 
