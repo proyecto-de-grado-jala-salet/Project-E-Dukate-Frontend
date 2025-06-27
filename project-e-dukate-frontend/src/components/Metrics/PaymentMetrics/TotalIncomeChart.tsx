@@ -11,6 +11,7 @@ interface TotalIncomeChartProps {
   data: { status: string; count: number }[];
   periodType: string;
   onResetFilters: () => void;
+  showFilters: boolean;
 }
 
 export const TotalIncomeChart: React.FC<TotalIncomeChartProps> = ({
@@ -18,6 +19,7 @@ export const TotalIncomeChart: React.FC<TotalIncomeChartProps> = ({
   data,
   periodType,
   onResetFilters,
+  showFilters,
 }) => (
   <Box
     sx={{
@@ -27,12 +29,23 @@ export const TotalIncomeChart: React.FC<TotalIncomeChartProps> = ({
       p: 2,
       margin: '30px 0 0 0',
       boxShadow: 1,
+      whiteSpace: 'pre-wrap',
     }}
   >
-    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'black', m: 3 }}>
-      {periodType === 'yearly' ? 'Gráfico de Barras' : 'Gráfico de Líneas'}
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 'bold',
+        color: 'black',
+        m: 3,
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'keep-all',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      Ingresos{' '}Totales{' '}por{' '}Período
     </Typography>
-    {filters.length > 0 && (
+    {showFilters && filters.length > 0 && (
       <Box sx={{ m: 3 }}>
         <GenericFilterContainer filters={filters} onResetFilters={onResetFilters} />
       </Box>
@@ -45,7 +58,7 @@ export const TotalIncomeChart: React.FC<TotalIncomeChartProps> = ({
       <GenericEChart
         type={periodType === 'yearly' ? 'bar' : 'line'}
         data={data}
-        title="Ingresos Totales por Período"
+        title=""
         height="500px"
         formatLabel={(status) => status}
         colors={{}}

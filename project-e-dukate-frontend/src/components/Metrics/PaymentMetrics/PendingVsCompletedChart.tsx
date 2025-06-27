@@ -15,10 +15,21 @@ export const PendingVsCompletedChart: React.FC<PendingVsCompletedChartProps> = (
       p: 2,
       margin: '30px 0 0 0',
       boxShadow: 1,
+      whiteSpace: 'pre-wrap',
     }}
   >
-    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'black', m: 3 }}>
-      Montos Pendientes vs. Completados
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 'bold',
+        color: 'black',
+        m: 3,
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'keep-all',
+        fontFamily: 'Arial, sans-serif',
+      }}
+    >
+      Montos Pendientes{' '}vs.{' '}Completados
     </Typography>
     {!data ? (
       <Typography color="textSecondary" align="center">
