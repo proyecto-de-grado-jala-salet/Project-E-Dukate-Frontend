@@ -123,7 +123,6 @@ export const usePDFGenerator = ({ contentRef, fileName = 'Report' }: PDFGenerato
           await writableStream.write(pdfBlob);
           await writableStream.close();
           setPreviewOpen(false);
-          showNotification('PDF guardado exitosamente.', 'success');
         } catch (error) {
           if (error instanceof DOMException && error.name === 'AbortError') {
             return;
@@ -135,7 +134,6 @@ export const usePDFGenerator = ({ contentRef, fileName = 'Report' }: PDFGenerato
       } else {
         pdf.save(`${fileName}.pdf`);
         setPreviewOpen(false);
-        showNotification('PDF descargado automáticamente.', 'success');
       }
     } catch (error) {
       showNotification('Error al generar el PDF.', 'error');

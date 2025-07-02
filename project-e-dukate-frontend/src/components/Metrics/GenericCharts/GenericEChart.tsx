@@ -91,7 +91,7 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
       },
       yAxis: {
         type: 'value',
-        name: type === 'bar' ? 'Cantidad' : 'Ingresos ($)',
+        name: type === 'bar' ? 'Cantidad' : 'Ingresos (bs)',
         nameTextStyle: { color: '#000000', fontSize: 15 },
         axisLabel: { color: '#000000', fontSize: 15 },
       },

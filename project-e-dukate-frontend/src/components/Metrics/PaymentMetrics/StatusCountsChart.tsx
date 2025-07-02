@@ -18,49 +18,53 @@ export const StatusCountsChart: React.FC<StatusCountsChartProps> = ({
   data,
   onResetFilters,
   showFilters,
-}) => (
-  <Box
-    sx={{
-      width: '100%',
-      bgcolor: '#ffffff',
-      borderRadius: '12px',
-      p: 2,
-      margin: '30px 0 0 0',
-      boxShadow: 1,
-      whiteSpace: 'pre-wrap',
-    }}
-  >
-    <Typography
-      variant="h5"
+}) => {
+  const filteredData = data.filter(item => item.count > 0);
+
+  return (
+    <Box
       sx={{
-        fontWeight: 'bold',
-        color: 'black',
-        m: 3,
+        width: '100%',
+        bgcolor: '#ffffff',
+        borderRadius: '12px',
+        p: 2,
+        margin: '30px 0 0 0',
+        boxShadow: 1,
         whiteSpace: 'pre-wrap',
-        wordBreak: 'keep-all',
-        fontFamily: 'Arial, sans-serif',
       }}
     >
-      Gráfico{' '}de{' '}Conteo{' '}de{' '}Pagos
-    </Typography>
-    {showFilters && filters.length > 0 && (
-      <Box sx={{ m: 3 }}>
-        <GenericFilterContainer filters={filters} onResetFilters={onResetFilters} />
-      </Box>
-    )}
-    {!data ? (
-      <Typography color="textSecondary" align="center">
-        No hay datos disponibles para mostrar.
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: 'bold',
+          color: 'black',
+          m: 3,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'keep-all',
+          fontFamily: 'Arial, sans-serif',
+        }}
+      >
+        Gráfico{' '}de{' '}Conteo{' '}de{' '}Pagos
       </Typography>
-    ) : (
-      <GenericEChart
-        type="pie"
-        data={data}
-        title=""
-        height="400px"
-        formatLabel={(status) => (status === 'Pending' ? 'Pendientes' : 'Completados')}
-        colors={{ Pending: '#FF6384', Completed: '#36A2EB' }}
-      />
-    )}
-  </Box>
-);
+      {showFilters && filters.length > 0 && (
+        <Box sx={{ m: 3 }}>
+          <GenericFilterContainer filters={filters} onResetFilters={onResetFilters} />
+        </Box>
+      )}
+      {filteredData.length === 0 ? (
+        <Typography color="textSecondary" align="center">
+          No hay datos disponibles para mostrar.
+        </Typography>
+      ) : (
+        <GenericEChart
+          type="pie"
+          data={filteredData}
+          title=""
+          height="400px"
+          formatLabel={(status) => (status === 'Pending' ? 'Pendientes' : 'Completados')}
+          colors={{ Pending: '#FF6384', Completed: '#36A2EB' }}
+        />
+      )}
+    </Box>
+  );
+};

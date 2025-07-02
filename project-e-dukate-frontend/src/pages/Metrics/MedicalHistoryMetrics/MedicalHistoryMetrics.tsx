@@ -145,7 +145,8 @@ export const MedicalHistoryMetrics: React.FC = () => {
         previewImage={previewImage}
         onClose={handleClosePreview}
         onConfirm={handleConfirmDownload}
-        dialogWidth="850px"
+        dialogWidth="1450px"
+        initialZoom={1.6}
       />
     </>
   );

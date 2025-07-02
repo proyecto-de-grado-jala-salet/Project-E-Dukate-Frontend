@@ -37,13 +37,16 @@ export const usePaymentMetrics = () => {
   const [totalIncomeWeekRange, setTotalIncomeWeekRange] = useState<{ startDate: Date; endDate: Date } | null>(null);
   const [totalIncomeStartDate, setTotalIncomeStartDate] = useState<Date | null>(null);
   const [totalIncomeEndDate, setTotalIncomeEndDate] = useState<Date | null>(null);
-  const [institutionEarningsStartDate, setInstitutionEarningsStartDate] = useState<Date | null>(null);
-  const [institutionEarningsEndDate, setInstitutionEarningsEndDate] = useState<Date | null>(null);
+  const [metricCardStartDate, setMetricCardStartDate] = useState<Date | null>(null);
+  const [metricCardEndDate, setMetricCardEndDate] = useState<Date | null>(null);
+  const [pendingVsCompletedStartDate, setPendingVsCompletedStartDate] = useState<Date | null>(null);
+  const [pendingVsCompletedEndDate, setPendingVsCompletedEndDate] = useState<Date | null>(null);
   const [statusCountsStartDate, setStatusCountsStartDate] = useState<Date | null>(null);
   const [statusCountsEndDate, setStatusCountsEndDate] = useState<Date | null>(null);
   
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [totalIncomeData, setTotalIncomeData] = useState<IncomeByPeriod[] | null>(null);
+  const [metricCardPendingVsCompletedData, setMetricCardPendingVsCompletedData] = useState<PendingVsCompletedPayments | null>(null);
   const [pendingVsCompletedData, setPendingVsCompletedData] = useState<PendingVsCompletedPayments | null>(null);
   const [statusCountsData, setStatusCountsData] = useState<PaymentStatusCounts | null>(null);
   const [institutionEarningsData, setInstitutionEarningsData] = useState<InstitutionEarnings | null>(null);
@@ -62,11 +65,22 @@ export const usePaymentMetrics = () => {
       setTotalIncomeData,
       setError
     );
-    fetchPendingVsCompleted(setPendingVsCompletedData, setError);
+    fetchPendingVsCompleted(
+      metricCardStartDate,
+      metricCardEndDate,
+      setMetricCardPendingVsCompletedData,
+      setError
+    );
+    fetchPendingVsCompleted(
+      pendingVsCompletedStartDate,
+      pendingVsCompletedEndDate,
+      setPendingVsCompletedData,
+      setError
+    );
     fetchStatusCounts(statusCountsStartDate, statusCountsEndDate, setStatusCountsData, setError);
     fetchInstitutionEarnings(
-      institutionEarningsStartDate,
-      institutionEarningsEndDate,
+      metricCardStartDate,
+      metricCardEndDate,
       setInstitutionEarningsData,
       setError
     );
@@ -74,8 +88,19 @@ export const usePaymentMetrics = () => {
 
   useEffect(() => {
     fetchAvailableYears(setAvailableYears, setError);
-    fetchPendingVsCompleted(setPendingVsCompletedData, setError);
-  }, []);
+    fetchPendingVsCompleted(
+      metricCardStartDate,
+      metricCardEndDate,
+      setMetricCardPendingVsCompletedData,
+      setError
+    );
+    fetchPendingVsCompleted(
+      pendingVsCompletedStartDate,
+      pendingVsCompletedEndDate,
+      setPendingVsCompletedData,
+      setError
+    );
+  }, [metricCardEndDate, metricCardStartDate, pendingVsCompletedEndDate, pendingVsCompletedStartDate]);
 
   useEffect(() => {
     if (availableYears.length > 0) {
@@ -91,9 +116,21 @@ export const usePaymentMetrics = () => {
       );
       fetchStatusCounts(statusCountsStartDate, statusCountsEndDate, setStatusCountsData, setError);
       fetchInstitutionEarnings(
-        institutionEarningsStartDate,
-        institutionEarningsEndDate,
+        metricCardStartDate,
+        metricCardEndDate,
         setInstitutionEarningsData,
+        setError
+      );
+      fetchPendingVsCompleted(
+        metricCardStartDate,
+        metricCardEndDate,
+        setMetricCardPendingVsCompletedData,
+        setError
+      );
+      fetchPendingVsCompleted(
+        pendingVsCompletedStartDate,
+        pendingVsCompletedEndDate,
+        setPendingVsCompletedData,
         setError
       );
     }
@@ -106,8 +143,10 @@ export const usePaymentMetrics = () => {
     totalIncomeEndDate,
     statusCountsStartDate,
     statusCountsEndDate,
-    institutionEarningsStartDate,
-    institutionEarningsEndDate,
+    metricCardStartDate,
+    metricCardEndDate,
+    pendingVsCompletedStartDate,
+    pendingVsCompletedEndDate,
     availableYears,
   ]);
 
@@ -127,9 +166,15 @@ export const usePaymentMetrics = () => {
     setError(null);
   };
 
-  const resetInstitutionEarningsFilters = () => {
-    setInstitutionEarningsStartDate(null);
-    setInstitutionEarningsEndDate(null);
+  const resetMetricCardFilters = () => {
+    setMetricCardStartDate(null);
+    setMetricCardEndDate(null);
+    setError(null);
+  };
+
+  const resetPendingVsCompletedFilters = () => {
+    setPendingVsCompletedStartDate(null);
+    setPendingVsCompletedEndDate(null);
     setError(null);
   };
 
@@ -228,32 +273,56 @@ export const usePaymentMetrics = () => {
     },
   ] : [];
 
-  const institutionEarningsFilters: Filter[] = availableYears.length > 0 ? [
+  const metricCardFilters: Filter[] = availableYears.length > 0 ? [
     {
       label: 'Fecha Inicial',
       type: 'date' as const,
-      value: institutionEarningsStartDate ? format(institutionEarningsStartDate, 'yyyy-MM-dd') : '',
-      onChange: (value: string) => setInstitutionEarningsStartDate(value ? new Date(value) : null),
+      value: metricCardStartDate ? format(metricCardStartDate, 'yyyy-MM-dd') : '',
+      onChange: (value: string) => setMetricCardStartDate(value ? new Date(value) : null),
     },
     {
       label: 'Fecha Final',
       type: 'date' as const,
-      value: institutionEarningsEndDate ? format(institutionEarningsEndDate, 'yyyy-MM-dd') : '',
+      value: metricCardEndDate ? format(metricCardEndDate, 'yyyy-MM-dd') : '',
       onChange: (value: string) => {
         const newEndDate = value ? new Date(value) : null;
-        if (newEndDate && institutionEarningsStartDate && newEndDate < institutionEarningsStartDate) {
+        if (newEndDate && metricCardStartDate && newEndDate < metricCardStartDate) {
           showNotification('La fecha final no puede ser anterior a la fecha inicial.', 'error');
           return;
         }
-        setInstitutionEarningsEndDate(newEndDate);
+        setMetricCardEndDate(newEndDate);
       },
-      minDate: institutionEarningsStartDate ? format(institutionEarningsStartDate, 'yyyy-MM-dd') : undefined,
+      minDate: metricCardStartDate ? format(metricCardStartDate, 'yyyy-MM-dd') : undefined,
+    },
+  ] : [];
+
+  const pendingVsCompletedFilters: Filter[] = availableYears.length > 0 ? [
+    {
+      label: 'Fecha Inicial',
+      type: 'date' as const,
+      value: pendingVsCompletedStartDate ? format(pendingVsCompletedStartDate, 'yyyy-MM-dd') : '',
+      onChange: (value: string) => setPendingVsCompletedStartDate(value ? new Date(value) : null),
+    },
+    {
+      label: 'Fecha Final',
+      type: 'date' as const,
+      value: pendingVsCompletedEndDate ? format(pendingVsCompletedEndDate, 'yyyy-MM-dd') : '',
+      onChange: (value: string) => {
+        const newEndDate = value ? new Date(value) : null;
+        if (newEndDate && pendingVsCompletedStartDate && newEndDate < pendingVsCompletedStartDate) {
+          showNotification('La fecha final no puede ser anterior a la fecha inicial.', 'error');
+          return;
+        }
+        setPendingVsCompletedEndDate(newEndDate);
+      },
+      minDate: pendingVsCompletedStartDate ? format(pendingVsCompletedStartDate, 'yyyy-MM-dd') : undefined,
     },
   ] : [];
 
   return {
     availableYears,
     totalIncomeData,
+    metricCardPendingVsCompletedData,
     pendingVsCompletedData,
     statusCountsData,
     institutionEarningsData,
@@ -261,10 +330,12 @@ export const usePaymentMetrics = () => {
     totalIncomePeriodType,
     totalIncomeFilters,
     statusCountsFilters,
-    institutionEarningsFilters,
+    metricCardFilters,
+    pendingVsCompletedFilters,
     resetTotalIncomeFilters,
     resetStatusCountsFilters,
-    resetInstitutionEarningsFilters,
+    resetMetricCardFilters,
+    resetPendingVsCompletedFilters,
     retryFetch,
   };
 };

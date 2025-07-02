@@ -17,6 +17,7 @@ export const PaymentMetrics: React.FC = () => {
   const {
     availableYears,
     totalIncomeData,
+    metricCardPendingVsCompletedData,
     pendingVsCompletedData,
     statusCountsData,
     institutionEarningsData,
@@ -24,10 +25,12 @@ export const PaymentMetrics: React.FC = () => {
     totalIncomePeriodType,
     totalIncomeFilters,
     statusCountsFilters,
-    institutionEarningsFilters,
+    metricCardFilters,
+    pendingVsCompletedFilters,
     resetTotalIncomeFilters,
     resetStatusCountsFilters,
-    resetInstitutionEarningsFilters,
+    resetMetricCardFilters,
+    resetPendingVsCompletedFilters,
     retryFetch,
   } = usePaymentMetrics();
 
@@ -111,14 +114,14 @@ export const PaymentMetrics: React.FC = () => {
             No hay datos de pagos registrados.
           </Typography>
         )}
-        {(availableYears.length > 0 || pendingVsCompletedData) && (
+        {(availableYears.length > 0 || metricCardPendingVsCompletedData) && (
           <>
             <Box sx={{ mt: 3 }}>
-              {institutionEarningsFilters.length > 0 && (
+              {metricCardFilters.length > 0 && (
                 <Box sx={{ mb: 2 }}>
                   <GenericFilterContainer
-                    filters={institutionEarningsFilters}
-                    onResetFilters={resetInstitutionEarningsFilters}
+                    filters={metricCardFilters}
+                    onResetFilters={resetMetricCardFilters}
                   />
                 </Box>
               )}
@@ -130,16 +133,30 @@ export const PaymentMetrics: React.FC = () => {
                   justifyContent: 'center',
                 }}
               >
-                {pendingVsCompletedData ? (
+                {metricCardPendingVsCompletedData ? (
                   <>
                     <MetricCard
                       label="Monto Pendiente"
-                      value={pendingVsCompletedData.pendingAmount}
+                      value={metricCardPendingVsCompletedData.pendingAmount}
                     />
                     <MetricCard
                       label="Monto Completado"
-                      value={pendingVsCompletedData.completedAmount}
+                      value={metricCardPendingVsCompletedData.completedAmount}
                     />
+                    {institutionEarningsData ? (
+                      <MetricCard
+                        label="Ganancias Totales"
+                        value={institutionEarningsData.totalInstitutionEarnings}
+                      />
+                    ) : (
+                      <Typography
+                        color="textSecondary"
+                        align="center"
+                        sx={{ width: '100%' }}
+                      >
+                        No hay datos disponibles para las ganancias.
+                      </Typography>
+                    )}
                   </>
                 ) : (
                   <Typography
@@ -148,20 +165,6 @@ export const PaymentMetrics: React.FC = () => {
                     sx={{ width: '100%' }}
                   >
                     No hay datos disponibles para los montos.
-                  </Typography>
-                )}
-                {institutionEarningsData ? (
-                  <MetricCard
-                    label="Ganancias Totales"
-                    value={institutionEarningsData.totalInstitutionEarnings}
-                  />
-                ) : (
-                  <Typography
-                    color="textSecondary"
-                    align="center"
-                    sx={{ width: '100%' }}
-                  >
-                    No hay datos disponibles para las ganancias.
                   </Typography>
                 )}
               </Box>
@@ -181,10 +184,13 @@ export const PaymentMetrics: React.FC = () => {
                   onResetFilters={resetStatusCountsFilters}
                   showFilters={true}
                 />
+                <PendingVsCompletedChart
+                  filters={pendingVsCompletedFilters}
+                  data={chartDataPendingVsCompleted || []}
+                  onResetFilters={resetPendingVsCompletedFilters}
+                  showFilters={true}
+                />
               </>
-            )}
-            {pendingVsCompletedData && (
-              <PendingVsCompletedChart data={chartDataPendingVsCompleted || []} />
             )}
           </>
         )}
@@ -203,7 +209,7 @@ export const PaymentMetrics: React.FC = () => {
           <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#000', mb: 3 }}>
             Métricas de Pagos
           </Typography>
-          {(availableYears.length > 0 || pendingVsCompletedData) && (
+          {(availableYears.length > 0 || metricCardPendingVsCompletedData) && (
             <>
               <Box sx={{ mt: 3 }}>
                 <Box
@@ -214,16 +220,30 @@ export const PaymentMetrics: React.FC = () => {
                     justifyContent: 'center',
                   }}
                 >
-                  {pendingVsCompletedData ? (
+                  {metricCardPendingVsCompletedData ? (
                     <>
                       <MetricCard
                         label="Monto Pendiente"
-                        value={pendingVsCompletedData.pendingAmount}
+                        value={metricCardPendingVsCompletedData.pendingAmount}
                       />
                       <MetricCard
                         label="Monto Completado"
-                        value={pendingVsCompletedData.completedAmount}
+                        value={metricCardPendingVsCompletedData.completedAmount}
                       />
+                      {institutionEarningsData ? (
+                        <MetricCard
+                          label="Ganancias Totales"
+                          value={institutionEarningsData.totalInstitutionEarnings}
+                        />
+                      ) : (
+                        <Typography
+                          color="textSecondary"
+                          align="center"
+                          sx={{ width: '100%' }}
+                        >
+                          No hay datos disponibles para las ganancias.
+                        </Typography>
+                      )}
                     </>
                   ) : (
                     <Typography
@@ -232,20 +252,6 @@ export const PaymentMetrics: React.FC = () => {
                       sx={{ width: '100%' }}
                     >
                       No hay datos disponibles para los montos.
-                    </Typography>
-                  )}
-                  {institutionEarningsData ? (
-                    <MetricCard
-                      label="Ganancias Totales"
-                      value={institutionEarningsData.totalInstitutionEarnings}
-                    />
-                  ) : (
-                    <Typography
-                      color="textSecondary"
-                      align="center"
-                      sx={{ width: '100%' }}
-                    >
-                      No hay datos disponibles parafog las ganancias.
                     </Typography>
                   )}
                 </Box>
@@ -265,10 +271,13 @@ export const PaymentMetrics: React.FC = () => {
                     onResetFilters={resetStatusCountsFilters}
                     showFilters={false}
                   />
+                  <PendingVsCompletedChart
+                    filters={pendingVsCompletedFilters}
+                    data={chartDataPendingVsCompleted || []}
+                    onResetFilters={resetPendingVsCompletedFilters}
+                    showFilters={false}
+                  />
                 </>
-              )}
-              {pendingVsCompletedData && (
-                <PendingVsCompletedChart data={chartDataPendingVsCompleted || []} />
               )}
             </>
           )}
@@ -279,6 +288,7 @@ export const PaymentMetrics: React.FC = () => {
         previewImage={previewImage}
         onClose={handleClosePreview}
         onConfirm={handleConfirmDownload}
+        initialZoom={2.4}
       />
     </>
   );
