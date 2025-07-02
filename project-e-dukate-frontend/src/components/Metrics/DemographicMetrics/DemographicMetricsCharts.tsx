@@ -35,9 +35,6 @@ export const DemographicMetricsCharts: React.FC<DemographicMetricsChartsProps> =
           boxShadow: 1,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'black', m: 3 }}>
-          Gráfico Circular
-        </Typography>
         {genderPieData.length === 0 && agePieData.length === 0 && (
           <Typography color="textSecondary" align="center">
             No hay datos disponibles para mostrar.
@@ -87,9 +84,6 @@ export const DemographicMetricsCharts: React.FC<DemographicMetricsChartsProps> =
           boxShadow: 1,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'black', m: 3 }}>
-          Gráfico de Barras
-        </Typography>
         {genderChartData.length === 0 && ageChartData.length === 0 && (
           <Typography color="textSecondary" align="center">
             No hay datos disponibles para mostrar.

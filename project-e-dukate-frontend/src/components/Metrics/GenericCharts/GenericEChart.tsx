@@ -28,11 +28,13 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
   colors = statusColors,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
 
   useEffect(() => {
     if (!chartRef.current || !data) return;
 
     const chart = echarts.init(chartRef.current);
+    chartInstanceRef.current = chart;
     const statuses = data.map(m => m.status);
     const formattedStatuses = statuses.map(formatLabel);
     const counts = data.map(m => m.count);
@@ -89,7 +91,7 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
       },
       yAxis: {
         type: 'value',
-        name: type === 'bar' ? 'Cantidad' : 'Ingresos ($)',
+        name: type === 'bar' ? 'Cantidad' : 'Ingresos (bs)',
         nameTextStyle: { color: '#000000', fontSize: 15 },
         axisLabel: { color: '#000000', fontSize: 15 },
       },
@@ -107,10 +109,19 @@ export const GenericEChart: React.FC<GenericEChartProps> = ({
 
     chart.setOption(option);
 
+    window.addEventListener('resize', () => chart.resize());
+
     return () => {
       chart.dispose();
+      window.removeEventListener('resize', () => chart.resize());
     };
   }, [data, type, title, formatLabel, colors]);
+
+  useEffect(() => {
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.resize();
+    }
+  }, [data]);
 
   return <Box ref={chartRef} sx={{ height, width: '100%' }} />;
 };

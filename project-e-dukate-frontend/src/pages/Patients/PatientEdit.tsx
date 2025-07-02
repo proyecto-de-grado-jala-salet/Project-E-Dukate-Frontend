@@ -90,6 +90,8 @@ export const PatientEdit: React.FC<PatientEditProps> = ({ formData, handleSubmit
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
         <Button
           variant="outlined"
+          color='error'
+          sx={{ borderRadius: "10px" }}
           onClick={handleCancel}
           disabled={isSubmitting}
         >
@@ -99,7 +101,7 @@ export const PatientEdit: React.FC<PatientEditProps> = ({ formData, handleSubmit
           variant="contained"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          sx={{ bgcolor: '#f5c71a', color: 'black' }}
+          sx={{ borderRadius: "10px", bgcolor: '#f5a623', color: 'black' }}
         >
           Actualizar
         </Button>

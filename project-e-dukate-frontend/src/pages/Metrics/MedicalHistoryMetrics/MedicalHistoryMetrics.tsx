@@ -1,22 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import { CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { GenericFilterContainer } from '@/components/GenericFilters';
 import { MedicalHistoryMetricsCharts } from '@/components/Metrics/MedicalHistoryMetrics';
 import { fetchMedicalHistoryMetrics } from '@/services/metricsService';
-import { MedicalHistoryFilterDto } from '@/types/medicalHistory';
-import { MedicalHistoryMetricsDto } from '@/types/medicalHistory';
-import { statuses } from '@/utils/medicalHistoryConstants';
-import { formatStatusLabel } from '@/utils/medicalHistoryConstants';
+import { MedicalHistoryFilterDto, MedicalHistoryMetricsDto } from '@/types/medicalHistory';
+import { statuses, formatStatusLabel } from '@/utils/medicalHistoryConstants';
+import { usePDFGenerator } from '@/hooks/usePDFGenerator';
+import { PDFPreviewDialog } from '@/components/PDF';
 
 export const MedicalHistoryMetrics: React.FC = () => {
   const [filter, setFilter] = useState<MedicalHistoryFilterDto>({});
   const [metricsData, setMetricsData] = useState<MedicalHistoryMetricsDto | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const componentRef = useRef<HTMLDivElement>(null);
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const {
+    previewOpen,
+    previewImage,
+    isCapturing,
+    handleGeneratePDF,
+    handleConfirmDownload,
+    handleClosePreview,
+  } = usePDFGenerator({ contentRef: pdfContentRef, fileName: 'Informe_de_métricas_del_historial_médico' });
 
   const statusOptions = statuses.map(status => ({
     value: status,
@@ -80,28 +88,67 @@ export const MedicalHistoryMetrics: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
-        Métricas de Historiales Médicos
-      </Typography>
-      <GenericFilterContainer
-        filters={filterConfig}
-        onResetFilters={() => setFilter({})}
-      />
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-          <CircularProgress />
+    <>
+      <Box sx={{ p: 3 }} ref={componentRef}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
+            Métricas de Historiales Médicos
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ bgcolor: '#f5a623', color: 'black', borderRadius: '10px' }}
+            onClick={handleGeneratePDF}
+          >
+            Descargar en PDF
+          </Button>
         </Box>
-      )}
-      {error && (
-        <Typography color="error" sx={{ my: 2 }}>
-          {error}
-        </Typography>
-      )}
-      {!loading && !error && metricsData && (
-        <MedicalHistoryMetricsCharts metricsData={metricsData} />
-      )}
-    </Box>
+        <GenericFilterContainer
+          filters={filterConfig}
+          onResetFilters={() => setFilter({})}
+        />
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
+        {error && (
+          <Typography color="error" sx={{ my: 2 }}>
+            {error}
+          </Typography>
+        )}
+        {!loading && !error && metricsData && (
+          <MedicalHistoryMetricsCharts metricsData={metricsData} />
+        )}
+      </Box>
+      <Box
+        sx={{
+          position: 'absolute',
+          left: '-9999px',
+          top: '-9999px',
+          width: '1357px',
+          height: 'auto',
+          visibility: isCapturing ? 'visible' : 'hidden',
+        }}
+        ref={pdfContentRef}
+      >
+        <Box sx={{ p: 3, backgroundColor: '#ffffff' }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
+            Métricas de Historiales Médicos
+          </Typography>
+          {!loading && !error && metricsData && (
+            <MedicalHistoryMetricsCharts metricsData={metricsData} />
+          )}
+        </Box>
+      </Box>
+      <PDFPreviewDialog
+        open={previewOpen}
+        previewImage={previewImage}
+        onClose={handleClosePreview}
+        onConfirm={handleConfirmDownload}
+        dialogWidth="1450px"
+        initialZoom={1.6}
+      />
+    </>
   );
 };
 

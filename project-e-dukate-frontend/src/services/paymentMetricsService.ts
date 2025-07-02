@@ -81,11 +81,21 @@ export const fetchTotalIncome = async (
 };
 
 export const fetchPendingVsCompleted = async (
+  startDate: Date | null,
+  endDate: Date | null,
   setPendingVsCompletedData: (data: PendingVsCompletedPayments | null) => void,
   setError: (error: string | null) => void
 ) => {
   try {
-    const data = await apiRequest<PendingVsCompletedPayments>('paymentMetrics', 'GET', undefined, 'pending-vs-completed');
+    const queryParams = [];
+    if (startDate) {
+      queryParams.push(`startDate=${format(startDate, 'yyyy-MM-dd')}T00:00:00Z`);
+    }
+    if (endDate) {
+      queryParams.push(`endDate=${format(endDate, 'yyyy-MM-dd')}T23:59:59Z`);
+    }
+    const query = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+    const data = await apiRequest<PendingVsCompletedPayments>('paymentMetrics', 'GET', undefined, 'pending-vs-completed', query);
     setPendingVsCompletedData(data);
     setError(null);
   } catch (error: any) {
