@@ -17,6 +17,11 @@ import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { staticRanges } from '@/utils/dateRangeConstants'
 import { inputRanges } from '@/utils/dateRangeConstants'
+import { DatePicker } from '@mui/x-date-pickers';
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 
 interface GenericFilterContainerProps {
   filters: Filter[];
@@ -126,8 +131,7 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
             display: 'flex',
             alignItems: 'center',
             px: 1,
-            py: 0.5,
-            borderRight: { xs: 'none', sm: '1px solid #e0e0e0' },
+            py: 1,
           }}
         >
           <HiOutlineFilter size={20} color="#000" />
@@ -167,6 +171,63 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
                     )}`
                   : filter.label}
               </Button>
+            ) : filter.type === "date" ? (
+              <Box
+                sx={{
+                  mx: 0.5,
+                  width: "180px",
+                  minWidth: "180px",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                    borderColor: "transparent",
+                    backgroundColor: "transparent",
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "transparent",
+                    },
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "transparent",
+                  },
+                  borderLeft: { xs: "none", sm: "1px solid #e0e0e0" },
+                  px: 0.5,
+                  py: 0.5,
+                }}
+              >
+                <LocalizationProvider
+                  dateAdapter={AdapterDayjs}
+                  adapterLocale="es"
+                >
+                  <DatePicker
+                    value={filter.value ? dayjs(filter.value) : null}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        filter.onChange(newValue.format("YYYY-MM-DD"));
+                      }
+                    }}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          "& .MuiInputBase-root": {
+                            height: "32px",
+                          },
+                          "& .MuiInputBase-input": {
+                            padding: "8.5px 14px",
+                            fontSize: "14px",
+                          },
+                        },
+                      },
+                      inputAdornment: {
+                        sx: {
+                          "& .MuiButtonBase-root": {
+                            color: "#000",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </Box>
             ) : (
               <FilterButton
                 label={filter.label}
