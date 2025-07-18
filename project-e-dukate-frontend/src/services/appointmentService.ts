@@ -2,15 +2,25 @@ import { apiRequest } from "./api";
 import { showNotification } from "./notificationService";
 import { Appointment } from "@/types/appointment";
 
-export const fetchAppointments = async (
-  patientId?: string,
-  specialistId?: string,
-  date?: string,
-  status?: string,
-  patientSearch?: string,
-  pageNumber: number = 1,
-  pageSize: number = 10
-): Promise<{
+interface FetchAppointmentsParams {
+  patientId?: string;
+  specialistId?: string;
+  date?: string;
+  status?: string;
+  patientSearch?: string;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export const fetchAppointments = async ({
+  patientId,
+  specialistId,
+  date,
+  status,
+  patientSearch,
+  pageNumber = 1,
+  pageSize = 10,
+}: FetchAppointmentsParams): Promise<{
   items: Appointment[];
   totalCount: number;
   pageNumber: number;

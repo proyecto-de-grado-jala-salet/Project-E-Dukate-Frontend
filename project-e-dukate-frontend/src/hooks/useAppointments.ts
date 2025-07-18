@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { useEffect } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from "react";
 import { useApi } from "./useApi";
-import { AppointmentFilter } from "@/types/appointment";
-import { Appointment } from "@/types/appointment";
+import { AppointmentFilter, Appointment } from "@/types/appointment";
 import { Specialist } from '@/types/userTypes';
 import { Filter } from "@/types/filterOption";
 import { useDebounce } from "./useDebounce";
@@ -88,37 +87,24 @@ export const useAppointments = () => {
     }
   ];
 
-  useEffect(() => {
+  const buildQueryParams = (page: number) => {
     const queryParams = new URLSearchParams();
-
-    if (filters.patientId) queryParams.append("patientId", filters.patientId);
-    if (filters.specialistId)
-      queryParams.append("specialistId", filters.specialistId);
-    if (filters.date)
-      queryParams.append("date", filters.date.toISOString().split("T")[0]);
-    if (filters.status) queryParams.append("status", filters.status);
-    if (debouncedPatientSearch)
-      queryParams.append("patientSearch", debouncedPatientSearch);
-    
-    queryParams.append("PageNumber", "1");
-    queryParams.append("PageSize", pageSize.toString());
-    
-    fetchAppointments(1, queryParams.toString());
-  }, [filters.patientId, filters.specialistId, filters.date, filters.status, debouncedPatientSearch, fetchAppointments, pageSize]);
-
-  const handlePageChange = (page: number) => {
-    const queryParams = new URLSearchParams();
-    
     if (filters.patientId) queryParams.append("patientId", filters.patientId);
     if (filters.specialistId) queryParams.append("specialistId", filters.specialistId);
     if (filters.date) queryParams.append("date", filters.date.toISOString().split("T")[0]);
     if (filters.status) queryParams.append("status", filters.status);
     if (debouncedPatientSearch) queryParams.append("patientSearch", debouncedPatientSearch);
-    
     queryParams.append("PageNumber", page.toString());
     queryParams.append("PageSize", pageSize.toString());
-    
-    fetchAppointments(page, queryParams.toString());
+    return queryParams.toString();
+  };
+
+  useEffect(() => {
+    fetchAppointments(1, buildQueryParams(1));
+  }, [filters.patientId, filters.specialistId, filters.date, filters.status, debouncedPatientSearch, fetchAppointments, pageSize]);
+
+  const handlePageChange = (page: number) => {
+    fetchAppointments(page, buildQueryParams(page));
   };
 
   const handleResetFilters = () => {
