@@ -25,6 +25,7 @@ interface TableProps<T extends GenericItem> {
   enableEdit?: boolean;
   enableDelete?: boolean;
   enableMedicalHistory?: boolean;
+  emptyMessage?: string;
 }
 
 export const Table = <T extends GenericItem>({
@@ -43,6 +44,7 @@ export const Table = <T extends GenericItem>({
   enableEdit = true,
   enableDelete = true,
   enableMedicalHistory = true,
+  emptyMessage,
 }: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
@@ -75,7 +77,13 @@ export const Table = <T extends GenericItem>({
 
   if (loading) return <Typography variant="h6">Cargando...</Typography>;
   if (error) return <Typography variant="h6" color="error">{error}</Typography>;
-  if (!items || items.length === 0) return <Typography variant="h6">No se encontraron elementos</Typography>;
+  if (!items || items.length === 0) {
+    return (
+      <Typography variant="h6" sx={{ textAlign: 'center', padding: 2 }}>
+        {emptyMessage || "No se encontraron elementos"}
+      </Typography>
+    );
+  }
 
   return (
     <Box sx={sx}>

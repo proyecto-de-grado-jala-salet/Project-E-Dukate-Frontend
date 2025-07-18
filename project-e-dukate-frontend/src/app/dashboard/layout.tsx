@@ -35,8 +35,9 @@ export default function DashboardLayout({
             "pagos",
             "horarios",
             "metricas",
+            "citas",
           ]
-        : ["pacientes", "pagos"];
+        : ["pacientes", "pagos", "citas"];
 
     const defaultTab = userRole === "Administrator" ? "especialidades" : "pacientes";
 
@@ -51,8 +52,8 @@ export default function DashboardLayout({
     const mainTab = pathSegments[1];
     const validTabs =
       userRole === "Administrator"
-        ? ["especialidades", "usuarios", "pacientes", "pagos", "horarios", "metricas"]
-        : ["pacientes", "pagos"];
+        ? ["especialidades", "usuarios", "pacientes", "pagos", "horarios", "metricas", "citas"]
+        : ["pacientes", "pagos", "citas"];
     
     return validTabs.includes(mainTab) ? mainTab : (userRole === "Administrator" ? "especialidades" : "pacientes");
   };
