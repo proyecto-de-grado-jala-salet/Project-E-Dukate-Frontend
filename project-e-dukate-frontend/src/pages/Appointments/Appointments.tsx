@@ -8,7 +8,7 @@ import { AddAppointmentDialog } from "@/components/Appointments/AddAppointmentDi
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 import { useAppointments } from "@/hooks/useAppointments";
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from "@mui/icons-material/Search";
 import { Appointment } from "@/types/appointment";
 
 const Appointments: React.FC = () => {
@@ -16,7 +16,7 @@ const Appointments: React.FC = () => {
   const { userRole } = useAuthStore();
   const isAdmin = userRole === "Administrator" || userRole === "Specialist";
   const [openDialog, setOpenDialog] = useState(false);
-  
+
   const {
     filters,
     appointments,
@@ -25,25 +25,26 @@ const Appointments: React.FC = () => {
     currentPage,
     loading,
     patientOptions,
+    specialtyOptions,
     specialistOptions,
     filterConfig,
     handlePageChange,
     handleResetFilters,
     handlePatientSearchChange,
     addAppointment,
-    deleteAppointment
+    deleteAppointment,
   } = useAppointments();
 
   const handleEdit = (appointment: Appointment) => {
     if (isAdmin) {
-      router.push(`/dashboard/citas/editar/${appointment.Id}`);
+      router.push(`/dashboard/citas/editar/${appointment.id}`);
     }
   };
 
   const handleDelete = async (appointment: Appointment) => {
     if (isAdmin) {
       try {
-        await deleteAppointment(appointment.Id);
+        await deleteAppointment(appointment.id);
       } catch (err) {
         console.error("Error eliminando cita:", err);
       }
@@ -52,26 +53,31 @@ const Appointments: React.FC = () => {
 
   const handleAddAppointment = async (appointment: {
     patientId: string;
+    specialtyId: string;
     specialistId: string;
-    startTime: string;
-    endTime: string;
-    status: string;
+    sessionCount: number;
+    scheduledSessions: { timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[];
   }) => {
     try {
-      const patient = patientOptions.find(p => p.value === appointment.patientId);
-      const specialist = specialistOptions.find(s => s.value === appointment.specialistId);
-      
-      const newAppointment = {
-        Id: crypto.randomUUID(),
-        StartTime: appointment.startTime,
-        EndTime: appointment.endTime,
-        PatientId: appointment.patientId,
-        PatientName: patient?.label || "",
-        SpecialistId: appointment.specialistId,
-        SpecialistName: specialist?.label || "",
-        Status: appointment.status,
+      const patient = patientOptions.find((p) => p.value === appointment.patientId);
+      const specialist = specialistOptions.find((s) => s.value === appointment.specialistId);
+      const specialty = specialtyOptions.find((s) => s.value === appointment.specialtyId);
+
+      const newAppointment: Appointment = {
+        id: crypto.randomUUID(),
+        patientId: appointment.patientId,
+        patientName: patient?.label || "",
+        specialtyId: appointment.specialtyId,
+        specialtyName: specialty?.label || "",
+        specialistId: appointment.specialistId,
+        specialistName: specialist?.label || "",
+        sessionCount: appointment.sessionCount,
+        scheduledSessions: appointment.scheduledSessions,
+        startTime: appointment.scheduledSessions[0]?.startTime || "",
+        endTime: appointment.scheduledSessions[0]?.endTime || "",
+        status: "Scheduled",
       };
-      
+
       await addAppointment(newAppointment);
       setOpenDialog(false);
     } catch (err) {
@@ -90,12 +96,12 @@ const Appointments: React.FC = () => {
             placeholder="Buscar paciente"
             value={filters.patientSearch}
             onChange={(e) => handlePatientSearchChange(e.target.value)}
-            InputProps={{ startAdornment: <SearchIcon sx={{ color: 'gray' }} /> }}
+            InputProps={{ startAdornment: <SearchIcon sx={{ color: "gray" }} /> }}
             sx={{
               bgcolor: "#ffffff",
               borderRadius: "12px",
               width: "300px",
-              "& .MuiInputBase-root": { 
+              "& .MuiInputBase-root": {
                 height: "45px",
                 padding: "10px 14px",
                 borderRadius: "12px",
@@ -116,24 +122,21 @@ const Appointments: React.FC = () => {
           )}
         </Box>
       </Box>
-      
-      <GenericFilterContainer
-        filters={filterConfig}
-        onResetFilters={handleResetFilters}
-      />
-      
+
+      <GenericFilterContainer filters={filterConfig} onResetFilters={handleResetFilters} />
+
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
           <CircularProgress />
         </Box>
       )}
-      
+
       {error && (
         <Typography color="error" sx={{ my: 2 }}>
           {error}
         </Typography>
       )}
-      
+
       {!loading && !error && (
         <AppointmentTable
           appointments={appointments}
@@ -146,16 +149,16 @@ const Appointments: React.FC = () => {
           enableDelete={isAdmin}
         />
       )}
-      
+
       <AddAppointmentDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         onSave={handleAddAppointment}
         patientOptions={patientOptions}
-        specialistOptions={specialistOptions}
+        specialtyOptions={specialtyOptions}
       />
     </Box>
-);
+  );
 };
 
 export default Appointments;

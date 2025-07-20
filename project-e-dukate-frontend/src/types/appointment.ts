@@ -8,12 +8,23 @@ export interface Appointment extends GenericItem {
   patientName: string;
   specialistId?: string;
   specialistName: string;
+  specialtyId?: string;
+  specialtyName?: string;
+  sessionCount: number;
   status: string;
+  scheduledSessions: {
+    timeSlotId: string;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    status: string;
+  }[];
 }
 
 export interface AppointmentFilter {
   patientId?: string;
   specialistId?: string;
+  specialtyId?: string;
   date?: Date | null;
   status?: string;
   patientSearch?: string;

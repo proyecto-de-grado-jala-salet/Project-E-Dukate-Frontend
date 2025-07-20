@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
   demographicMetrics: 'http://localhost:5275/api/metrics/demographics/',
   paymentMetrics: 'http://localhost:5275/api/metrics/payments',
   appointments: 'http://localhost:5275/api/Appointments',
+  specialistsBySpecialty: 'http://localhost:5275/api/Schedules/specialists-by-specialty',
+  appointmentPreview: 'http://localhost:5275/api/Appointments/preview',
 };
 
 export const setAuthToken = (token: string) => {
