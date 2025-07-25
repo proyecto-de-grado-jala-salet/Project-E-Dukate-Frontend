@@ -7,6 +7,8 @@ import { Specialty } from "@/types/specialty";
 import { Filter } from "@/types/filterOption";
 import { useDebounce } from "./useDebounce";
 import { fetchSpecialistsBySpecialty } from "@/services/appointmentService";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 
 interface Patient {
   id: string;
@@ -23,7 +25,7 @@ export const useAppointments = () => {
     patientId: "",
     specialistId: "",
     specialtyId: "",
-    date: new Date(),
+    date: dayjs().startOf('day').toDate(),
     status: "",
     patientSearch: "",
   });
@@ -45,6 +47,10 @@ export const useAppointments = () => {
     deleteItem: deleteAppointment,
   } = useApi<Appointment>("appointments");
 
+  const reloadWithCurrentFilters = () => {
+    fetchAppointmentsData(currentPage, buildQueryParams(currentPage));
+  };
+
   const patientOptions = patients.map((p) => ({
     value: p.id,
     label: `${p.names} ${p.lastNamePaternal} ${p.lastNameMaternal ? p.lastNameMaternal : ""}`,
@@ -52,7 +58,7 @@ export const useAppointments = () => {
 
   const specialtyOptions = specialties.map((s) => ({
     value: s.id,
-    label: s.name,
+    label: s.typeOfSpecialty,
   }));
 
   const specialistOptions = specialists.map((s) => ({
@@ -98,9 +104,14 @@ export const useAppointments = () => {
     },
     {
       label: "Fecha",
-      value: filters.date ? filters.date.toISOString().split("T")[0] : "",
-      onChange: (value: string) =>
-        setFilters((prev) => ({ ...prev, date: value ? new Date(value) : null })),
+      value: filters.date ? dayjs(filters.date).format("YYYY-MM-DD") : "",
+      onChange: (value: string) => {
+        console.log("Date filter changed to:", value);
+        setFilters((prev) => ({
+          ...prev,
+          date: value ? dayjs(value).startOf('day').toDate() : null,
+        }));
+      },
       type: "date",
     },
     {
@@ -117,7 +128,7 @@ export const useAppointments = () => {
     if (filters.patientId) queryParams.append("patientId", filters.patientId);
     if (filters.specialistId) queryParams.append("specialistId", filters.specialistId);
     if (filters.specialtyId) queryParams.append("specialtyId", filters.specialtyId);
-    if (filters.date) queryParams.append("date", filters.date.toISOString().split("T")[0]);
+    if (filters.date) queryParams.append("date", dayjs(filters.date).format("YYYY-MM-DD"));
     if (filters.status) queryParams.append("status", filters.status);
     if (debouncedPatientSearch) queryParams.append("patientSearch", debouncedPatientSearch);
     queryParams.append("PageNumber", page.toString());
@@ -147,7 +158,7 @@ export const useAppointments = () => {
       patientId: "",
       specialistId: "",
       specialtyId: "",
-      date: new Date(),
+      date: dayjs().startOf('day').toDate(),
       status: "",
       patientSearch: "",
     });
@@ -176,5 +187,8 @@ export const useAppointments = () => {
     handlePatientSearchChange,
     addAppointment,
     deleteAppointment,
+    reloadWithCurrentFilters,
+    fetchAppointmentsData,
+    buildQueryParams,
   };
 };

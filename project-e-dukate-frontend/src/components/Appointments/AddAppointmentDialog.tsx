@@ -55,6 +55,7 @@ interface AddAppointmentDialogProps {
   }) => void;
   patientOptions: { value: string; label: string }[];
   specialtyOptions: { value: string; label: string }[];
+  reloadAppointments: () => void;
 }
 
 const PreviewDialog: React.FC<{
@@ -94,6 +95,7 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
   onSave,
   patientOptions,
   specialtyOptions,
+  reloadAppointments,
 }) => {
   const [form, setForm] = useState({
     patientId: "",
@@ -206,7 +208,6 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
   };
 
   const handleConfirm = () => {
-    console.log("Confirmando cita:", form);
     onSave({
       patientId: form.patientId,
       specialtyId: form.specialtyId,
@@ -215,6 +216,7 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
       sessionCost: form.sessionCost,
       scheduledSessions: form.scheduledSessions,
     });
+    reloadAppointments();
     setForm({
       patientId: "",
       specialtyId: "",
@@ -234,9 +236,25 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
 
   const availableSchedules = schedules.filter((s) => s.attends && s.timeSlots.length > 0);
 
+  const handleCloseDialog = () => {
+    setForm({
+      patientId: "",
+      specialtyId: "",
+      specialistId: "",
+      sessionCount: 1,
+      sessionCost: 65,
+      scheduledSessions: [],
+    });
+    setSpecialists([]);
+    setSchedules([]);
+    setPreviewData([]);
+    setShowPreviewDialog(false);
+    onClose();
+  };
+
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={handleCloseDialog} key={open ? "dialog-open" : "dialog-closed"}>
         <DialogTitle>Añadir Nueva Cita</DialogTitle>
         <DialogContent>
           <TextField

@@ -33,6 +33,9 @@ const Appointments: React.FC = () => {
     handlePatientSearchChange,
     addAppointment,
     deleteAppointment,
+    reloadWithCurrentFilters,
+    fetchAppointmentsData,
+    buildQueryParams,
   } = useAppointments();
 
   const handleEdit = (appointment: Appointment) => {
@@ -79,6 +82,8 @@ const Appointments: React.FC = () => {
       };
 
       await addAppointment(newAppointment);
+      console.log("Current filters before reload:", filters);
+      await fetchAppointmentsData(1, buildQueryParams(1));
       setOpenDialog(false);
     } catch (err) {
       console.error("Error agregando cita:", err);
@@ -156,6 +161,7 @@ const Appointments: React.FC = () => {
         onSave={handleAddAppointment}
         patientOptions={patientOptions}
         specialtyOptions={specialtyOptions}
+        reloadAppointments={reloadWithCurrentFilters}
       />
     </Box>
   );
