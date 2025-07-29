@@ -51,10 +51,11 @@ interface AddAppointmentDialogProps {
     specialistId: string;
     sessionCount: number;
     sessionCost: number;
-    scheduledSessions: { timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[];
+    scheduledSessions: { id: string; timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[];
   }) => void;
   patientOptions: { value: string; label: string }[];
   specialtyOptions: { value: string; label: string }[];
+  reloadAppointments: () => void;
 }
 
 const PreviewDialog: React.FC<{
@@ -94,6 +95,7 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
   onSave,
   patientOptions,
   specialtyOptions,
+  reloadAppointments,
 }) => {
   const [form, setForm] = useState({
     patientId: "",
@@ -101,7 +103,7 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
     specialistId: "",
     sessionCount: 1,
     sessionCost: 65,
-    scheduledSessions: [] as { timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[],
+    scheduledSessions: [] as { id: string; timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[],
   });
   const [specialists, setSpecialists] = useState<{ value: string; label: string }[]>([]);
   const [schedules, setSchedules] = useState<ScheduleDto[]>([]);
@@ -133,7 +135,6 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
         .then((backendSchedules: BackendSchedule[]) => {
           const mappedSchedules = mapBackendSchedules(backendSchedules);
           setSchedules(mappedSchedules);
-          console.log("Horarios cargados:", mappedSchedules);
         })
         .catch(() => setSchedules([]));
     } else {
@@ -143,9 +144,10 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
   }, [form.specialistId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.name === 'sessionCount' || e.target.name === 'sessionCost' 
-      ? parseInt(e.target.value) || 0 
-      : e.target.value;
+    const value =
+      e.target.name === "sessionCount" || e.target.name === "sessionCost"
+        ? parseInt(e.target.value) || 0
+        : e.target.value;
     setForm({ ...form, [e.target.name]: value });
   };
 
@@ -162,7 +164,6 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
       const selectedSlot = selectedSchedule?.timeSlots.find((ts) => ts.id === value);
       newSessions[index].startTime = normalizeTime(selectedSlot?.startTime || "");
       newSessions[index].endTime = normalizeTime(selectedSlot?.endTime || "");
-      console.log(`Sesión ${index + 1} actualizada:`, newSessions[index]);
     }
 
     setForm({ ...form, scheduledSessions: newSessions });
@@ -173,7 +174,14 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
       ...form,
       scheduledSessions: [
         ...form.scheduledSessions,
-        { timeSlotId: "", dayOfWeek: "", startTime: "", endTime: "", status: "Scheduled" },
+        {
+          id: crypto.randomUUID(),
+          timeSlotId: "",
+          dayOfWeek: "",
+          startTime: "",
+          endTime: "",
+          status: "Scheduled",
+        },
       ],
     });
   };
@@ -184,7 +192,6 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
   };
 
   const handleSave = async () => {
-    console.log("Formulario antes de guardar:", form);
     try {
       const appointment: Partial<Appointment> = {
         patientId: form.patientId,
@@ -194,19 +201,15 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
         sessionCost: parseFloat(form.sessionCost.toString()),
         scheduledSessions: form.scheduledSessions,
       };
-      console.log("Payload enviado a /api/Appointments/preview:", JSON.stringify(appointment, null, 2));
       const data = await fetchAppointmentPreview(appointment);
-      console.log("Respuesta de /api/Appointments/preview:", data);
       setPreviewData(data);
       setShowPreviewDialog(true);
     } catch (err: any) {
       console.error("Error obteniendo vista previa:", err);
-      console.log("Respuesta del servidor:", err.response?.data);
     }
   };
 
   const handleConfirm = () => {
-    console.log("Confirmando cita:", form);
     onSave({
       patientId: form.patientId,
       specialtyId: form.specialtyId,
@@ -215,6 +218,7 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
       sessionCost: form.sessionCost,
       scheduledSessions: form.scheduledSessions,
     });
+    reloadAppointments();
     setForm({
       patientId: "",
       specialtyId: "",
@@ -228,15 +232,30 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
   };
 
   const handleBack = () => {
-    console.log("Regresando al formulario");
     setShowPreviewDialog(false);
   };
 
   const availableSchedules = schedules.filter((s) => s.attends && s.timeSlots.length > 0);
 
+  const handleCloseDialog = () => {
+    setForm({
+      patientId: "",
+      specialtyId: "",
+      specialistId: "",
+      sessionCount: 1,
+      sessionCost: 65,
+      scheduledSessions: [],
+    });
+    setSpecialists([]);
+    setSchedules([]);
+    setPreviewData([]);
+    setShowPreviewDialog(false);
+    onClose();
+  };
+
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={handleCloseDialog} key={open ? "dialog-open" : "dialog-closed"}>
         <DialogTitle>Añadir Nueva Cita</DialogTitle>
         <DialogContent>
           <TextField
@@ -328,7 +347,7 @@ export const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
           />
 
           {form.scheduledSessions.map((session, index) => (
-            <Box key={index} sx={{ mb: 2 }}>
+            <Box key={session.id} sx={{ mb: 2 }}>
               <Typography variant="subtitle1">Sesión {index + 1}</Typography>
               <TextField
                 select

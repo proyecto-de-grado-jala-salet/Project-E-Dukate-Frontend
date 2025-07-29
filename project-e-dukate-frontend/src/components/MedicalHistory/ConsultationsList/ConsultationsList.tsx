@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Este archivo utiliza la plantilla Simple Editor de Tiptap, que está bajo la licencia MIT.
  * Copyright (c) 2021-present, ueberdosis and contributors
@@ -8,18 +9,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Box } from "@mui/material";
-import { Typography } from "@mui/material";
-import { Pagination } from "@mui/material";
-import { TextField } from "@mui/material";
-import { Button } from "@mui/material";
-import { IconButton } from "@mui/material";
+import { Box, Typography, Pagination, TextField, Button, IconButton, List, ListItem, ListItemText, Tooltip } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
+import { FaRegEye } from "react-icons/fa6";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { SimpleEditor } from "@/components/tiptap/tiptap-templates/simple/simple-editor";
-import { apiRequest } from "@/services/api";
+import { apiRequest, API_ENDPOINTS, getAuthToken } from "@/services/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 import { showNotification } from "@/services/notificationService";
+import { PDFViewer } from "@/components/PdfViewer/PdfViewer";
+import { IoRefreshOutline } from "react-icons/io5";
 
 interface Consultation {
   id: string;
@@ -27,6 +27,12 @@ interface Consultation {
   consultationDate: string;
   notes: string;
   specialistId: string;
+}
+
+interface Document {
+  id: string;
+  fileName: string;
+  uploadDate: string;
 }
 
 interface PaginatedConsultations {
@@ -45,6 +51,7 @@ interface ConsultationsListProps {
   onPageChange: (page: number) => void;
   onConsultationsUpdate: () => void;
   newConsultationId?: string | null;
+  selectedSpecialistId: string;
 }
 
 export const ConsultationsList: React.FC<ConsultationsListProps> = ({
@@ -55,11 +62,14 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
   onPageChange,
   onConsultationsUpdate,
   newConsultationId,
+  selectedSpecialistId,
 }) => {
   const [expandedConsultationId, setExpandedConsultationId] = useState<string | null>(null);
   const [editorContent, setEditorContent] = useState<string>("");
   const { userRole, userId } = useAuthStore();
-  const { medicalHistory } = useMedicalHistory();
+  const { medicalHistory, handleDeleteDocument, canEditSelectedSpecialist, loadingDocuments, refreshDocuments } = useMedicalHistory();
+  const [showPDFViewer, setShowPDFViewer] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (newConsultationId) {
@@ -96,21 +106,13 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
     );
   }
 
-  if (!consultations?.Items?.length) {
-    return (
-      <Typography variant="body1" sx={{ color: "black" }}>
-        Este especialista aún no tiene consultas registradas.
-      </Typography>
-    );
-  }
-
   const handleToggleExpand = (id: string) => {
     if (expandedConsultationId === id) {
       setExpandedConsultationId(null);
       setEditorContent("");
     } else {
       setExpandedConsultationId(id);
-      const consultation = consultations.Items.find((c) => c.id === id);
+      const consultation = consultations!.Items.find((c) => c.id === id);
       setEditorContent(consultation?.notes || "");
     }
   };
@@ -134,7 +136,7 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
   };
 
   const handleSave = async (consultationId: string) => {
-    const consultation = consultations.Items.find((c) => c.id === consultationId);
+    const consultation = consultations!.Items.find((c) => c.id === consultationId);
     if (!consultation) return;
 
     const updatedReason =
@@ -174,181 +176,308 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
     return false;
   };
 
+  const handleViewDocument = async (documentId: string) => {
+    const token = getAuthToken();
+    const url = `${API_ENDPOINTS.medicalconsultations}/documents/${documentId}`;
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error("No tienes permisos para ver este documento.");
+        } else if (response.status === 404) {
+          throw new Error("El documento no se encontró en el servidor.");
+        } else {
+          throw new Error(`Error al obtener el PDF: ${response.statusText}`);
+        }
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setPdfUrl(blobUrl);
+      setShowPDFViewer(true);
+    } catch (error: any) {
+      console.error("Error viewing document:", error);
+      showNotification(error.message || "Error al cargar el PDF", "error");
+    }
+  };
+
+  const documents = medicalHistory?.permissions
+    .find((p) => p.specialistId === selectedSpecialistId)
+    ?.documents || [];
+  
+  const selectedPermission = medicalHistory?.permissions.find(
+    (p) => p.specialistId === selectedSpecialistId
+  );
+
+  const canDeleteDocument = userRole === "Administrator" || (
+    userRole === "Specialist" &&
+    userId === selectedSpecialistId &&
+    selectedPermission?.canEdit
+  );
+
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {consultations.Items.map((consultation, index) => {
-        const isEditable = canEditConsultation(consultation);
+    <Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {consultations?.Items?.length ? (
+          <>
+            {consultations?.Items.map((consultation, index) => {
+              const isEditable = canEditConsultation(consultation);
 
-        return (
-          <Box
-            key={consultation.id}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr auto",
-              alignItems: "flex-start",
-              gap: 1,
-              width: "100%",
-            }}
-          >
-            <Box
-              sx={{
-                border: "1px solid #D8D8D8",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                overflow: "hidden",
-                width: "100%",
-              }}
-            >
-              <Box
-                onClick={() => handleToggleExpand(consultation.id)}
-                sx={{
-                  py: 2,
-                  px: 5,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  backgroundColor:
-                    expandedConsultationId === consultation.id ? "#fff" : "#fff",
-                  "&:hover": { backgroundColor: "#f9f9f9" },
-                }}
-              >
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="bold"
-                  sx={{ color: "black" }}
+              return (
+                <Box
+                  key={consultation.id}
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto",
+                    alignItems: "flex-start",
+                    gap: 1,
+                    width: "100%",
+                  }}
                 >
-                  {`Consulta ${index + 1}`}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "black" }}>
-                  {new Date(consultation.consultationDate).toLocaleDateString(
-                    "es-ES",
-                    {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }
-                  )}
-                </Typography>
-              </Box>
-
-              {expandedConsultationId === consultation.id && (
-                <Box sx={{ py: 2, px: 5 }}>
-                  <TextField
-                    label="Motivo de Consulta"
-                    id={`reason-${consultation.id}`}
-                    defaultValue={consultation.reason}
-                    fullWidth
-                    required
-                    disabled={!isEditable}
-                    sx={{
-                      mb: 2,
-                      "& .MuiInputBase-input": { color: "black" },
-                      "& .MuiInputLabel-root": { color: "black" },
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: "#D8D8D8" },
-                      },
-                    }}
-                    variant="outlined"
-                    size="small"
-                  />
-
                   <Box
                     sx={{
                       border: "1px solid #D8D8D8",
-                      borderRadius: "4px",
+                      borderRadius: "8px",
+                      backgroundColor: "#fff",
                       overflow: "hidden",
-                      mb: 2,
+                      width: "100%",
                     }}
                   >
                     <Box
+                      onClick={() => handleToggleExpand(consultation.id)}
                       sx={{
-                        p: 1.5,
-                        backgroundColor: "#fff",
-                        borderBottom: "1px solid #D8D8D8",
+                        py: 2,
+                        px: 5,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        backgroundColor:
+                          expandedConsultationId === consultation.id
+                            ? "#fff"
+                            : "#fff",
+                        "&:hover": { backgroundColor: "#f9f9f9" },
                       }}
                     >
                       <Typography
-                        variant="subtitle2"
+                        variant="subtitle1"
                         fontWeight="bold"
                         sx={{ color: "black" }}
                       >
-                        NOTAS DEL ENCUENTRO
+                        {`Consulta ${index + 1}`}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "black" }}>
+                        {new Date(
+                          consultation.consultationDate
+                        ).toLocaleDateString("es-ES", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ py: 1, px: 0, color: "#000" }}>
-                      <SimpleEditor
-                        content={editorContent}
-                        onUpdate={(content) => setEditorContent(content)}
-                        editable={isEditable}
-                      />
-                    </Box>
+                    {expandedConsultationId === consultation.id && (
+                      <Box sx={{ py: 2, px: 5 }}>
+                        <TextField
+                          label="Motivo de Consulta"
+                          id={`reason-${consultation.id}`}
+                          defaultValue={consultation.reason}
+                          fullWidth
+                          required
+                          disabled={!isEditable}
+                          sx={{
+                            mb: 2,
+                            "& .MuiInputBase-input": { color: "black" },
+                            "& .MuiInputLabel-root": { color: "black" },
+                            "& .MuiOutlinedInput-root": {
+                              "& fieldset": { borderColor: "#D8D8D8" },
+                            },
+                          }}
+                          variant="outlined"
+                          size="small"
+                        />
+
+                        <Box
+                          sx={{
+                            border: "1px solid #D8D8D8",
+                            borderRadius: "4px",
+                            overflow: "hidden",
+                            mb: 2,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              p: 1.5,
+                              backgroundColor: "#fff",
+                              borderBottom: "1px solid #D8D8D8",
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              fontWeight="bold"
+                              sx={{ color: "black" }}
+                            >
+                              NOTAS DEL ENCUENTRO
+                            </Typography>
+                          </Box>
+
+                          <Box sx={{ py: 1, px: 0, color: "#000" }}>
+                            <SimpleEditor
+                              content={editorContent}
+                              onUpdate={(content) => setEditorContent(content)}
+                              editable={isEditable}
+                            />
+                          </Box>
+                        </Box>
+
+                        {isEditable && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              mt: 1,
+                              gap: 1,
+                            }}
+                          >
+                            <Button
+                              variant="contained"
+                              onClick={() => handleSave(consultation.id)}
+                              sx={{
+                                backgroundColor: "#F4A601",
+                                color: "#000",
+                                "&:hover": { backgroundColor: "#e69500" },
+                              }}
+                            >
+                              Guardar Cambios
+                            </Button>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
                   </Box>
 
                   {isEditable && (
-                    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1, gap: 1 }}>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleSave(consultation.id)}
-                        sx={{
-                          backgroundColor: "#F4A601",
-                          color: "#000",
-                          "&:hover": { backgroundColor: "#e69500" },
-                        }}
-                      >
-                        Guardar Cambios
-                      </Button>
-                    </Box>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(consultation.id);
+                      }}
+                      size="medium"
+                      sx={{
+                        ml: 1,
+                        alignSelf: "flex-start",
+                        margin: "10px 0px 0px 0px",
+                        color: "#000",
+                        "&:hover": { color: "error.main" },
+                      }}
+                    >
+                      <DeleteIcon fontSize="medium" />
+                    </IconButton>
                   )}
                 </Box>
-              )}
-            </Box>
-
-            {isEditable && (
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(consultation.id);
-                }}
-                size="medium"
+              );
+            })}
+            {consultations && consultations.TotalPages > 0 && (
+              <Box
                 sx={{
-                  ml: 1,
-                  alignSelf: "flex-start",
-                  margin: "10px 0px 0px 0px",
-                  color: "#000",
-                  "&:hover": { color: "error.main" },
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                  mt: 2,
+                  py: 2,
+                  zIndex: 1,
                 }}
               >
-                <DeleteIcon fontSize="medium" />
+                <Pagination
+                  count={consultations.TotalPages}
+                  page={currentPage}
+                  onChange={(_, page) => onPageChange(page)}
+                  color="primary"
+                  sx={{
+                    "& .MuiPaginationItem-root": { color: "text.primary" },
+                  }}
+                />
+              </Box>
+            )}
+          </>
+        ) : (
+          <Typography variant="body1" sx={{ color: "black", mb: 2 }}>
+            Este especialista aún no tiene consultas registradas.
+          </Typography>
+        )}
+      </Box>
+
+      {selectedSpecialistId && (
+        <Box sx={{ mt: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography variant="h5" fontWeight="bold" sx={{ color: "black" }}>
+              Documentos Médicos
+            </Typography>
+            {userRole !== "Administrator" && (
+              <IconButton
+                onClick={refreshDocuments}
+                sx={{
+                  backgroundColor: "#F4A601",
+                  color: "#000",
+                  borderRadius: "10px",
+                  px: 3,
+                  py: 1,
+                  fontSize: "14px",
+                  "&:hover": { backgroundColor: "#e69500" },
+                }}
+              >
+                <IoRefreshOutline size={24} />
+                Refrescar
               </IconButton>
             )}
           </Box>
-        );
-      })}
-      {consultations && consultations.TotalPages > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%",
-            mt: 2,
-            py: 2,
-            zIndex: 1,
-          }}
-        >
-          <Pagination
-            count={consultations.TotalPages}
-            page={currentPage}
-            onChange={(_, page) => onPageChange(page)}
-            color="primary"
-            sx={{
-              "& .MuiPaginationItem-root": { color: "text.primary" },
-            }}
-          />
+          {loadingDocuments ? (
+            <Typography variant="body1" sx={{ color: "black" }}>
+              Cargando documentos...
+            </Typography>
+          ) : documents.length > 0 ? (
+            <List>
+              {documents.map((doc) => (
+                <ListItem
+                  key={doc.id}
+                  sx={{ borderBottom: "1px solid #8B8989" }}
+                >
+                  <ListItemText
+                    primary={doc.fileName}
+                    secondary={new Date(doc.uploadDate).toLocaleDateString(
+                      "es-ES"
+                    )}
+                    sx={{ color: "black" }}
+                  />
+                  <Tooltip title="Vista Previa" placement="bottom">
+                    <IconButton onClick={() => handleViewDocument(doc.id)}>
+                      <FaRegEye />
+                    </IconButton>
+                  </Tooltip>
+                  {canDeleteDocument && (
+                    <Tooltip title="Eliminar" placement="bottom">
+                      <IconButton onClick={() => handleDeleteDocument(doc.id)}>
+                        <DeleteOutlineIcon sx={{ color: "red" }} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Typography variant="body1" sx={{ color: "black" }}>
+              No hay documentos registrados para este especialista.
+            </Typography>
+          )}
         </Box>
+      )}
+
+      {showPDFViewer && pdfUrl && (
+        <PDFViewer fileUrl={pdfUrl} onClose={() => setShowPDFViewer(false)} />
       )}
     </Box>
   );

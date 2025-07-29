@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { apiRequest } from "./api";
+import { apiRequest, API_ENDPOINTS, getAuthToken } from "./api";
 import { showNotification } from "./notificationService";
 import { MedicalHistoryDto } from "@/types/medicalHistory";
 import { PermissionRequestDto } from "@/types/medicalHistory";
@@ -145,11 +145,64 @@ export const getSpecialistConsultations = async (
     showNotification("No se encontraron consultas", "error");
     return null;
   } catch (error) {
-    console.error("Error in getSpecialistConsultations:", error);
     showNotification(
       error instanceof Error ? error.message : "Error al obtener las consultas",
       "error"
     );
     return null;
+  }
+};
+
+export const uploadDocument = async (
+  permissionId: string,
+  file: File
+): Promise<{ id: string } | null> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = getAuthToken();
+    const response = await fetch(
+      `${API_ENDPOINTS.medicalconsultations}/permissions/${permissionId}/documents`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => response.statusText);
+      console.error("Upload error:", errorData);
+      throw new Error(errorData.error || `Error al subir el documento: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return { id: data.DocumentId };
+  } catch (error) {
+    showNotification(
+      error instanceof Error ? error.message : "Error al subir el documento",
+      "error"
+    );
+    return null;
+  }
+};
+
+export const deleteDocument = async (documentId: string): Promise<boolean> => {
+  try {
+    await apiRequest(
+      "medicalconsultations",
+      "DELETE",
+      undefined,
+      `documents/${documentId}`
+    );
+    return true;
+  } catch (error) {
+    showNotification(
+      error instanceof Error ? error.message : "Error al eliminar el documento",
+      "error"
+    );
+    return false;
   }
 };

@@ -115,6 +115,7 @@ export const StatusSelectWithButton: React.FC<StatusSelectWithButtonProps> = ({
                 textTransform: "none",
                 px: 3,
                 py: 1,
+                borderRadius: "10px",
               }}
             >
               Añadir Consulta

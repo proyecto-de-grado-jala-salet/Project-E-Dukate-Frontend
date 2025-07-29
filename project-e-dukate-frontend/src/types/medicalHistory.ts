@@ -5,6 +5,12 @@ export enum MedicalHistoryStatus {
   AltaAbandono = 'AltaAbandono',
 }
 
+export interface MedicalDocumentDto {
+  id: string;
+  fileName: string;
+  uploadDate: string;
+}
+
 export interface MedicalConsultationDto {
   id: string;
   specialistId: string;
@@ -19,6 +25,7 @@ export interface MedicalHistoryPermissionDto {
   canEdit: boolean;
   status: MedicalHistoryStatus;
   consultations: MedicalConsultationDto[];
+  documents: MedicalDocumentDto[];
 }
 
 export interface MedicalHistoryDto {

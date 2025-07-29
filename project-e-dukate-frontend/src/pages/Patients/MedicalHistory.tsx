@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Typography } from "@mui/material";
 import { Box } from "@mui/material";
 import { PatientInfo } from "@/components/MedicalHistory/PatientInfo";
@@ -10,6 +10,7 @@ import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 
 export const MedicalHistory: React.FC = () => {
   const [newConsultationId, setNewConsultationId] = useState<string | null>(null);
+  const [selectedSpecialistId, setSelectedSpecialistId] = useState<string>("");
   const {
     medicalHistory,
     patientData,
@@ -33,6 +34,18 @@ export const MedicalHistory: React.FC = () => {
     handleAddConsultation,
     refreshConsultations,
   } = useMedicalHistory();
+
+  useEffect(() => {
+    if (selectedConsultationSpecialist) {
+      setSelectedSpecialistId(selectedConsultationSpecialist);
+    }
+  }, [selectedConsultationSpecialist]);
+  
+  useEffect(() => {
+    if (selectedSpecialistId) {
+      setSelectedConsultationSpecialist(selectedSpecialistId);
+    }
+  }, [selectedSpecialistId, setSelectedConsultationSpecialist]);
 
   const handleAddConsultationWithId = async () => {
     const consultationId = await handleAddConsultation();
@@ -72,7 +85,7 @@ export const MedicalHistory: React.FC = () => {
         align="left"
         sx={{ fontWeight: "bold", mb: 2, color: "#000000" }}
       >
-        Historial Medico {patientData.names} {patientData.lastNamePaternal} 
+        Historial Medico {patientData.names} {patientData.lastNamePaternal}
       </Typography>
       <PatientInfo patient={patientData} />
       <SpecialistStatusForm
@@ -83,12 +96,12 @@ export const MedicalHistory: React.FC = () => {
         setSelectedStatus={setSelectedStatus}
         onAddConsultation={handleAddConsultationWithId}
         specialistsWithPermission={specialistsWithPermission}
-        selectedConsultationSpecialist={selectedConsultationSpecialist}
-        setSelectedConsultationSpecialist={setSelectedConsultationSpecialist}
+        selectedConsultationSpecialist={selectedSpecialistId}
+        setSelectedConsultationSpecialist={setSelectedSpecialistId}
         isStatusDropdownDisabled={isStatusDropdownDisabled}
         canEditSelectedSpecialist={canEditSelectedSpecialist}
       />
-      {selectedConsultationSpecialist && (
+      {selectedSpecialistId && (
         <Box sx={{ mt: 3 }}>
           <ConsultationsList
             consultations={consultations}
@@ -98,6 +111,7 @@ export const MedicalHistory: React.FC = () => {
             onPageChange={setCurrentPage}
             onConsultationsUpdate={refreshConsultations}
             newConsultationId={newConsultationId}
+            selectedSpecialistId={selectedSpecialistId}
           />
         </Box>
       )}
