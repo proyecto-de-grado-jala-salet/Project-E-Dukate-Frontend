@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useAppointments } from "@/hooks/useAppointments";
 import SearchIcon from "@mui/icons-material/Search";
 import { Appointment } from "@/types/appointment";
+import { showNotification } from "@/services/notificationService";
 
 const Appointments: React.FC = () => {
   const router = useRouter();
@@ -32,7 +33,6 @@ const Appointments: React.FC = () => {
     handleResetFilters,
     handlePatientSearchChange,
     addAppointment,
-    deleteAppointment,
     reloadWithCurrentFilters,
     fetchAppointmentsData,
     buildQueryParams,
@@ -44,22 +44,13 @@ const Appointments: React.FC = () => {
     }
   };
 
-  const handleDelete = async (appointment: Appointment) => {
-    if (isAdmin) {
-      try {
-        await deleteAppointment(appointment.id);
-      } catch (err) {
-        console.error("Error eliminando cita:", err);
-      }
-    }
-  };
-
   const handleAddAppointment = async (appointment: {
     patientId: string;
     specialtyId: string;
     specialistId: string;
     sessionCount: number;
-    scheduledSessions: { timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[];
+    sessionCost: number;
+    scheduledSessions: { id: string; timeSlotId: string; dayOfWeek: string; startTime: string; endTime: string; status: string }[];
   }) => {
     try {
       const patient = patientOptions.find((p) => p.value === appointment.patientId);
@@ -75,6 +66,7 @@ const Appointments: React.FC = () => {
         specialistId: appointment.specialistId,
         specialistName: specialist?.label || "",
         sessionCount: appointment.sessionCount,
+        sessionCost: appointment.sessionCost,
         scheduledSessions: appointment.scheduledSessions,
         startTime: appointment.scheduledSessions[0]?.startTime || "",
         endTime: appointment.scheduledSessions[0]?.endTime || "",
@@ -82,11 +74,11 @@ const Appointments: React.FC = () => {
       };
 
       await addAppointment(newAppointment);
-      console.log("Current filters before reload:", filters);
       await fetchAppointmentsData(1, buildQueryParams(1));
       setOpenDialog(false);
     } catch (err) {
       console.error("Error agregando cita:", err);
+      showNotification("Error al agregar la cita.", "error");
     }
   };
 
@@ -149,9 +141,8 @@ const Appointments: React.FC = () => {
           currentPage={currentPage}
           onPageChange={handlePageChange}
           onEdit={isAdmin ? handleEdit : undefined}
-          onDelete={isAdmin ? handleDelete : undefined}
           enableEdit={isAdmin}
-          enableDelete={isAdmin}
+          enableDelete={false}
         />
       )}
 

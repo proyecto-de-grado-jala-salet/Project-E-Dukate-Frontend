@@ -12,7 +12,8 @@ export interface Appointment extends GenericItem {
   specialtyName?: string;
   sessionCount: number;
   status: string;
-  scheduledSessions: {
+  scheduledSessions?: {
+    id: string;
     timeSlotId: string;
     dayOfWeek: string;
     startTime: string;

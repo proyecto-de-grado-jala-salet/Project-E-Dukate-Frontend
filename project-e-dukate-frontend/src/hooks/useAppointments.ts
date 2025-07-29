@@ -6,7 +6,6 @@ import { Specialist } from "@/types/userTypes";
 import { Specialty } from "@/types/specialty";
 import { Filter } from "@/types/filterOption";
 import { useDebounce } from "./useDebounce";
-import { fetchSpecialistsBySpecialty } from "@/services/appointmentService";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
@@ -25,7 +24,7 @@ export const useAppointments = () => {
     patientId: "",
     specialistId: "",
     specialtyId: "",
-    date: dayjs().startOf('day').toDate(),
+    date: dayjs().startOf("day").toDate(),
     status: "",
     patientSearch: "",
   });
@@ -33,7 +32,7 @@ export const useAppointments = () => {
   const debouncedPatientSearch = useDebounce(filters.patientSearch, 500);
   const { data: patients } = useApi<Patient>("patients");
   const { data: specialties } = useApi<Specialty>("specialties");
-  const [specialists, setSpecialists] = useState<Specialist[]>([]);
+  const { data: specialists } = useApi<Specialist>("specialists");
 
   const {
     data: appointments,
@@ -74,28 +73,6 @@ export const useAppointments = () => {
 
   const filterConfig: Filter[] = [
     {
-      label: "Especialidad",
-      value: filters.specialtyId || "",
-      onChange: async (value: string) => {
-        setFilters((prev) => ({ ...prev, specialtyId: value, specialistId: "" }));
-        if (value) {
-          const specialistsData = await fetchSpecialistsBySpecialty(value);
-          setSpecialists(specialistsData);
-        } else {
-          setSpecialists([]);
-        }
-      },
-      options: [...specialtyOptions],
-      type: "dropdown",
-    },
-    {
-      label: "Especialista",
-      value: filters.specialistId || "",
-      onChange: (value: string) => setFilters((prev) => ({ ...prev, specialistId: value })),
-      options: [...specialistOptions],
-      type: "dropdown",
-    },
-    {
       label: "Paciente",
       value: filters.patientId || "",
       onChange: (value: string) => setFilters((prev) => ({ ...prev, patientId: value })),
@@ -103,13 +80,19 @@ export const useAppointments = () => {
       type: "dropdown",
     },
     {
+      label: "Especialista",
+      value: filters.specialistId || '',
+      onChange: (value: string) => setFilters(prev => ({ ...prev, specialistId: value })),
+      options: [...specialistOptions],
+      type: "dropdown"
+    },
+    {
       label: "Fecha",
       value: filters.date ? dayjs(filters.date).format("YYYY-MM-DD") : "",
       onChange: (value: string) => {
-        console.log("Date filter changed to:", value);
         setFilters((prev) => ({
           ...prev,
-          date: value ? dayjs(value).startOf('day').toDate() : null,
+          date: value ? dayjs(value).startOf("day").toDate() : null,
         }));
       },
       type: "date",
@@ -127,7 +110,6 @@ export const useAppointments = () => {
     const queryParams = new URLSearchParams();
     if (filters.patientId) queryParams.append("patientId", filters.patientId);
     if (filters.specialistId) queryParams.append("specialistId", filters.specialistId);
-    if (filters.specialtyId) queryParams.append("specialtyId", filters.specialtyId);
     if (filters.date) queryParams.append("date", dayjs(filters.date).format("YYYY-MM-DD"));
     if (filters.status) queryParams.append("status", filters.status);
     if (debouncedPatientSearch) queryParams.append("patientSearch", debouncedPatientSearch);
@@ -141,7 +123,6 @@ export const useAppointments = () => {
   }, [
     filters.patientId,
     filters.specialistId,
-    filters.specialtyId,
     filters.date,
     filters.status,
     debouncedPatientSearch,
@@ -158,11 +139,10 @@ export const useAppointments = () => {
       patientId: "",
       specialistId: "",
       specialtyId: "",
-      date: dayjs().startOf('day').toDate(),
+      date: dayjs().startOf("day").toDate(),
       status: "",
       patientSearch: "",
     });
-    setSpecialists([]);
   };
 
   const handlePatientSearchChange = (value: string) => {

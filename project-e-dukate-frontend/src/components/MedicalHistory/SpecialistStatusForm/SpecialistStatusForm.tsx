@@ -1,9 +1,11 @@
-import React from "react";
-import { Box } from "@mui/material";
+import React, { useRef } from "react";
+import { Box, Button } from "@mui/material";
 import { Specialist } from "@/types/userTypes";
 import { SpecialistSelect } from "@/components/MedicalHistory/SpecialistSelect";
 import { StatusSelectWithButton } from "@/components/MedicalHistory/StatusSelectWithButton";
 import { useAuthStore } from "@/stores/authStore";
+import { useMedicalHistory } from "@/hooks/useMedicalHistory";
+import { showNotification } from "@/services/notificationService";
 
 interface SpecialistStatusFormProps {
   specialists: Specialist[];
@@ -33,6 +35,26 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
   canEditSelectedSpecialist,
 }) => {
   const { userRole } = useAuthStore();
+  const { handleUploadDocument } = useMedicalHistory();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const selectedFile = event.target.files[0];
+      await handleUploadDocument(selectedFile);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } else {
+      showNotification("Por favor selecciona un archivo PDF", "error");
+    }
+  };
 
   return (
     <Box
@@ -58,20 +80,49 @@ export const SpecialistStatusForm: React.FC<SpecialistStatusFormProps> = ({
           label="Ver consulta del Prof. Especialista"
           specialists={specialistsWithPermission}
           value={selectedConsultationSpecialist}
-          onChange={setSelectedConsultationSpecialist}
+          onChange={(value) => {
+            setSelectedConsultationSpecialist(value);
+          }}
           width={250}
         />
       </Box>
-      <StatusSelectWithButton
-        selectedStatus={selectedStatus}
-        setSelectedStatus={setSelectedStatus}
-        onAddConsultation={onAddConsultation}
-        isStatusDropdownDisabled={isStatusDropdownDisabled}
-        isAddButtonDisabled={!selectedSpecialists.length || !selectedStatus}
-        width={250}
-        userRole={userRole}
-        canEditSelectedSpecialist={canEditSelectedSpecialist}
-      />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <StatusSelectWithButton
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+          onAddConsultation={onAddConsultation}
+          isStatusDropdownDisabled={isStatusDropdownDisabled}
+          isAddButtonDisabled={!selectedSpecialists.length || !selectedStatus}
+          width={250}
+          userRole={userRole}
+          canEditSelectedSpecialist={canEditSelectedSpecialist}
+        />
+        {canEditSelectedSpecialist && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              style={{ display: "none" }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleUpload}
+              sx={{
+                backgroundColor: "#F4A601",
+                color: "#000",
+                borderRadius: "10px",
+                px: 3,
+                py: 1,
+                "&:hover": { backgroundColor: "#e69500" },
+              }}
+            >
+              Subir PDF
+            </Button>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

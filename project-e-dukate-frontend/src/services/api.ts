@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   appointments: 'http://localhost:5275/api/Appointments',
   specialistsBySpecialty: 'http://localhost:5275/api/Schedules/specialists-by-specialty',
   appointmentPreview: 'http://localhost:5275/api/Appointments/preview',
+  appointmentArchive: 'http://localhost:5275/api/Appointments/sessions',
 };
 
 export const setAuthToken = (token: string) => {

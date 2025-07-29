@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
@@ -8,11 +8,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { MedicalHistoryDto } from "@/types/medicalHistory";
 import { Patient } from "@/types/userTypes";
 import { Specialist } from "@/types/userTypes";
-import { getMedicalHistoryByPatientId } from "@/services/medicalHistoryService";
-import { updatePermission } from "@/services/medicalHistoryService";
-import { deletePermission } from "@/services/medicalHistoryService";
-import { updateMedicalHistoryStatus } from "@/services/medicalHistoryService";
-import { getSpecialistConsultations } from "@/services/medicalHistoryService";
+import { getMedicalHistoryByPatientId, getSpecialistConsultations, uploadDocument, deleteDocument, updatePermission, deletePermission, updateMedicalHistoryStatus } from "@/services/medicalHistoryService";
 import { apiRequest } from "@/services/api";
 import { showNotification } from "@/services/notificationService";
 
@@ -48,12 +44,16 @@ interface UseMedicalHistoryReturn {
   errorConsultations: string | null;
   specialistsLoading: boolean;
   specialistsError: string | null;
+  loadingDocuments: boolean;
   setSelectedSpecialists: (specialists: string[]) => void;
   setSelectedStatus: (status: string) => void;
   setSelectedConsultationSpecialist: (specialistId: string) => void;
   setCurrentPage: (page: number) => void;
   handleAddConsultation: () => Promise<string | null>;
+  handleUploadDocument: (file: File) => Promise<void>;
+  handleDeleteDocument: (documentId: string) => Promise<void>;
   refreshConsultations: () => void;
+  refreshDocuments: () => void;
 }
 
 export const useMedicalHistory = (): UseMedicalHistoryReturn => {
@@ -71,6 +71,8 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingConsultations, setLoadingConsultations] = useState(false);
   const [errorConsultations, setErrorConsultations] = useState<string | null>(null);
+  const [loadingDocuments, setLoadingDocuments] = useState<boolean>(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
   const pageSize = 10;
   const {
     data: specialists,
@@ -78,32 +80,54 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
     error: specialistsError,
   } = useApi<Specialist>("specialists");
 
+  const specialistsWithPermission =
+    specialists?.filter((specialist) =>
+      medicalHistory?.permissions.some(
+        (permission) =>
+          permission.specialistId === specialist.id && permission.canEdit
+      )
+    ) || [];
+
   useEffect(() => {
     if (!patientId || entityType !== "patient") {
-      showNotification("Invalid patient or entityType", "error");
+      showNotification("Paciente o tipo de entidad inválido", "error");
       router.push("/dashboard/pacientes");
       return;
     }
 
     const fetchMedicalHistory = async () => {
-      const history = await getMedicalHistoryByPatientId(patientId);
-      if (history) {
-        setMedicalHistory(history);
-        const initialSpecialists = history.permissions
-          .filter((p) => p.canEdit)
-          .map((p) => p.specialistId);
-        setSelectedSpecialists(initialSpecialists);
-        setConsultations(null);
-        setSelectedConsultationSpecialist("");
-        setSelectedStatus("");
-        setIsStatusDropdownDisabled(true);
-        setCurrentPage(1);
-      } else {
-        setMedicalHistory(null);
-        setConsultations(null);
-        setSelectedConsultationSpecialist("");
-        setSelectedStatus("");
-        setIsStatusDropdownDisabled(true);
+      setLoadingDocuments(true);
+      try {
+        const history = await getMedicalHistoryByPatientId(patientId);
+        if (history) {
+          setMedicalHistory(history);
+          const initialSpecialists = history.permissions
+            .filter((p) => p.canEdit)
+            .map((p) => p.specialistId);
+          setSelectedSpecialists(initialSpecialists);
+          const userPermission = history.permissions.find(
+            (p) => p.specialistId === userId && p.canEdit
+          );
+          const firstSpecialist =
+            userPermission?.specialistId ||
+            history.permissions.find((p) => p.canEdit)?.specialistId ||
+            "";
+          setSelectedConsultationSpecialist(firstSpecialist);
+          setConsultations(null);
+          setSelectedStatus("");
+          setIsStatusDropdownDisabled(true);
+          setCurrentPage(1);
+        } else {
+          setMedicalHistory(null);
+          setConsultations(null);
+          setSelectedConsultationSpecialist("");
+          setSelectedStatus("");
+          setIsStatusDropdownDisabled(true);
+        }
+      } catch (error) {
+        showNotification("Error al cargar el historial médico", "error");
+      } finally {
+        setLoadingDocuments(false);
       }
     };
 
@@ -117,22 +141,14 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
         );
         setPatientData(patient);
       } catch (error) {
-        showNotification("Error fetching patient data", "error");
+        showNotification("Error al cargar los datos del paciente", "error");
         router.push("/dashboard/pacientes");
       }
     };
 
     fetchMedicalHistory();
     fetchPatientData();
-  }, [patientId, entityType, router]);
-
-  const specialistsWithPermission =
-    specialists?.filter((specialist) =>
-      medicalHistory?.permissions.some(
-        (permission) =>
-          permission.specialistId === specialist.id && permission.canEdit
-      )
-    ) || [];
+  }, [patientId, entityType, router, userId]);
 
   const fetchConsultations = async () => {
     if (!selectedConsultationSpecialist || !medicalHistory) {
@@ -157,9 +173,7 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
       setSelectedStatus("");
       setIsStatusDropdownDisabled(true);
       setCanEditSelectedSpecialist(false);
-      setErrorConsultations(
-        "No se encontraron permisos válidos para este especialista"
-      );
+      setErrorConsultations("No se encontraron permisos válidos para este especialista");
       setLoadingConsultations(false);
       return;
     }
@@ -192,6 +206,36 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
   const refreshConsultations = () => {
     fetchConsultations();
   };
+
+  
+
+  const refreshDocuments = async () => {
+    if (!patientId) {
+      showNotification(
+        "No se puede refrescar los documentos: paciente no encontrado",
+        "error"
+      );
+      return;
+    }
+    setLoadingDocuments(true);
+    try {
+      const updatedHistory = await getMedicalHistoryByPatientId(patientId);
+      if (updatedHistory) {
+        setMedicalHistory(updatedHistory);
+        setForceUpdate((prev) => prev + 1);
+      } else {
+        showNotification("No se encontraron datos del historial médico", "error");
+      }
+    } catch (error) {
+      showNotification("Error al refrescar documentos", "error");
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  useEffect(() => {
+  fetchConsultations();
+}, [selectedConsultationSpecialist, medicalHistory, currentPage, patientId, forceUpdate]);
 
   const handleAddConsultation = async (): Promise<string | null> => {
     if (!medicalHistory || !selectedConsultationSpecialist || !userId) {
@@ -227,57 +271,121 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
     }
   };
 
+  const handleUploadDocument = async (file: File): Promise<void> => {
+    if (!medicalHistory || !selectedConsultationSpecialist || !userId) {
+      showNotification(
+        `No se puede subir el documento: ${
+          !medicalHistory
+            ? "Historial médico no encontrado"
+            : !selectedConsultationSpecialist
+              ? "Selecciona un especialista"
+              : "Usuario no autenticado"
+        }`,
+        "error"
+      );
+      return;
+    }
+
+    const permission = medicalHistory.permissions.find((p) => {
+      return p.specialistId === selectedConsultationSpecialist;
+    });
+    if (!permission) {
+      showNotification("No tienes permisos para subir documentos", "error");
+      return;
+    }
+
+    if (permission.specialistId !== userId) {
+      showNotification(
+        "No tienes permisos para subir documentos para este especialista",
+        "error"
+      );
+      return;
+    }
+    if (!permission.canEdit) {
+      showNotification("No tienes permisos de edición para este especialista", "error");
+      return;
+    }
+    try {
+      const result = await uploadDocument(permission.id, file);
+      if (result) {
+        await refreshDocuments();
+      }
+    } catch (error) {
+      showNotification("Error al subir el documento", "error");
+    }
+  };
+
+  const handleDeleteDocument = async (documentId: string): Promise<void> => {
+    try {
+      const success = await deleteDocument(documentId);
+      if (success) {
+        await refreshDocuments();
+      }
+    } catch (error) {
+      showNotification("Error al eliminar el documento", "error");
+    }
+  };
+
   const handleSpecialistChange = async (newSpecialists: string[]) => {
     if (!medicalHistory || !patientId) return;
 
-    const addedSpecialists = newSpecialists.filter(
-      (s) => !selectedSpecialists.includes(s)
-    );
-    const removedSpecialists = selectedSpecialists.filter(
-      (s) => !newSpecialists.includes(s)
-    );
-
-    for (const specialistId of addedSpecialists) {
-      await updatePermission({
-        medicalHistoryId: medicalHistory.id,
-        specialistId,
-        canEdit: true,
-      });
-    }
-
-    for (const specialistId of removedSpecialists) {
-      const permission = medicalHistory.permissions.find(
-        (p) => p.specialistId === specialistId
+    try {
+      const addedSpecialists = newSpecialists.filter(
+        (s) => !selectedSpecialists.includes(s)
       );
-      if (permission) {
-        await deletePermission(permission.id);
+      const removedSpecialists = selectedSpecialists.filter(
+        (s) => !newSpecialists.includes(s)
+      );
+
+      for (const specialistId of addedSpecialists) {
+        await updatePermission({
+          medicalHistoryId: medicalHistory.id,
+          specialistId,
+          canEdit: true,
+        });
       }
-    }
 
-    const updatedHistory = await getMedicalHistoryByPatientId(patientId);
-    if (updatedHistory) {
-      setMedicalHistory(updatedHistory);
-    }
+      for (const specialistId of removedSpecialists) {
+        const permission = medicalHistory.permissions.find(
+          (p) => p.specialistId === specialistId
+        );
+        if (permission) {
+          await deletePermission(permission.id);
+        }
+      }
 
-    setSelectedSpecialists(newSpecialists);
+      const updatedHistory = await getMedicalHistoryByPatientId(patientId);
+      if (updatedHistory) {
+        setMedicalHistory(updatedHistory);
+      }
+
+      await refreshDocuments();
+      setSelectedSpecialists(newSpecialists);
+    } catch (error) {
+      showNotification("Error al cambiar especialistas", "error");
+    }
   };
 
   const handleStatusChange = async (newStatus: string) => {
     if (!medicalHistory || !patientId || !selectedConsultationSpecialist) {
-      showNotification("Cannot update status", "error");
+      showNotification("No se puede actualizar el estado", "error");
       return;
     }
 
-    await updateMedicalHistoryStatus(
-      medicalHistory.id,
-      selectedConsultationSpecialist,
-      newStatus
-    );
-    setSelectedStatus(newStatus);
-
-    const updatedHistory = await getMedicalHistoryByPatientId(patientId);
-    if (updatedHistory) {
-      setMedicalHistory(updatedHistory);
+    try {
+      await updateMedicalHistoryStatus(
+        medicalHistory.id,
+        selectedConsultationSpecialist,
+        newStatus
+      );
+      setSelectedStatus(newStatus);
+      const updatedHistory = await getMedicalHistoryByPatientId(patientId);
+      if (updatedHistory) {
+        setMedicalHistory(updatedHistory);
+      }
+      await refreshDocuments();
+    } catch (error) {
+      showNotification("Error al cambiar el estado", "error");
     }
   };
 
@@ -297,11 +405,15 @@ export const useMedicalHistory = (): UseMedicalHistoryReturn => {
     errorConsultations,
     specialistsLoading,
     specialistsError,
+    loadingDocuments,
     setSelectedSpecialists: handleSpecialistChange,
     setSelectedStatus: handleStatusChange,
     setSelectedConsultationSpecialist,
     setCurrentPage,
     handleAddConsultation,
+    handleUploadDocument,
+    handleDeleteDocument,
     refreshConsultations,
+    refreshDocuments,
   };
 };

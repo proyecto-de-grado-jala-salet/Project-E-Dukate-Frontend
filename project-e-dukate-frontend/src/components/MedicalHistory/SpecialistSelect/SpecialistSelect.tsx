@@ -1,11 +1,6 @@
 import React from "react";
-import { Box } from "@mui/material";
-import { Typography } from "@mui/material";
-import { FormControl } from "@mui/material";
-import { Select } from "@mui/material";
-import { MenuItem } from "@mui/material";
-import { SelectChangeEvent } from "@mui/material";
-import { SxProps } from "@mui/material";
+import { Box, FormControl, Select, MenuItem, Typography } from "@mui/material";
+import { SelectChangeEvent, SxProps } from "@mui/material";
 import { Theme } from "@mui/material";
 import { Specialist } from "@/types/userTypes";
 import { GenericChip } from "@/components/GenericChip";
@@ -79,7 +74,11 @@ export const SpecialistSelect = <T extends string | string[]>({
                     <GenericChip
                       label={`${specialist.names} ${specialist.lastNamePaternal}`}
                     />
-                  ) : null;
+                  ) : (
+                    <Typography sx={{ color: "#000000", fontStyle: "italic" }}>
+                      Seleccione un especialista
+                    </Typography>
+                  );
                 })()
               ) : (
                 <Typography sx={{ color: "#000000", fontStyle: "italic" }}>
@@ -90,7 +89,7 @@ export const SpecialistSelect = <T extends string | string[]>({
           )}
           MenuProps={MenuProps}
         >
-          <MenuItem value="" disabled>
+          <MenuItem value="" disabled={!multiple}>
             <Typography
               sx={{
                 color: "#000000",
