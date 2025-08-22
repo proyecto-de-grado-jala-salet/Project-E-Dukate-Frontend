@@ -1,28 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// project-e-dukate-frontend/src/components/Appointments/AppointmentTable.tsx
 "use client";
 
 import React, { useState } from 'react';
 import { Table } from '../Table';
 import { Appointment } from '../../types/appointment';
 import { ColumnConfig } from '../../types/table';
-import { Box, Typography, IconButton, Tooltip } from '@mui/material';
-import { FaRegCalendarCheck } from "react-icons/fa";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Box, Typography } from '@mui/material';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { RescheduleSessionDialog } from './RescheduleSessionDialog';
 import { cancelSession } from '@/services/appointmentService';
-
-// Mapeo de días de la semana
-const dayTranslation: Record<string, string> = {
-  Sunday: "Domingo",
-  Monday: "Lunes",
-  Tuesday: "Martes",
-  Wednesday: "Miércoles",
-  Thursday: "Jueves",
-  Friday: "Viernes",
-  Saturday: "Sábado",
-};
+import { dayTranslation } from "@/utils/scheduleUtils";
+import { showNotification } from "@/services/notificationService";
 
 const statusMap: Record<string, string> = {
   Scheduled: "Programada",
@@ -44,7 +32,7 @@ interface AppointmentTableProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   enableEdit: boolean;
-  enableDelete: boolean;
+  enableReschedule: boolean;
   onRefresh: () => void;
 }
 
@@ -53,6 +41,8 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
   totalPages, 
   currentPage, 
   onPageChange, 
+  enableEdit,
+  enableReschedule,
   onRefresh
 }) => {
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
@@ -61,7 +51,6 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   const handleCancelSession = (session: any) => {
-    
     const appointmentForState: Appointment = {
       id: session.id,
       startTime: session.startTime,
@@ -90,7 +79,6 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
   };
   
   const handleRescheduleSession = (session: any) => {
-    
     const appointmentForState: Appointment = {
       id: session.id,
       startTime: session.startTime,
@@ -130,6 +118,7 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
       setOpenCancelDialog(false);
     } catch (error) {
       console.error("Error cancelando sesión:", error);
+      showNotification("Error al cancelar la sesión", "error");
     }
   };
 
@@ -199,53 +188,6 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         );
       },
     },
-    {
-      header: "Acciones",
-      key: "actions",
-      render: (item) => {
-        if (item.status === "Cancelled") {
-          return (
-            <Box sx={{ 
-              display: "flex", 
-              justifyContent: "center", 
-              gap: 1,
-              padding: "4px 0"
-            }}>
-              <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
-                -
-              </Typography>
-            </Box>
-          );
-        }
-        
-        return (
-          <Box sx={{ 
-            display: "flex", 
-            justifyContent: "center", 
-            gap: 1,
-            padding: "4px 0"
-          }}>
-            <Tooltip title="Reprogramar sesión" placement="bottom">
-              <IconButton 
-                onClick={() => handleRescheduleSession(item)}
-                disabled={item.status === "Confirmed"}
-              >
-                <FaRegCalendarCheck />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Cancelar sesión" placement="bottom">
-              <IconButton 
-                onClick={() => handleCancelSession(item)}
-                disabled={item.status === "Confirmed"}
-              >
-                <DeleteOutlineIcon sx={{ color: "red" }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        );
-      },
-    },
   ];
 
   return (
@@ -258,8 +200,12 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         currentPage={currentPage}
         pageSize={10}
         onPageChange={onPageChange}
-        enableEdit={false}
+        enableEdit={enableEdit}
         enableDelete={false}
+        enableReschedule={enableReschedule}
+        onReschedule={handleRescheduleSession}
+        enableCancel={true}
+        onCancel={handleCancelSession}
         keyExtractor={(item) => item.sessionId || item.id}
       />
       

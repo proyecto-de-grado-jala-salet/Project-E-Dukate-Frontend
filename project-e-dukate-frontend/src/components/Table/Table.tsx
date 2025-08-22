@@ -8,6 +8,8 @@ import { Pagination } from '../Pagination';
 import { GenericItem, ColumnConfig } from '../../types/table';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
 import { Tooltip } from '@mui/material';
+import { TbCalendarX } from "react-icons/tb";
+import { TbCalendarTime } from "react-icons/tb";
 
 interface TableProps<T extends GenericItem> {
   items?: T[];
@@ -15,7 +17,10 @@ interface TableProps<T extends GenericItem> {
   error: string | null;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onReschedule?: (item: T) => void;
   onMedicalHistory?: (item: T) => void;
+  onCancel?: (item: T) => void;
+  enableCancel?: boolean;
   totalPages: number;
   currentPage: number;
   pageSize: number;
@@ -24,6 +29,7 @@ interface TableProps<T extends GenericItem> {
   sx?: SxProps;
   enableEdit?: boolean;
   enableDelete?: boolean;
+  enableReschedule?: boolean;
   enableMedicalHistory?: boolean;
   emptyMessage?: string;
   keyExtractor?: (item: T) => string | number;
@@ -35,7 +41,10 @@ export const Table = <T extends GenericItem>({
   error,
   onEdit,
   onDelete,
+  onReschedule,
   onMedicalHistory,
+  onCancel,
+  enableCancel = true,
   totalPages,
   currentPage,
   pageSize,
@@ -44,6 +53,7 @@ export const Table = <T extends GenericItem>({
   sx,
   enableEdit = true,
   enableDelete = true,
+  enableReschedule = true,
   enableMedicalHistory = true,
   emptyMessage,
   keyExtractor = (item) => item.id,
@@ -62,6 +72,12 @@ export const Table = <T extends GenericItem>({
   const handleEdit = (item: T) => {
     if (onEdit) {
       onEdit(item);
+    }
+  };
+
+  const handleReschedule = (item: T) => {
+    if (onReschedule) {
+      onReschedule(item);
     }
   };
 
@@ -126,13 +142,36 @@ export const Table = <T extends GenericItem>({
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
-                  <Box
-                    sx={{ display: "flex", justifyContent: "center", gap: 1 }}
-                  >
-                    {enableEdit && onEdit && (
-                      <Tooltip title="Editar" placement="bottom">
-                        <IconButton onClick={() => handleEdit(item)}>
-                          <FaRegEdit />
+                  {item.status === "Cancelled" ? (
+                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                      -
+                    </Typography>
+                  ) : (
+                    <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                      {enableEdit && onEdit && (
+                        <Tooltip title="Editar" placement="bottom">
+                          <IconButton onClick={() => handleEdit(item)}>
+                            <FaRegEdit />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {enableReschedule && onReschedule && (
+                        <Tooltip title="Reprogramar sesión" placement="bottom">
+                          <IconButton
+                            onClick={() => handleReschedule(item)}
+                            disabled={item.status === "Confirmed"}
+                          >
+                            <TbCalendarTime />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {enableCancel && onCancel && (
+                      <Tooltip title="Cancelar sesión" placement="bottom">
+                        <IconButton
+                          onClick={() => onCancel(item)}
+                          disabled={item.status === "Confirmed"}
+                        >
+                          <TbCalendarX style={{ color: "red" }} />
                         </IconButton>
                       </Tooltip>
                     )}
@@ -148,21 +187,23 @@ export const Table = <T extends GenericItem>({
                         </IconButton>
                       </Tooltip>
                     )}
-                    {enableMedicalHistory && onMedicalHistory && (
-                      <Tooltip title="Historial Médico" placement="bottom">
-                        <IconButton onClick={() => handleMedicalHistory(item)}>
-                          <FolderCopyOutlinedIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {(!enableEdit || !onEdit) &&
-                      (!enableDelete || !onDelete) &&
-                      (!enableMedicalHistory || !onMedicalHistory) && (
-                        <Typography variant="body2" color="textSecondary">
-                          -
-                        </Typography>
+                      {enableMedicalHistory && onMedicalHistory && (
+                        <Tooltip title="Historial Médico" placement="bottom">
+                          <IconButton onClick={() => handleMedicalHistory(item)}>
+                            <FolderCopyOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
                       )}
-                  </Box>
+                      {(!enableEdit || !onEdit) &&
+                        (!enableDelete || !onDelete) &&
+                        (!enableReschedule || !onReschedule) &&
+                        (!enableMedicalHistory || !onMedicalHistory) && (
+                          <Typography variant="body2" color="textSecondary">
+                            -
+                          </Typography>
+                        )}
+                    </Box>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

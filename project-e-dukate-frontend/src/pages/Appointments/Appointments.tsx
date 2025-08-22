@@ -130,7 +130,7 @@ const Appointments: React.FC = () => {
           currentPage={currentPage}
           onPageChange={handlePageChange}
           enableEdit={isAdmin}
-          enableDelete={isAdmin}
+          enableReschedule={isAdmin}
           onRefresh={refreshAppointments}
         />
       )}

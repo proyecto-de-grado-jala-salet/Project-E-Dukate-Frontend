@@ -96,6 +96,12 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
     }
   }, [open, appointment, session]);
 
+  const formatDateTime = (dateTimeString: string) => {
+    const [datePart, timePart] = dateTimeString.split("T");
+    const cleanTime = timePart.replace("Z", "");
+    return `${datePart} - ${cleanTime}`;
+  };
+
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({
       ...prev,
@@ -281,15 +287,17 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
               Vista previa de la nueva fecha:
             </Typography>
             {previewData.map((date, index) => (
-              <Box key={index} sx={{ 
-                p: 2, 
-                mb: 2, 
-                bgcolor: '#f5f5f5', 
-                borderRadius: 1,
-                border: '1px solid #e0e0e0'
-              }}>
-                <Typography>{`Sesión reprogramada: ${date.start} - ${date.end}`}</Typography>
-              </Box>
+            <Box key={index} sx={{ 
+              p: 2, 
+              mb: 2, 
+              bgcolor: '#f5f5f5', 
+              borderRadius: 1,
+              border: '1px solid #e0e0e0'
+            }}>
+              <Typography>
+                {`Sesión reprogramada: ${formatDateTime(date.start)} - ${formatDateTime(date.end)}`}
+              </Typography>
+            </Box>
             ))}
           </Box>
         )}
