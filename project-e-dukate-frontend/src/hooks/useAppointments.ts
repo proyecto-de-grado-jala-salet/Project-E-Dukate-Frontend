@@ -20,11 +20,12 @@ interface Patient {
 }
 
 export const useAppointments = () => {
+  const initialDate = dayjs().startOf("day").toDate();
   const [filters, setFilters] = useState<AppointmentFilter>({
     patientId: "",
     specialistId: "",
     specialtyId: "",
-    date: dayjs().startOf("day").toDate(),
+    date: initialDate,
     status: "",
     patientSearch: "",
   });
@@ -69,6 +70,7 @@ export const useAppointments = () => {
     { value: "Scheduled", label: "Programada" },
     { value: "Confirmed", label: "Confirmada" },
     { value: "Cancelled", label: "Cancelada" },
+    { value: "Rescheduled", label: "Reprogramada" },
   ];
 
   const filterConfig: Filter[] = [
@@ -110,7 +112,10 @@ export const useAppointments = () => {
     const queryParams = new URLSearchParams();
     if (filters.patientId) queryParams.append("patientId", filters.patientId);
     if (filters.specialistId) queryParams.append("specialistId", filters.specialistId);
-    if (filters.date) queryParams.append("date", dayjs(filters.date).format("YYYY-MM-DD"));
+    if (filters.date) {
+      const dateStr = dayjs(filters.date).format("YYYY-MM-DD");
+      queryParams.append("date", dateStr);
+    }
     if (filters.status) queryParams.append("status", filters.status);
     if (debouncedPatientSearch) queryParams.append("patientSearch", debouncedPatientSearch);
     queryParams.append("PageNumber", page.toString());
@@ -130,16 +135,31 @@ export const useAppointments = () => {
     pageSize,
   ]);
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchAppointmentsData(currentPage, buildQueryParams(currentPage));
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentPage, fetchAppointmentsData, buildQueryParams]);
+
   const handlePageChange = (page: number) => {
     fetchAppointmentsData(page, buildQueryParams(page));
   };
 
   const handleResetFilters = () => {
+    const newDate = dayjs().startOf("day").toDate();
     setFilters({
       patientId: "",
       specialistId: "",
       specialtyId: "",
-      date: dayjs().startOf("day").toDate(),
+      date: newDate,
       status: "",
       patientSearch: "",
     });

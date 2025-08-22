@@ -26,6 +26,7 @@ interface TableProps<T extends GenericItem> {
   enableDelete?: boolean;
   enableMedicalHistory?: boolean;
   emptyMessage?: string;
+  keyExtractor?: (item: T) => string | number;
 }
 
 export const Table = <T extends GenericItem>({
@@ -45,6 +46,7 @@ export const Table = <T extends GenericItem>({
   enableDelete = true,
   enableMedicalHistory = true,
   emptyMessage,
+  keyExtractor = (item) => item.id,
 }: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
@@ -112,7 +114,7 @@ export const Table = <T extends GenericItem>({
           </TableHead>
           <TableBody>
             {items.map((item, rowIndex) => (
-              <TableRow key={item.id}>
+              <TableRow key={keyExtractor(item)}>
                 {columns.map((col) => (
                   <TableCell
                     key={col.key as string}

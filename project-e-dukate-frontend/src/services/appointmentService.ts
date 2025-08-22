@@ -110,3 +110,51 @@ export const fetchAppointmentPreview = async (appointment: Partial<Appointment>)
     }
   }
 };
+
+export const cancelSession = async (appointmentId: string, sessionId: string): Promise<void> => {
+  try {
+    await apiRequest(
+      "cancelSession", 
+      "PUT", 
+      null, 
+      `${appointmentId}/cancel-session/${sessionId}`
+    );
+    showNotification("Sesión cancelada exitosamente", "success");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Error al cancelar la sesión";
+    showNotification(errorMessage, "error");
+    throw new Error(errorMessage);
+  }
+};
+
+export const rescheduleSession = async (
+  appointmentId: string, 
+  sessionId: string,
+  dayOfWeek: string,
+  startTime: string,
+  endTime: string,
+  timeSlotId: string
+): Promise<void> => {
+  try {
+    const payload = {
+      sessionId,
+      dayOfWeek,
+      startTime,
+      endTime,
+      timeSlotId
+    };
+    
+    await apiRequest(
+      "rescheduleSession", 
+      "PUT", 
+      payload, 
+      `${appointmentId}`
+    );
+    
+    showNotification("Sesión reprogramada exitosamente", "success");
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Error al reprogramar la sesión";
+    showNotification(errorMessage, "error");
+    throw new Error(errorMessage);
+  }
+};

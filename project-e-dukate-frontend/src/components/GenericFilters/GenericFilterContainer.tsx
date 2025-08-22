@@ -201,7 +201,8 @@ export const GenericFilterContainer: React.FC<GenericFilterContainerProps> = ({
                     value={filter.value ? dayjs(filter.value) : null}
                     onChange={(newValue) => {
                       if (newValue) {
-                        filter.onChange(newValue.format("YYYY-MM-DD"));
+                        const utcDate = newValue.format("YYYY-MM-DD");
+                        filter.onChange(utcDate);
                       }
                     }}
                     slotProps={{

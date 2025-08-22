@@ -1,23 +1,19 @@
 "use client";
-
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, TextField, Typography } from "@mui/material";
 import { AppointmentTable } from "@/components/Appointments/AppointmentTable";
 import { GenericFilterContainer } from "@/components/GenericFilters/GenericFilterContainer";
 import { AddAppointmentDialog } from "@/components/Appointments/AddAppointmentDialog";
 import { useAuthStore } from "@/stores/authStore";
-import { useRouter } from "next/navigation";
 import { useAppointments } from "@/hooks/useAppointments";
 import SearchIcon from "@mui/icons-material/Search";
-import { Appointment } from "@/types/appointment";
 import { showNotification } from "@/services/notificationService";
+import { Appointment } from "@/types/appointment";
 
 const Appointments: React.FC = () => {
-  const router = useRouter();
   const { userRole } = useAuthStore();
   const isAdmin = userRole === "Administrator" || userRole === "Specialist";
   const [openDialog, setOpenDialog] = useState(false);
-
   const {
     filters,
     appointments,
@@ -37,11 +33,9 @@ const Appointments: React.FC = () => {
     fetchAppointmentsData,
     buildQueryParams,
   } = useAppointments();
-
-  const handleEdit = (appointment: Appointment) => {
-    if (isAdmin) {
-      router.push(`/dashboard/citas/editar/${appointment.id}`);
-    }
+  
+  const refreshAppointments = () => {
+    fetchAppointmentsData(currentPage, buildQueryParams(currentPage));
   };
 
   const handleAddAppointment = async (appointment: {
@@ -72,7 +66,6 @@ const Appointments: React.FC = () => {
         endTime: appointment.scheduledSessions[0]?.endTime || "",
         status: "Scheduled",
       };
-
       await addAppointment(newAppointment);
       await fetchAppointmentsData(1, buildQueryParams(1));
       setOpenDialog(false);
@@ -119,33 +112,28 @@ const Appointments: React.FC = () => {
           )}
         </Box>
       </Box>
-
       <GenericFilterContainer filters={filterConfig} onResetFilters={handleResetFilters} />
-
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
           <CircularProgress />
         </Box>
       )}
-
       {error && (
         <Typography color="error" sx={{ my: 2 }}>
           {error}
         </Typography>
       )}
-
       {!loading && !error && (
         <AppointmentTable
           appointments={appointments}
           totalPages={totalPages}
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          onEdit={isAdmin ? handleEdit : undefined}
           enableEdit={isAdmin}
-          enableDelete={false}
+          enableDelete={isAdmin}
+          onRefresh={refreshAppointments}
         />
       )}
-
       <AddAppointmentDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
