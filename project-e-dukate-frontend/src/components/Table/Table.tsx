@@ -8,6 +8,10 @@ import { Pagination } from '../Pagination';
 import { GenericItem, ColumnConfig } from '../../types/table';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
 import { Tooltip } from '@mui/material';
+import { TbCalendarX } from "react-icons/tb";
+import { TbCalendarTime } from "react-icons/tb";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 
 interface TableProps<T extends GenericItem> {
   items?: T[];
@@ -15,7 +19,10 @@ interface TableProps<T extends GenericItem> {
   error: string | null;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onReschedule?: (item: T) => void;
   onMedicalHistory?: (item: T) => void;
+  onCancel?: (item: T) => void;
+  enableCancel?: boolean;
   totalPages: number;
   currentPage: number;
   pageSize: number;
@@ -24,8 +31,11 @@ interface TableProps<T extends GenericItem> {
   sx?: SxProps;
   enableEdit?: boolean;
   enableDelete?: boolean;
+  enableReschedule?: boolean;
   enableMedicalHistory?: boolean;
   emptyMessage?: string;
+  keyExtractor?: (item: T) => string | number;
+  selectedDate?: Date | null;
 }
 
 export const Table = <T extends GenericItem>({
@@ -34,7 +44,10 @@ export const Table = <T extends GenericItem>({
   error,
   onEdit,
   onDelete,
+  onReschedule,
   onMedicalHistory,
+  onCancel,
+  enableCancel = true,
   totalPages,
   currentPage,
   pageSize,
@@ -43,11 +56,19 @@ export const Table = <T extends GenericItem>({
   sx,
   enableEdit = true,
   enableDelete = true,
+  enableReschedule = true,
   enableMedicalHistory = true,
   emptyMessage,
+  keyExtractor = (item) => item.id,
+  selectedDate,
 }: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
+
+  const isPastDate = (date: Date | null | undefined): boolean => {
+    if (!date) return false;
+    return dayjs(date).isBefore(dayjs().startOf("day"));
+  };
 
   const handleConfirmDelete = () => {
     if (itemToDelete && onDelete) {
@@ -60,6 +81,12 @@ export const Table = <T extends GenericItem>({
   const handleEdit = (item: T) => {
     if (onEdit) {
       onEdit(item);
+    }
+  };
+
+  const handleReschedule = (item: T) => {
+    if (onReschedule) {
+      onReschedule(item);
     }
   };
 
@@ -112,7 +139,7 @@ export const Table = <T extends GenericItem>({
           </TableHead>
           <TableBody>
             {items.map((item, rowIndex) => (
-              <TableRow key={item.id}>
+              <TableRow key={keyExtractor(item)}>
                 {columns.map((col) => (
                   <TableCell
                     key={col.key as string}
@@ -124,43 +151,92 @@ export const Table = <T extends GenericItem>({
                   </TableCell>
                 ))}
                 <TableCell sx={{ padding: "16px 24px", textAlign: "center" }}>
-                  <Box
-                    sx={{ display: "flex", justifyContent: "center", gap: 1 }}
-                  >
-                    {enableEdit && onEdit && (
-                      <Tooltip title="Editar" placement="bottom">
-                        <IconButton onClick={() => handleEdit(item)}>
-                          <FaRegEdit />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {enableDelete && onDelete && (
-                      <Tooltip title="Eliminar" placement="bottom">
-                        <IconButton
-                          onClick={() => {
-                            setItemToDelete(item);
-                            setOpenDeleteDialog(true);
-                          }}
-                        >
-                          <DeleteOutlineIcon sx={{ color: "red" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {enableMedicalHistory && onMedicalHistory && (
-                      <Tooltip title="Historial Médico" placement="bottom">
-                        <IconButton onClick={() => handleMedicalHistory(item)}>
-                          <FolderCopyOutlinedIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {(!enableEdit || !onEdit) &&
-                      (!enableDelete || !onDelete) &&
-                      (!enableMedicalHistory || !onMedicalHistory) && (
-                        <Typography variant="body2" color="textSecondary">
-                          -
-                        </Typography>
+                  {item.status === "Cancelled" ? (
+                    <Typography variant="body2" color="textSecondary" sx={{ fontStyle: 'italic' }}>
+                      -
+                    </Typography>
+                  ) : (
+                    <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                      {enableEdit && onEdit && (
+                        <Tooltip title="Editar" placement="bottom">
+                          <IconButton onClick={() => handleEdit(item)}>
+                            <FaRegEdit />
+                          </IconButton>
+                        </Tooltip>
                       )}
-                  </Box>
+                      {enableReschedule && onReschedule && (
+                        <Tooltip
+                          title={isPastDate(selectedDate) ? "No puedes Reprogramar la Sesión pasada" : "Reprogramar sesión"}
+                          placement="bottom"
+                        >
+                          <span>
+                            <IconButton
+                              onClick={() => handleReschedule(item)}
+                              disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
+                              sx={{
+                                opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.5 : 1,
+                                color: '#454545',
+                                '&:hover': {
+                                  color: item.status === "Confirmed" || isPastDate(selectedDate) ? '#9F9F9F' : '#1B74B4',
+                                },
+                              }}
+                            >
+                              <TbCalendarTime />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                      {enableCancel && onCancel && (
+                        <Tooltip
+                          title={isPastDate(selectedDate) ? "No puedes Cancelar la Sesión pasada" : "Cancelar sesión"}
+                          placement="bottom"
+                        >
+                          <span>
+                            <IconButton
+                              onClick={() => onCancel(item)}
+                              disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
+                              sx={{
+                                opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.5 : 1,
+                                color: '#454545',
+                                '&:hover': {
+                                  color: item.status === "Confirmed" || isPastDate(selectedDate) ? '#9F9F9F' : 'red',
+                                },
+                              }}
+                            >
+                              <TbCalendarX />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                      {enableDelete && onDelete && (
+                        <Tooltip title="Eliminar" placement="bottom">
+                          <IconButton
+                            onClick={() => {
+                              setItemToDelete(item);
+                              setOpenDeleteDialog(true);
+                            }}
+                          >
+                            <DeleteOutlineIcon sx={{ color: "red" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {enableMedicalHistory && onMedicalHistory && (
+                        <Tooltip title="Historial Médico" placement="bottom">
+                          <IconButton onClick={() => handleMedicalHistory(item)}>
+                            <FolderCopyOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {(!enableEdit || !onEdit) &&
+                        (!enableDelete || !onDelete) &&
+                        (!enableReschedule || !onReschedule) &&
+                        (!enableMedicalHistory || !onMedicalHistory) && (
+                          <Typography variant="body2" color="textSecondary">
+                            -
+                          </Typography>
+                        )}
+                    </Box>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
