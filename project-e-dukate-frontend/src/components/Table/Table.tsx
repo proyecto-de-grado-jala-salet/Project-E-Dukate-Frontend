@@ -59,8 +59,8 @@ export const Table = <T extends GenericItem>({
   enableReschedule = true,
   enableMedicalHistory = true,
   emptyMessage,
-  selectedDate,
   keyExtractor = (item) => item.id,
+  selectedDate,
 }: TableProps<T>) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<T | null>(null);
@@ -156,78 +156,86 @@ export const Table = <T extends GenericItem>({
                       -
                     </Typography>
                   ) : (
-                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
-                    {enableEdit && onEdit && (
-                      <Tooltip title="Editar" placement="bottom">
-                        <IconButton onClick={() => handleEdit(item)}>
-                          <FaRegEdit />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {enableReschedule && onReschedule && (
-                      <Tooltip
-                        title={isPastDate(selectedDate) ? "No puedes Reprogramar la Sesión pasada" : "Reprogramar sesión"}
-                        placement="bottom"
-                      >
-                        <span>
-                          <IconButton
-                            onClick={() => handleReschedule(item)}
-                            disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
-                            sx={{
-                              opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.5 : 1,
-                            }}
-                          >
-                            <TbCalendarTime />
+                    <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                      {enableEdit && onEdit && (
+                        <Tooltip title="Editar" placement="bottom">
+                          <IconButton onClick={() => handleEdit(item)}>
+                            <FaRegEdit />
                           </IconButton>
-                        </span>
-                      </Tooltip>
-                    )}
-                    {enableCancel && onCancel && (
-                      <Tooltip
-                        title={isPastDate(selectedDate) ? "No puedes Cancelar la Sesión pasada" : "Cancelar sesión"}
-                        placement="bottom"
-                      >
-                        <span>
-                          <IconButton
-                            onClick={() => onCancel(item)}
-                            disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
-                            sx={{
-                              opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.3 : 1,
-                            }}
-                          >
-                            <TbCalendarX style={{ color: "red" }} />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    )}
-                    {enableDelete && onDelete && (
-                      <Tooltip title="Eliminar" placement="bottom">
-                        <IconButton
-                          onClick={() => {
-                            setItemToDelete(item);
-                            setOpenDeleteDialog(true);
-                          }}
-                        >
-                          <DeleteOutlineIcon sx={{ color: "red" }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {enableMedicalHistory && onMedicalHistory && (
-                      <Tooltip title="Historial Médico" placement="bottom">
-                        <IconButton onClick={() => handleMedicalHistory(item)}>
-                          <FolderCopyOutlinedIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    {(!enableEdit || !onEdit) &&
-                      (!enableDelete || !onDelete) &&
-                      (!enableReschedule || !onReschedule) &&
-                      (!enableMedicalHistory || !onMedicalHistory) && (
-                        <Typography variant="body2" color="textSecondary">
-                          -
-                        </Typography>
+                        </Tooltip>
                       )}
-                  </Box>
+                      {enableReschedule && onReschedule && (
+                        <Tooltip
+                          title={isPastDate(selectedDate) ? "No puedes Reprogramar la Sesión pasada" : "Reprogramar sesión"}
+                          placement="bottom"
+                        >
+                          <span>
+                            <IconButton
+                              onClick={() => handleReschedule(item)}
+                              disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
+                              sx={{
+                                opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.5 : 1,
+                                color: '#454545',
+                                '&:hover': {
+                                  color: item.status === "Confirmed" || isPastDate(selectedDate) ? '#9F9F9F' : '#1B74B4',
+                                },
+                              }}
+                            >
+                              <TbCalendarTime />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                      {enableCancel && onCancel && (
+                        <Tooltip
+                          title={isPastDate(selectedDate) ? "No puedes Cancelar la Sesión pasada" : "Cancelar sesión"}
+                          placement="bottom"
+                        >
+                          <span>
+                            <IconButton
+                              onClick={() => onCancel(item)}
+                              disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
+                              sx={{
+                                opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.5 : 1,
+                                color: '#454545',
+                                '&:hover': {
+                                  color: item.status === "Confirmed" || isPastDate(selectedDate) ? '#9F9F9F' : 'red',
+                                },
+                              }}
+                            >
+                              <TbCalendarX />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                      {enableDelete && onDelete && (
+                        <Tooltip title="Eliminar" placement="bottom">
+                          <IconButton
+                            onClick={() => {
+                              setItemToDelete(item);
+                              setOpenDeleteDialog(true);
+                            }}
+                          >
+                            <DeleteOutlineIcon sx={{ color: "red" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {enableMedicalHistory && onMedicalHistory && (
+                        <Tooltip title="Historial Médico" placement="bottom">
+                          <IconButton onClick={() => handleMedicalHistory(item)}>
+                            <FolderCopyOutlinedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {(!enableEdit || !onEdit) &&
+                        (!enableDelete || !onDelete) &&
+                        (!enableReschedule || !onReschedule) &&
+                        (!enableMedicalHistory || !onMedicalHistory) && (
+                          <Typography variant="body2" color="textSecondary">
+                            -
+                          </Typography>
+                        )}
+                    </Box>
                   )}
                 </TableCell>
               </TableRow>
