@@ -34,6 +34,7 @@ interface AppointmentTableProps {
   enableEdit: boolean;
   enableReschedule: boolean;
   onRefresh: () => void;
+  selectedDate?: Date | null;
 }
 
 export const AppointmentTable: React.FC<AppointmentTableProps> = ({ 
@@ -43,7 +44,8 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
   onPageChange, 
   enableEdit,
   enableReschedule,
-  onRefresh
+  onRefresh,
+  selectedDate
 }) => {
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [openRescheduleDialog, setOpenRescheduleDialog] = useState(false);
@@ -207,6 +209,7 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         enableCancel={true}
         onCancel={handleCancelSession}
         keyExtractor={(item) => item.sessionId || item.id}
+        selectedDate={selectedDate}
       />
       
       <ConfirmationDialog

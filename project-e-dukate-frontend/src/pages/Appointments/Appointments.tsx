@@ -132,6 +132,7 @@ const Appointments: React.FC = () => {
           enableEdit={isAdmin}
           enableReschedule={isAdmin}
           onRefresh={refreshAppointments}
+          selectedDate={filters.date}
         />
       )}
       <AddAppointmentDialog
