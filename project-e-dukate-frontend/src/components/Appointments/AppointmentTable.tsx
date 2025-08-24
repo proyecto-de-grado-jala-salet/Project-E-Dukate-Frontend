@@ -2,13 +2,14 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Table } from '../Table';
 import { Appointment } from '../../types/appointment';
 import { ColumnConfig } from '../../types/table';
 import { Box, Typography } from '@mui/material';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { RescheduleSessionDialog } from './RescheduleSessionDialog';
-import { cancelSession } from '@/services/appointmentService';
+import { cancelSession, confirmSession } from '@/services/appointmentService';
 import { dayTranslation } from "@/utils/scheduleUtils";
 import { showNotification } from "@/services/notificationService";
 
@@ -37,17 +38,20 @@ interface AppointmentTableProps {
   selectedDate?: Date | null;
 }
 
-export const AppointmentTable: React.FC<AppointmentTableProps> = ({ 
-  appointments, 
-  totalPages, 
-  currentPage, 
-  onPageChange, 
+export const AppointmentTable: React.FC<AppointmentTableProps> = ({
+  appointments,
+  totalPages,
+  currentPage,
+  onPageChange,
   enableEdit,
   enableReschedule,
   onRefresh,
   selectedDate
 }) => {
+  const router = useRouter();
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [openPaymentErrorDialog, setOpenPaymentErrorDialog] = useState(false);
   const [openRescheduleDialog, setOpenRescheduleDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -74,12 +78,93 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         status: session.sessionStatus || session.status
       }]
     };
-    
+
     setSelectedAppointment(appointmentForState);
     setSelectedSession(session);
     setOpenCancelDialog(true);
   };
-  
+
+  const handleConfirmSession = (session: any) => {
+    const appointmentForState: Appointment = {
+      id: session.id,
+      startTime: session.startTime,
+      endTime: session.endTime,
+      patientId: session.patientId,
+      patientName: session.patientName,
+      specialistId: session.specialistId,
+      specialistName: session.specialistName,
+      specialtyId: session.specialtyId,
+      specialtyName: session.specialtyName,
+      sessionCount: 1,
+      status: session.status,
+      scheduledSessions: [{
+        id: session.sessionId || session.id,
+        timeSlotId: session.timeSlotId,
+        dayOfWeek: session.dayOfWeek,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        status: session.sessionStatus || session.status
+      }]
+    };
+
+    setSelectedAppointment(appointmentForState);
+    setSelectedSession(session);
+    setOpenConfirmDialog(true);
+  };
+
+  const confirmCancelSession = async () => {
+    if (!selectedAppointment || !selectedSession) return;
+
+    try {
+      await cancelSession(
+        selectedAppointment.id,
+        selectedSession.sessionId || selectedSession.id
+      );
+      onRefresh();
+      setOpenCancelDialog(false);
+    } catch (error) {
+      console.error("Error cancelando sesión:", error);
+      showNotification("Error al cancelar la sesión", "error");
+    }
+  };
+
+  const confirmSessionAction = async () => {
+    if (!selectedAppointment || !selectedSession) return;
+
+    try {
+      await confirmSession(
+        selectedAppointment.id,
+        selectedSession.sessionId || selectedSession.id
+      );
+      onRefresh();
+      setOpenConfirmDialog(false);
+    } catch (error: any) {
+      const errorMessage = error.message || "Error al confirmar la sesión";
+      if (errorMessage.includes("El monto pagado debe ser al menos la mitad del monto total")) {
+        setOpenConfirmDialog(false);
+        setOpenPaymentErrorDialog(true);
+      } else {
+        setOpenConfirmDialog(false);
+        showNotification(errorMessage, "error");
+      }
+    }
+  };
+
+  const handlePaymentErrorCancel = () => {
+    setOpenPaymentErrorDialog(false);
+  };
+
+  const handleGoToPayments = () => {
+    console.log("Redirecting to /dashboard/pagos");
+    setOpenPaymentErrorDialog(false);
+    try {
+      router.push('/dashboard/pagos');
+    } catch (err) {
+      console.error("Router push failed:", err);
+      window.location.href = '/dashboard/pagos';
+    }
+  };
+
   const handleRescheduleSession = (session: any) => {
     const appointmentForState: Appointment = {
       id: session.id,
@@ -102,26 +187,10 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         status: session.sessionStatus || session.status
       }]
     };
-    
+
     setSelectedAppointment(appointmentForState);
     setSelectedSession(session);
     setOpenRescheduleDialog(true);
-  };
-  
-  const confirmCancelSession = async () => {
-    if (!selectedAppointment || !selectedSession) return;
-    
-    try {
-      await cancelSession(
-        selectedAppointment.id, 
-        selectedSession.sessionId || selectedSession.id
-      );
-      onRefresh();
-      setOpenCancelDialog(false);
-    } catch (error) {
-      console.error("Error cancelando sesión:", error);
-      showNotification("Error al cancelar la sesión", "error");
-    }
   };
 
   const handleRescheduleSuccess = () => {
@@ -144,13 +213,13 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
   });
 
   const columns: ColumnConfig<Appointment>[] = [
-    { 
-      header: "Hora de inicio", 
-      key: "startTime" 
+    {
+      header: "Hora de inicio",
+      key: "startTime"
     },
-    { 
-      header: "Hora de finalización", 
-      key: "endTime" 
+    {
+      header: "Hora de finalización",
+      key: "endTime"
     },
     { header: "Paciente", key: "patientName" },
     { header: "Médico", key: "specialistName" },
@@ -159,7 +228,7 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
       key: "status",
       render: (item) => {
         const statusText = statusMap[item.status as keyof typeof statusMap] || item.status;
-        
+
         return (
           <Box
             sx={{
@@ -208,10 +277,11 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         onReschedule={handleRescheduleSession}
         enableCancel={true}
         onCancel={handleCancelSession}
+        onConfirm={handleConfirmSession}
         keyExtractor={(item) => item.sessionId || item.id}
         selectedDate={selectedDate}
       />
-      
+
       <ConfirmationDialog
         open={openCancelDialog}
         onClose={() => setOpenCancelDialog(false)}
@@ -219,7 +289,25 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
         title="Cancelar Sesión"
         message={`¿Está seguro de cancelar la sesión programada para ${selectedSession?.startTime} del día ${selectedSession?.dayOfWeek ? dayTranslation[selectedSession.dayOfWeek] : ''}?`}
       />
-      
+
+      <ConfirmationDialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+        onConfirm={confirmSessionAction}
+        title="Confirmar Sesión"
+        message={`¿Está seguro de confirmar la sesión programada para ${selectedSession?.startTime} - ${selectedSession?.endTime} del día ${selectedSession?.dayOfWeek ? dayTranslation[selectedSession.dayOfWeek] : ''}?`}
+      />
+
+      <ConfirmationDialog
+        open={openPaymentErrorDialog}
+        onClose={handlePaymentErrorCancel}
+        onConfirm={handleGoToPayments}
+        title="Pago Insuficiente"
+        message="El monto pagado debe ser al menos la mitad del monto total para confirmar la sesión. ¿Desea ir a la pantalla de pagos?"
+        confirmLabel="Ir a Pagos"
+        cancelLabel="Cancelar"
+      />
+
       {selectedAppointment && selectedSession && (
         <RescheduleSessionDialog
           open={openRescheduleDialog}

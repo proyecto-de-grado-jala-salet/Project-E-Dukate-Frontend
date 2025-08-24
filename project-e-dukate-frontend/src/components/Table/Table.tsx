@@ -8,8 +8,7 @@ import { Pagination } from '../Pagination';
 import { GenericItem, ColumnConfig } from '../../types/table';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
 import { Tooltip } from '@mui/material';
-import { TbCalendarX } from "react-icons/tb";
-import { TbCalendarTime } from "react-icons/tb";
+import { TbCalendarX, TbCalendarTime, TbCalendarCheck } from "react-icons/tb";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
@@ -22,6 +21,7 @@ interface TableProps<T extends GenericItem> {
   onReschedule?: (item: T) => void;
   onMedicalHistory?: (item: T) => void;
   onCancel?: (item: T) => void;
+  onConfirm?: (item: T) => void;
   enableCancel?: boolean;
   totalPages: number;
   currentPage: number;
@@ -47,6 +47,7 @@ export const Table = <T extends GenericItem>({
   onReschedule,
   onMedicalHistory,
   onCancel,
+  onConfirm,
   enableCancel = true,
   totalPages,
   currentPage,
@@ -93,6 +94,12 @@ export const Table = <T extends GenericItem>({
   const handleMedicalHistory = (item: T) => {
     if (onMedicalHistory) {
       onMedicalHistory(item);
+    }
+  };
+
+  const handleConfirm = (item: T) => {
+    if (onConfirm) {
+      onConfirm(item);
     }
   };
 
@@ -220,6 +227,28 @@ export const Table = <T extends GenericItem>({
                           </IconButton>
                         </Tooltip>
                       )}
+                      {onConfirm && (
+                        <Tooltip
+                          title={isPastDate(selectedDate) ? "No puedes Confirmar la Sesión pasada" : "Confirmar sesión"}
+                          placement="bottom"
+                        >
+                          <span>
+                            <IconButton
+                              onClick={() => handleConfirm(item)}
+                              disabled={item.status === "Confirmed" || isPastDate(selectedDate)}
+                              sx={{
+                                opacity: item.status === "Confirmed" || isPastDate(selectedDate) ? 0.5 : 1,
+                                color: '#454545',
+                                '&:hover': {
+                                  color: item.status === "Confirmed" || isPastDate(selectedDate) ? '#9F9F9F' : '#178F0C',
+                                },
+                              }}
+                            >
+                              <TbCalendarCheck />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
                       {enableMedicalHistory && onMedicalHistory && (
                         <Tooltip title="Historial Médico" placement="bottom">
                           <IconButton onClick={() => handleMedicalHistory(item)}>
@@ -230,6 +259,7 @@ export const Table = <T extends GenericItem>({
                       {(!enableEdit || !onEdit) &&
                         (!enableDelete || !onDelete) &&
                         (!enableReschedule || !onReschedule) &&
+                        (!onConfirm) &&
                         (!enableMedicalHistory || !onMedicalHistory) && (
                           <Typography variant="body2" color="textSecondary">
                             -

@@ -158,3 +158,29 @@ export const rescheduleSession = async (
     throw new Error(errorMessage);
   }
 };
+
+export const confirmSession = async (appointmentId: string, sessionId: string): Promise<void> => {
+  try {
+    await apiRequest(
+      "appointments",
+      "POST",
+      null,
+      `${appointmentId}/sessions/${sessionId}/confirm`
+    );
+  } catch (error: any) {
+    const serverError = error.response?.data;
+    if (serverError) {
+      const errorMessage = Array.isArray(serverError.errors)
+        ? serverError.errors.join(", ")
+        : serverError.error || serverError.message || "Error desconocido al confirmar la sesión";
+      if (!errorMessage.includes("El monto pagado debe ser al menos la mitad del monto total")) {
+        showNotification(errorMessage, "error");
+      }
+      throw new Error(errorMessage);
+    } else {
+      const errorMessage = error.message || "Error al confirmar la sesión";
+      showNotification(errorMessage, "error");
+      throw new Error(errorMessage);
+    }
+  }
+};
