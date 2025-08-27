@@ -36,8 +36,9 @@ export default function DashboardLayout({
             "horarios",
             "metricas",
             "citas",
+            "politica-privacidad",
           ]
-        : ["pacientes", "pagos", "citas"];
+        : ["pacientes", "pagos", "citas", "politica-privacidad"];
 
     const defaultTab = userRole === "Administrator" ? "especialidades" : "pacientes";
 
@@ -52,8 +53,17 @@ export default function DashboardLayout({
     const mainTab = pathSegments[1];
     const validTabs =
       userRole === "Administrator"
-        ? ["especialidades", "usuarios", "pacientes", "pagos", "horarios", "metricas", "citas"]
-        : ["pacientes", "pagos", "citas"];
+        ? [
+            "especialidades",
+            "usuarios",
+            "pacientes",
+            "pagos",
+            "horarios",
+            "metricas",
+            "citas",
+            "politica-privacidad",
+          ]
+        : ["pacientes", "pagos", "citas", "politica-privacidad"];
     
     return validTabs.includes(mainTab) ? mainTab : (userRole === "Administrator" ? "especialidades" : "pacientes");
   };
