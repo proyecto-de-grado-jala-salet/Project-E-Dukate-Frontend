@@ -16,7 +16,7 @@ interface CustomTextFieldProps extends Omit<TextFieldProps, 'onChange'> {
   helperText?: string | null;
 }
 
-export const TextField: React.FC<CustomTextFieldProps> = ({
+const TextFieldComponent: React.FC<CustomTextFieldProps> = ({
   label,
   value,
   onChange,
@@ -36,7 +36,7 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
   const [showText, setShowText] = useState(false);
   const inputType = showToggle && type === "password" ? (showText ? "text" : "password") : type;
 
-  const renderLabel = () => {
+  const renderLabel = React.useMemo(() => {
     if (!label) return undefined;
     return (
       <span>
@@ -48,11 +48,11 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
         )}
       </span>
     );
-  };
+  }, [label, required]);
 
   return (
     <MuiTextField
-      label={renderLabel()}
+      label={renderLabel}
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
       error={error}
@@ -100,4 +100,7 @@ export const TextField: React.FC<CustomTextFieldProps> = ({
   );
 };
 
+TextFieldComponent.displayName = 'TextField';
+
+export const TextField = React.memo(TextFieldComponent);
 export default TextField;

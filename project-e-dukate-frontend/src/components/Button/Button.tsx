@@ -7,7 +7,7 @@ interface CustomButtonProps extends ButtonProps {
   endIcon?: React.ReactNode;
 }
 
-export const Button: React.FC<CustomButtonProps> = ({
+const ButtonComponent: React.FC<CustomButtonProps> = ({
   label,
   startIcon,
   endIcon,
@@ -32,4 +32,7 @@ export const Button: React.FC<CustomButtonProps> = ({
   </MuiButton>
 );
 
+ButtonComponent.displayName = 'Button';
+
+export const Button = React.memo(ButtonComponent);
 export default Button;

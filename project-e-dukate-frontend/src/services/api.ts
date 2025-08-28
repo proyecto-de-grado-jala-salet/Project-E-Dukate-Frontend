@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import Cookies from 'js-cookie';
+
 export const API_ENDPOINTS = {
   specialties: 'http://localhost:5275/api/Specialties',
   users: 'http://localhost:5275/api/Users',
@@ -24,15 +26,15 @@ export const API_ENDPOINTS = {
 };
 
 export const setAuthToken = (token: string) => {
-  sessionStorage.setItem('authToken', token);
+  Cookies.set('authToken', token, { expires: 1, secure: true, sameSite: 'strict' });
 };
 
-export const getAuthToken = (): string | null => {
-  return sessionStorage.getItem('authToken');
+export const getAuthToken = (): string | undefined => {
+  return Cookies.get('authToken');
 };
 
 export const clearAuthToken = () => {
-  sessionStorage.removeItem('authToken');
+  Cookies.remove('authToken');
 };
 
 export const apiRequest = async <T>(
@@ -57,6 +59,7 @@ export const apiRequest = async <T>(
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
   };
 
   const response = await fetch(url, options);

@@ -79,6 +79,7 @@ export const Login: React.FC = () => {
           alt="E-Dukate Logo"
           width={250}
           height={80}
+          loading="lazy"
         />
       </Box>
 
