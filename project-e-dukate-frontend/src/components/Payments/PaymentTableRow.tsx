@@ -1,9 +1,9 @@
 import React from "react";
-import { TableRow } from "@mui/material";
-import { TableCell } from "@mui/material";
-import { Box } from "@mui/material";
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import Box from '@mui/material/Box';
 import { EditableCurrencyField } from "./EditableCurrencyField";
-import { Payment } from "../../types/payments";
+import { Payment } from "@/types/payments";
 
 interface PaymentTableRowProps {
   payment: Payment;

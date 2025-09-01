@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Typography } from '@mui/material';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
-import { Button } from '../../components/Button';
-import { TextField } from '../../components/TextField';
-import { Table } from '../../components/Table';
-import { useApi } from '../../hooks/useApi';
+import { Button } from '@/components/Button';
+import { TextField } from '@/components/TextField';
+import { Table } from '@/components/Table';
+import { useApi } from '@/hooks/useApi';
 import { useRouter } from 'next/navigation';
-import { ColumnConfig } from '../../types/table';
-import { useEditStore } from '../../stores/editStore';
-import { useAuthStore } from '../../stores/authStore';
-import { useDebounce } from '../../hooks/useDebounce';
+import { ColumnConfig } from '@/types/table';
+import { useEditStore } from '@/stores/editStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface Patient {
   id: string;

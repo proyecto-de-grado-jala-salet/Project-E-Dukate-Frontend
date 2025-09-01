@@ -4,11 +4,11 @@ import { useState} from "react";
 import { useEffect } from "react";
 import { useApi } from "./useApi";
 import { useDebounce } from "./useDebounce";
-import { apiRequest } from "../services/api";
-import { showNotification } from "../services/notificationService";
-import { Payment } from "../types/payments";
-import { Specialist } from "../types/userTypes";
-import { Patient } from "../types/userTypes";
+import { apiRequest } from "@/services/api";
+import { showNotification } from "@/services/notificationService";
+import { Payment } from "@/types/payments";
+import { Specialist } from "@/types/userTypes";
+import { Patient } from "@/types/userTypes";
 
 export const usePayments = () => {
   const [specialistId, setSpecialistId] = useState("");

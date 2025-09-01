@@ -1,5 +1,8 @@
 import React from 'react';
-import { Modal as MuiModal, Box, Typography, SxProps } from '@mui/material';
+import MuiModal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { type SxProps } from '@mui/material/styles';
 import { Button } from '../Button';
 
 interface ModalProps {
@@ -13,7 +16,7 @@ interface ModalProps {
   sx?: SxProps;
 }
 
-export const Modal: React.FC<ModalProps> = ({
+export const Modal = React.memo<ModalProps>(({
   open,
   onClose,
   title,
@@ -46,6 +49,9 @@ export const Modal: React.FC<ModalProps> = ({
       </Box>
     </Box>
   </MuiModal>
-);
+));
+
+// Asignar el displayName después de memo
+Modal.displayName = 'Modal';
 
 export default Modal;

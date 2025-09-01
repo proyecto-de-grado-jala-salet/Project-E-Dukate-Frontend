@@ -3,9 +3,9 @@ import { FormSection } from './FormSection';
 import { InputGroup } from './InputGroup';
 import { Dropdown } from '../Dropdown';
 import { useSpecialties } from '../../hooks/useSpecialties';
-import { Box } from '@mui/material';
-import { CircularProgress } from '@mui/material';
-import { Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 
 interface SpecialistFormProps {
   formData: {

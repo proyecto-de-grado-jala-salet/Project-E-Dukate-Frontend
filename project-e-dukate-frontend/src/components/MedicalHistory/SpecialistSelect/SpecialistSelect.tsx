@@ -1,7 +1,11 @@
 import React from "react";
-import { Box, FormControl, Select, MenuItem, Typography } from "@mui/material";
-import { SelectChangeEvent, SxProps } from "@mui/material";
-import { Theme } from "@mui/material";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from "@mui/material/FormControl";
+import { type SelectChangeEvent } from '@mui/material/Select';
+import { type SxProps, type Theme } from '@mui/material/styles';
 import { Specialist } from "@/types/userTypes";
 import { GenericChip } from "@/components/GenericChip";
 import { MenuProps } from "@/utils/medicalHistoryConstants";

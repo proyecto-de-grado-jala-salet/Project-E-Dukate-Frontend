@@ -37,6 +37,8 @@ export const clearAuthToken = () => {
   Cookies.remove('authToken');
 };
 
+const requestCache = new Map();
+
 export const apiRequest = async <T>(
   endpoint: keyof typeof API_ENDPOINTS,
   method: string,
@@ -45,6 +47,10 @@ export const apiRequest = async <T>(
   query?: string
 ): Promise<T> => {
   const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ''}` : `${API_ENDPOINTS[endpoint]}${query || ''}`;
+  const cacheKey = `${method}:${url}`;
+  if (method === 'GET' && requestCache.has(cacheKey)) {
+    return requestCache.get(cacheKey);
+  }
   const token = getAuthToken();
 
   const headers: HeadersInit = {
@@ -59,7 +65,7 @@ export const apiRequest = async <T>(
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
-    cache: 'no-store',
+    cache: 'default',
   };
 
   const response = await fetch(url, options);
@@ -93,5 +99,19 @@ export const apiRequest = async <T>(
     return response.status === 204 ? ({} as T) : await response.json();
   } else {
     return (await response.text()) as unknown as T;
+  }
+};
+
+export const clearApiCache = (endpoint?: keyof typeof API_ENDPOINTS) => {
+  if (endpoint) {
+    // Eliminar todas las entradas de caché para este endpoint
+    for (const key of requestCache.keys()) {
+      if (key.includes(endpoint)) {
+        requestCache.delete(key);
+      }
+    }
+  } else {
+    // Limpiar todo el caché
+    requestCache.clear();
   }
 };

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import { IconButton } from '@mui/material';
-import { Menu } from '@mui/material';
-import { MenuItem } from '@mui/material';
-import { SxProps } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { type SxProps } from '@mui/material/styles';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { FaRegUserCircle } from "react-icons/fa";
 import { useRouter } from 'next/navigation';

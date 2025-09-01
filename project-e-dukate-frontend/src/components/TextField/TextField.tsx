@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { TextField as MuiTextField, InputAdornment, IconButton, SxProps, TextFieldProps, Typography } from '@mui/material';
+import React from 'react';
+import { useState } from 'react';
+import MuiTextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import { type SxProps } from '@mui/material/styles';
+import { type TextFieldProps } from '@mui/material/TextField';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 

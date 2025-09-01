@@ -1,12 +1,12 @@
 import { InputRange } from 'react-date-range';
-import { startOfWeek } from 'date-fns';
-import { endOfWeek } from 'date-fns';
-import { addDays } from 'date-fns';
-import { subDays } from 'date-fns';
-import { startOfDay } from 'date-fns';
-import { endOfDay } from 'date-fns';
-import { startOfMonth } from 'date-fns';
-import { endOfMonth } from 'date-fns';
+import startOfWeek from 'date-fns/startOfWeek';
+import endOfWeek from 'date-fns/endOfWeek';
+import addDays from 'date-fns/addDays';
+import subDays from 'date-fns/subDays';
+import startOfDay from 'date-fns/startOfDay';
+import endOfDay from 'date-fns/endOfDay';
+import startOfMonth from 'date-fns/startOfMonth';
+import endOfMonth from 'date-fns/endOfMonth';
 import { es } from 'date-fns/locale';
 
 export const staticRanges = [

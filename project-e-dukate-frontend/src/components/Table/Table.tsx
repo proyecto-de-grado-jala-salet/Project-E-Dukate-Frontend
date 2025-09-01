@@ -1,14 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { Box, Typography, Table as MuiTable, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, SxProps } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { SxProps } from '@mui/material/styles';
+import MuiTable from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import IconButton from '@mui/material/IconButton';
 import { FaRegEdit } from "react-icons/fa";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { Pagination } from '../Pagination';
-import { GenericItem, ColumnConfig } from '../../types/table';
+import { GenericItem, ColumnConfig } from '@/types/table';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
-import { Tooltip } from '@mui/material';
-import { TbCalendarX, TbCalendarTime, TbCalendarCheck } from "react-icons/tb";
+import Tooltip from '@mui/material/Tooltip';
+import { TbCalendarX } from 'react-icons/tb';
+import { TbCalendarTime } from 'react-icons/tb';
+import { TbCalendarCheck } from 'react-icons/tb';
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 

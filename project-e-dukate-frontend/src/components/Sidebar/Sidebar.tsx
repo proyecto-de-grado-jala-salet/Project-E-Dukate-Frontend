@@ -1,15 +1,16 @@
 import React, { useState, useRef } from 'react';
-import {
-  Box,
-  Popper,
-  Paper,
-  ClickAwayListener,
-  Grow,
-  MenuList,
-  MenuItem,
-} from '@mui/material';
-import { List, ListItemButton, ListItemIcon, Tooltip } from '@mui/material';
-import { SxProps } from '@mui/material';
+import Box from '@mui/material/Box';
+import Popper from '@mui/material/Popper';
+import Paper from '@mui/material/Paper';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Tooltip from '@mui/material/Tooltip';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+import Grow from '@mui/material/Grow';
+import MenuList from '@mui/material/MenuList';
+import MenuItem from '@mui/material/MenuItem';
+import { type SxProps } from '@mui/material/styles';
 import { FaStethoscope } from 'react-icons/fa';
 import { IoSettingsOutline, IoPeopleOutline } from 'react-icons/io5';
 import { MdOutlinePrivacyTip } from 'react-icons/md';
@@ -21,8 +22,8 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { LiaBusinessTimeSolid } from 'react-icons/lia';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../../stores/authStore';
-import { clearAuthToken } from '../../services/api';
+import { useAuthStore } from '@/stores/authStore';
+import { clearAuthToken } from '@/services/api';
 import Image from 'next/image';
 
 interface SubMenuItem {

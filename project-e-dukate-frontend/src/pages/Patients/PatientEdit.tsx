@@ -1,9 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Button } from '@mui/material';
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
 import { PersonalInfoForm } from '@/components/FormComponents/PersonalInfoForm';
 import { GeneralInfoForm } from '@/components/FormComponents/GeneralInfoForm';

@@ -1,12 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from "react";
-import { useEffect  } from "react";
-import { useCallback } from "react";
-import { API_ENDPOINTS } from "../services/api";
-import { apiRequest } from "../services/api";
-import { showNotification } from "../services/notificationService";
-import { GenericItem } from "../types/table";
+import { useState } from 'react';
+import { useCallback } from 'react';
+import { useEffect } from 'react';
+import { API_ENDPOINTS } from "@/services/api";
+import { apiRequest } from "@/services/api";
+import { showNotification } from "@/services/notificationService";
+import { GenericItem } from "@/types/table";
 
 interface PagedResponse<T> {
   items: T[];
@@ -29,7 +27,11 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
     async (page: number = 1, queryParams: string = "") => {
       setLoading(true);
       try {
-        const fullQuery = queryParams ? `?${queryParams}` : "";
+        const paginationParams = `PageNumber=${page}&PageSize=${pageSize}`;
+        const fullQuery = queryParams 
+          ? `?${paginationParams}&${queryParams}` 
+          : `?${paginationParams}`;
+          
         const result = await apiRequest<PagedResponse<T>>(
           endpoint,
           "GET",
@@ -37,13 +39,11 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
           undefined,
           fullQuery
         );
+        
         if (!result || !result.items) {
           throw new Error("No se encontraron resultados");
         }
-        const normalizedData = result.items.map(item => ({
-          ...item,
-          schedules: Array.isArray(item.schedules) ? item.schedules : [],
-        }));
+        
         setData(result.items);
         setTotalCount(result.totalCount);
         setTotalPages(result.totalPages);
@@ -67,71 +67,44 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
     fetchData();
   }, [fetchData]);
 
-  const addItem = async (item: Partial<T>) => {
+  const addItem = useCallback(async (item: Partial<T>) => {
     try {
       await apiRequest<T>(endpoint, "POST", item);
       await fetchData(currentPage);
     } catch (err: unknown) {
-      const response = await fetch(API_ENDPOINTS[endpoint], { 
-        method: "POST", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(item) 
-      }).catch(() => null);
-      let errorMessage = "Error al añadir el elemento";
-      if (response && !response.ok) {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorMessage;
-      }
+      const errorMessage = err instanceof Error ? err.message : "Error al añadir el elemento";
+      showNotification(errorMessage, "error");
       throw new Error(errorMessage);
     }
-  };
+  }, [endpoint, currentPage, fetchData]);
 
-  const updateItem = async (id: string, item: Partial<T>) => {
+  const updateItem = useCallback(async (id: string, item: Partial<T>) => {
     try {
       await apiRequest<T>(endpoint, "PUT", item, id);
       await fetchData(currentPage);
     } catch (err: unknown) {
-      const response = await fetch(`${API_ENDPOINTS[endpoint]}/${id}`, { 
-        method: "PUT", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(item) 
-      }).catch(() => null);
-      let errorMessage = "Error al actualizar el elemento";
-      if (response && !response.ok) {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorMessage;
-      }
+      const errorMessage = err instanceof Error ? err.message : "Error al actualizar el elemento";
+      showNotification(errorMessage, "error");
       throw new Error(errorMessage);
     }
-  };
+  }, [endpoint, currentPage, fetchData]);
 
-  const deleteItem = async (id: string, role?: string) => {
+  const deleteItem = useCallback(async (id: string, role?: string) => {
     try {
       const query = role ? `?role=${role}` : "";
       await apiRequest<T>(endpoint, "DELETE", undefined, id, query);
-      const queryParams = new URLSearchParams({
-        "PageNumber": currentPage.toString(),
-        "PageSize": pageSize.toString(),
-      });
-      const result = await apiRequest<PagedResponse<T>>(endpoint, "GET", undefined, undefined, `?${queryParams}`);
-
-      setData(result.items);
-      setTotalCount(result.totalCount);
-      setTotalPages(result.totalPages);
-
-      if (result.items.length === 0 && currentPage > 1) {
-        const previousPage = currentPage - 1;
-        await fetchData(previousPage);
-        return { success: true, movedToPrevious: true, newPage: previousPage };
+      if (data.length === 1 && currentPage > 1) {
+        await fetchData(currentPage - 1);
+      } else {
+        await fetchData(currentPage);
       }
-
-      return { success: true, movedToPrevious: false };
+      return { success: true };
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Error al eliminar el elemento";
       showNotification(errorMessage, "error");
       throw err;
     }
-  };
+  }, [endpoint, currentPage, data.length, fetchData]);
 
   return {
     data,

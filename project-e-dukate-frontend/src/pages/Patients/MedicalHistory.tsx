@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Typography } from "@mui/material";
-import { Box } from "@mui/material";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { PatientInfo } from "@/components/MedicalHistory/PatientInfo";
 import { SpecialistStatusForm } from "@/components/MedicalHistory/SpecialistStatusForm";
 import { ConsultationsList } from "@/components/MedicalHistory/ConsultationsList";

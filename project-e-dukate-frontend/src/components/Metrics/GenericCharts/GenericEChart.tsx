@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import * as echarts from 'echarts';
 import { statusColors } from '@/utils/medicalHistoryConstants';
 import { formatStatusLabel } from '@/utils/medicalHistoryConstants';

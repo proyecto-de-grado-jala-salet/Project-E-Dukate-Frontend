@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import { useRouter } from 'next/navigation';
 import { Button } from '../Button';
 import { FaRegUserCircle } from 'react-icons/fa';

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useRef } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import { usePaymentMetrics } from '@/hooks/usePaymentMetrics';
 import {
   MetricCard,

@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import { PersonalInfoForm } from '../../components/FormComponents/PersonalInfoForm';
-import { GeneralInfoForm } from '../../components/FormComponents/GeneralInfoForm';
-import { Button } from '../../components/Button';
-import { useApi } from '../../hooks/useApi';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { PersonalInfoForm } from '@/components/FormComponents/PersonalInfoForm';
+import { GeneralInfoForm } from '@/components/FormComponents/GeneralInfoForm';
+import { Button } from '@/components/Button';
+import { useApi } from '@/hooks/useApi';
 import { useRouter } from 'next/navigation';
-import { validatePatient } from '../../utils/validators';
-import { showNotification } from '../../services/notificationService';
+import { validatePatient } from '@/utils/validators';
+import { showNotification } from '@/services/notificationService';
 import dayjs from 'dayjs';
 
 interface PatientFormData {

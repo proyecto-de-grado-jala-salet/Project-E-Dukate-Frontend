@@ -1,5 +1,6 @@
 import React from "react";
-import { Chip, SxProps, Theme } from "@mui/material";
+import Chip from '@mui/material/Chip';
+import { type SxProps, type Theme } from '@mui/material/styles';
 
 interface GenericChipProps {
   label: string;

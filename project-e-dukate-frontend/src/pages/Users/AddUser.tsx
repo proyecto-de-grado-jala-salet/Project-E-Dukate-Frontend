@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Typography } from '@mui/material';
-import { Box } from '@mui/material';
-import { Button } from '../../components/Button';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { Button } from '@/components/Button';
 import { useRouter } from 'next/navigation';
-import { addSpecialist } from '../../services/userService';
-import { addAdministrator } from '../../services/userService';
-import { RoleSelector } from '../../components/FormComponents';
-import { PersonalInfoForm } from '../../components/FormComponents';
-import { GeneralInfoForm } from '../../components/FormComponents';
-import { AdministratorForm } from '../../components/FormComponents';
-import { SpecialistForm } from '../../components/FormComponents';
-import { validateAdministrator } from '../../utils/validators';
-import { validateSpecialist } from '../../utils/validators';
-import { SpecialistDto } from '../../types/user';
-import { AdministratorDto } from '../../types/user';
+import { addSpecialist } from '@/services/userService';
+import { addAdministrator } from '@/services/userService';
+import { RoleSelector } from '@/components/FormComponents';
+import { PersonalInfoForm } from '@/components/FormComponents';
+import { GeneralInfoForm } from '@/components/FormComponents';
+import { AdministratorForm } from '@/components/FormComponents';
+import { SpecialistForm } from '@/components/FormComponents';
+import { validateAdministrator } from '@/utils/validators';
+import { validateSpecialist } from '@/utils/validators';
+import { SpecialistDto } from '@/types/user';
+import { AdministratorDto } from '@/types/user';
 
 interface AddUserProps {
   initialRole?: string | null;

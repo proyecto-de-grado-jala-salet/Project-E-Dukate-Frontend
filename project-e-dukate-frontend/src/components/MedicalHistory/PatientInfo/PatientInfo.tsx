@@ -1,8 +1,8 @@
 import React from 'react';
-import { Box } from '@mui/material';
-import { Typography } from '@mui/material';
-import { Paper } from '@mui/material';
-import { Divider } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
 import dayjs from 'dayjs';
 import { Patient } from '@/types/userTypes';
 import { mapGenderToRadioValue } from '@/utils/formUtils';

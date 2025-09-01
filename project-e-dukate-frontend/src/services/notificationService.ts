@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { ToastOptions } from "../types/toast";
+import { ToastOptions } from "@/types/toast";
 
 const defaultOptions: ToastOptions = {
   autoClose: 3000,

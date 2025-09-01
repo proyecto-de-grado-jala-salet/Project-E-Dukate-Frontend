@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import { GenericFilterContainer } from '@/components/GenericFilters';
 import { DemographicMetricsCharts } from '@/components/Metrics/DemographicMetrics';
 import { fetchDemographicMetrics } from '@/services/demographicMetricsService';

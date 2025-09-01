@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Typography } from '@mui/material';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { Table } from '@/components/Table';
 import { useApi } from '@/hooks/useApi';
 import { ColumnConfig } from '@/types/table';
@@ -10,12 +10,12 @@ import { Specialist } from '@/types/userTypes';
 import { Schedule } from '@/types/userTypes';
 import { useRouter } from 'next/navigation';
 import { useEditStore } from '@/stores/editStore';
-import { TextField } from '../../components/TextField';
+import { TextField } from '@/components/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import { dayTranslation } from '@/utils/scheduleUtils';
 import { formatTimeSlot } from '@/utils/scheduleUtils';
 import slugify from 'slugify';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string => {
   const dayInEnglish = Object.keys(dayTranslation).find(

@@ -1,6 +1,6 @@
 import React from "react";
-import { Box } from "@mui/material";
-import { IconButton } from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DeleteIcon from "@mui/icons-material/Delete";

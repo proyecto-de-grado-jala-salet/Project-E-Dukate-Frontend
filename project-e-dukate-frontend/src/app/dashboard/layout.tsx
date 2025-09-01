@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Box } from "@mui/material";
+import React from 'react';
+import { useEffect } from 'react';
+import Box from "@mui/material/Box";
 import { Sidebar } from "../../components/Sidebar";
 import { Header } from "../../components/Header";
 import { usePathname, useRouter } from "next/navigation";

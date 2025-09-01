@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from 'react';
-import { Typography } from '@mui/material';
-import { Box } from '@mui/material';
-import { CircularProgress } from '@mui/material';
-import { TextField } from '../../components/TextField';
-import { Button } from '../../components/Button';
-import { apiRequest } from '../../services/api';
-import { setAuthToken } from '../../services/api';
-import { useAuthStore } from '../../stores/authStore';
+import React from 'react';
+import { useState } from 'react';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import { TextField } from '@/components/TextField';
+import { Button } from '@/components/Button';
+import { apiRequest } from '@/services/api';
+import { setAuthToken } from '@/services/api';
+import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -37,7 +38,7 @@ export const Login: React.FC = () => {
       const { token } = response;
       setAuthToken(token);
       setAuth(token);
-      router.push('/dashboard');
+      router.push('/dashboard/especialidades');
     } catch (err: any) {
       const errorData = err.response?.data || {};
       const errorMessage = typeof errorData === 'string' ? errorData : (errorData.Error || 'Error al iniciar sesión');

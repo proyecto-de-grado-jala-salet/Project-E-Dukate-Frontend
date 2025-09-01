@@ -2,22 +2,25 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Box, Typography, Button, Popover } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Popover from '@mui/material/Popover';
 import { HiOutlineFilter } from 'react-icons/hi';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import { FilterButton } from '../FilterButton';
 import { MultiSelectFilter } from '../MultiSelectFilter';
 import { Filter } from '@/types/filterOption';
 import { DateRangePicker } from 'react-date-range';
-import { startOfWeek } from 'date-fns';
-import { endOfWeek } from 'date-fns';
-import { format } from 'date-fns';
+import startOfWeek from 'date-fns/startOfWeek';
+import endOfWeek from 'date-fns/endOfWeek';
+import format from 'date-fns/format';
 import { es } from 'date-fns/locale';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
 import { staticRanges } from '@/utils/dateRangeConstants'
 import { inputRanges } from '@/utils/dateRangeConstants'
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
