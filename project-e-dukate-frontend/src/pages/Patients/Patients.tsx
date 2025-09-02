@@ -13,6 +13,7 @@ import { ColumnConfig } from '@/types/table';
 import { useEditStore } from '@/stores/editStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useDebounce } from '@/hooks/useDebounce';
+import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
 
 interface Patient {
   id: string;
@@ -27,6 +28,7 @@ interface Patient {
 export const Patients: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const { userRole } = useAuthStore();
@@ -73,11 +75,13 @@ export const Patients: React.FC = () => {
   };
 
   const handleAddPatient = () => {
+    setIsNavigating(true);
     router.push('/dashboard/pacientes/agregar');
   };
 
   const handleEdit = async (item: Patient) => {
     try {
+      setIsNavigating(true);
       setEditData(item.id, '', 'patient');
       const patientNameSlug = `${item.names}-${item.lastNamePaternal}`
         .toLowerCase()
@@ -93,6 +97,7 @@ export const Patients: React.FC = () => {
 
   const handleMedicalHistory = (item: Patient) => {
     try {
+      setIsNavigating(true);
       setEditData(item.id, '', 'patient');
       const patientNameSlug = `${item.names}-${item.lastNamePaternal}`
         .toLowerCase()
@@ -111,62 +116,65 @@ export const Patients: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
-          Pacientes
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            placeholder="Buscar paciente"
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
-            sx={{
-              bgcolor: "#ffffff",
-              borderRadius: "10px",
-              width: "300px",
-              "& .MuiInputBase-root": {
+    <>
+      {isNavigating && <ECGLoader message="Cargando..." />}
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
+            Pacientes
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              placeholder="Buscar paciente"
+              value={searchTerm}
+              onChange={handleSearchTermChange}
+              startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
+              sx={{
+                bgcolor: "#ffffff",
+                borderRadius: "10px",
+                width: "300px",
+                "& .MuiInputBase-root": {
+                  height: "45px",
+                  padding: "10px 14px",
+                },
+                "& .MuiInputBase-input": {
+                  padding: "0",
+                },
+              }}
+            />
+            {isAdmin && (
+              <Button
+                label="Añadir Paciente"
+                variant="contained"
+                sx={{
+                bgcolor: "#f5a623",
+                color: "black",
                 height: "45px",
                 padding: "10px 14px",
-              },
-              "& .MuiInputBase-input": {
-                padding: "0",
-              },
-            }}
-          />
-          {isAdmin && (
-            <Button
-              label="Añadir Paciente"
-              variant="contained"
-              sx={{
-              bgcolor: "#f5a623",
-              color: "black",
-              height: "45px",
-              padding: "10px 14px",
-            }}
-              onClick={handleAddPatient}
-            />
-          )}
+              }}
+                onClick={handleAddPatient}
+              />
+            )}
+          </Box>
         </Box>
+        <Table
+          items={patients ?? []}
+          columns={patientColumns}
+          error={patientsError}
+          onEdit={isAdmin ? handleEdit : undefined}
+          onDelete={isAdmin ? handleDelete : undefined}
+          onMedicalHistory={handleMedicalHistory}
+          totalPages={patientsTotalPages}
+          currentPage={patientsCurrentPage}
+          pageSize={patientsPageSize}
+          onPageChange={handlePageChange}
+          loading={patientsLoading}
+          enableEdit={isAdmin}
+          enableDelete={isAdmin}
+          enableMedicalHistory={true}
+        />
       </Box>
-      <Table
-        items={patients ?? []}
-        columns={patientColumns}
-        error={patientsError}
-        onEdit={isAdmin ? handleEdit : undefined}
-        onDelete={isAdmin ? handleDelete : undefined}
-        onMedicalHistory={handleMedicalHistory}
-        totalPages={patientsTotalPages}
-        currentPage={patientsCurrentPage}
-        pageSize={patientsPageSize}
-        onPageChange={handlePageChange}
-        loading={patientsLoading}
-        enableEdit={isAdmin}
-        enableDelete={isAdmin}
-        enableMedicalHistory={true}
-      />
-    </Box>
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -11,6 +12,7 @@ import { mapRadioValueToGender } from '@/utils/formUtils';
 import { mapGenderToRadioValue } from '@/utils/formUtils';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
+import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -66,6 +68,7 @@ interface UserEditProps<T extends BaseUser> {
 
 export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, setFormData, isSubmitting }: UserEditProps<T>) => {
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
 
   const handlePersonalInfoChange = (
     field: 'names' | 'lastNamePaternal' | 'lastNameMaternal' | 'mobileNumber' | 'gender' | 'birthDate'
@@ -130,81 +133,85 @@ export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, set
   };
 
   const handleCancel = () => {
+    setIsNavigating(true);
     router.back();
   };
 
   if (!formData) return null;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
-        Actualizar Datos del Usuario
-      </Typography>
+    <>
+      {isNavigating && <ECGLoader message="Volviendo atrás..." />}
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
+          Actualizar Datos del Usuario
+        </Typography>
 
-      <PersonalInfoForm
-        formData={{
-          names: formData.names,
-          lastNamePaternal: formData.lastNamePaternal,
-          lastNameMaternal: formData.lastNameMaternal || '',
-          gender: mapGenderToRadioValue(formData.gender),
-          birthDate: formData.dateOfBirth,
-          mobileNumber: formData.mobileNumber,
-        }}
-        handleInputChange={handlePersonalInfoChange}
-      />
-
-      <GeneralInfoForm
-        formData={{
-          idNumber: String(formData.identityCard),
-          phoneNumber: formData.phoneNumber || '',
-          address: formData.address,
-        }}
-        handleInputChange={handleGeneralInfoChange}
-      />
-
-      {role === 'Specialist' && (
-        <SpecialistForm
+        <PersonalInfoForm
           formData={{
-            code: (formData as unknown as Specialist).specialistCode,
-            position: (formData as unknown as Specialist).typeOfSpecialty,
-            yearsOfExperience: String((formData as unknown as Specialist).yearsOfExperience),
-            email: formData.email,
-            password: formData.password,
+            names: formData.names,
+            lastNamePaternal: formData.lastNamePaternal,
+            lastNameMaternal: formData.lastNameMaternal || '',
+            gender: mapGenderToRadioValue(formData.gender),
+            birthDate: formData.dateOfBirth,
+            mobileNumber: formData.mobileNumber,
           }}
-          handleInputChange={handleSpecialistChange}
+          handleInputChange={handlePersonalInfoChange}
         />
-      )}
 
-      {role === 'Administrator' && (
-        <AdministratorForm
+        <GeneralInfoForm
           formData={{
-            email: formData.email,
-            password: formData.password,
+            idNumber: String(formData.identityCard),
+            phoneNumber: formData.phoneNumber || '',
+            address: formData.address,
           }}
-          handleInputChange={handleAdministratorChange}
+          handleInputChange={handleGeneralInfoChange}
         />
-      )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-        <Button
-          variant="outlined"
-          onClick={handleCancel}
-          disabled={isSubmitting}
-          color="error"
-          sx={{ borderRadius: 3 }}
-        >
-          Cancelar
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          sx={{ bgcolor: '#f5a623', color: 'black', borderRadius: 3 }}
-        >
-          Actualizar
-        </Button>
+        {role === 'Specialist' && (
+          <SpecialistForm
+            formData={{
+              code: (formData as unknown as Specialist).specialistCode,
+              position: (formData as unknown as Specialist).typeOfSpecialty,
+              yearsOfExperience: String((formData as unknown as Specialist).yearsOfExperience),
+              email: formData.email,
+              password: formData.password,
+            }}
+            handleInputChange={handleSpecialistChange}
+          />
+        )}
+
+        {role === 'Administrator' && (
+          <AdministratorForm
+            formData={{
+              email: formData.email,
+              password: formData.password,
+            }}
+            handleInputChange={handleAdministratorChange}
+          />
+        )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            color="error"
+            sx={{ borderRadius: 3 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            sx={{ bgcolor: '#f5a623', color: 'black', borderRadius: 3 }}
+          >
+            Actualizar
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

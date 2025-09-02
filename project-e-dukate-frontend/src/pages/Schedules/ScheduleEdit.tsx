@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
-import React from "react";
+import React, { useState } from "react";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useSpecialist } from "@/hooks/useSpecialist";
 import { Dayjs } from "dayjs";
@@ -7,6 +8,8 @@ import { calculateNextTimeSlot } from "@/utils/scheduleUtils";
 import { showNotification } from "@/services/notificationService";
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
 
 const ScheduleForm = dynamic(() => 
   import('@/components/ScheduleForm/ScheduleForm').then(mod => mod.ScheduleForm), 
@@ -20,8 +23,10 @@ const ScheduleForm = dynamic(() =>
 );
 
 export const ScheduleEdit: React.FC = () => {
+  const router = useRouter();
   const { schedules, setSchedules, loading, handleSubmit } = useSchedules();
   const { specialistName } = useSpecialist();
+  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
 
   const handleAttendsChange = (dayIndex: number, checked: boolean) => {
     setSchedules((prev) =>
@@ -100,17 +105,35 @@ export const ScheduleEdit: React.FC = () => {
     );
   };
 
+  const handleBack = () => {
+    setIsNavigating(true);
+    router.push('/dashboard/horarios');
+  };
+
+  const handleSubmitWithNavigation = async () => {
+    try {
+      await handleSubmit();
+      setIsNavigating(true);
+      router.push('/dashboard/horarios');
+    } catch (error) {
+      // El error ya se maneja en handleSubmit
+    }
+  };
+
   return (
-    <ScheduleForm
-      specialistName={specialistName}
-      schedules={schedules}
-      loading={loading}
-      onAttendsChange={handleAttendsChange}
-      onTimeChange={handleTimeChange}
-      onAddTimeSlot={addTimeSlot}
-      onRemoveTimeSlot={removeTimeSlot}
-      onSubmit={handleSubmit}
-    />
+    <>
+      {isNavigating && <ECGLoader message="Volviendo a horarios..." />}
+      <ScheduleForm
+        specialistName={specialistName}
+        schedules={schedules}
+        loading={loading}
+        onAttendsChange={handleAttendsChange}
+        onTimeChange={handleTimeChange}
+        onAddTimeSlot={addTimeSlot}
+        onRemoveTimeSlot={removeTimeSlot}
+        onSubmit={handleSubmitWithNavigation}
+      />
+    </>
   );
 };
 

@@ -13,6 +13,7 @@ import { SpecialistDto } from '@/types/user';
 import { AdministratorDto } from '@/types/user';
 import dynamic from 'next/dynamic';
 import CircularProgress from '@mui/material/CircularProgress';
+import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
 
 const RoleSelector = dynamic(() => 
   import('@/components/FormComponents/RoleSelector').then(mod => mod.RoleSelector), 
@@ -95,6 +96,7 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [backendError, setBackendError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
 
   const handleInputChange = useCallback((field: keyof typeof formData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -170,7 +172,8 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
         await addSpecialist(specialistData);
       }
 
-      // Navegar inmediatamente mientras los datos se procesan en segundo plano
+      // Mostrar el loader durante la navegación
+      setIsNavigating(true);
       router.push('/dashboard/usuarios');
     } catch (err) {
       setBackendError(err instanceof Error ? err.message : 'Error al añadir usuario');
@@ -180,6 +183,7 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
   }, [role, formData, calculateAge, router]);
 
   const handleCancel = useCallback(() => {
+    setIsNavigating(true);
     router.push('/dashboard/usuarios');
   }, [router]);
 
@@ -195,42 +199,45 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
-        Añadir Usuario
-      </Typography>
-      <RoleSelector selectedRole={role} onRoleSelect={setRole} />
-
-      <PersonalInfoForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
-      <GeneralInfoForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
-      {role === 'Administrator' ? (
-        <AdministratorForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
-      ) : (
-        <SpecialistForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
-      )}
-
-      {backendError && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {backendError}
+    <>
+      {isNavigating && <ECGLoader message="Volviendo a usuarios..." />}
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
+          Añadir Usuario
         </Typography>
-      )}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-        <Button 
-          label="Cancelar" 
-          variant="outlined" 
-          onClick={handleCancel} 
-          color="error"
-          disabled={isSubmitting}
-        />
-        <Button
-          label={isSubmitting ? "Guardando..." : "Guardar"}
-          variant="contained"
-          sx={{ bgcolor: '#f5a623', color: 'black' }}
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        />
+        <RoleSelector selectedRole={role} onRoleSelect={setRole} />
+
+        <PersonalInfoForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
+        <GeneralInfoForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
+        {role === 'Administrator' ? (
+          <AdministratorForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
+        ) : (
+          <SpecialistForm formData={formData} handleInputChange={handleInputChange} errors={formErrors} />
+        )}
+
+        {backendError && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {backendError}
+          </Typography>
+        )}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button 
+            label="Cancelar" 
+            variant="outlined" 
+            onClick={handleCancel} 
+            color="error"
+            disabled={isSubmitting}
+          />
+          <Button
+            label={isSubmitting ? "Guardando..." : "Guardar"}
+            variant="contained"
+            sx={{ bgcolor: '#f5a623', color: 'black' }}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

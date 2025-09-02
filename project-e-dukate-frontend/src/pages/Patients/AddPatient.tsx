@@ -11,6 +11,7 @@ import { showNotification } from '@/services/notificationService';
 import dayjs from 'dayjs';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
+import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -61,6 +62,7 @@ export const AddPatient: React.FC = () => {
     address: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
 
   const handleInputChange = (field: keyof PatientFormData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -94,6 +96,7 @@ const handleSubmit = async () => {
   
     try {
       await addItem(patientDto);
+      setIsNavigating(true); // Mostrar loader durante navegación
       router.push('/dashboard/pacientes');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al añadir paciente';
@@ -102,45 +105,49 @@ const handleSubmit = async () => {
   };
 
   const handleCancel = () => {
+    setIsNavigating(true); // Mostrar loader durante navegación
     router.push('/dashboard/pacientes');
   };
 
   return (
-    <Box sx={{ p: 3, minHeight: '100vh' }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
-        Registro de Paciente
-      </Typography>
-      <PersonalInfoForm
-        formData={{
-          names: formData.names,
-          lastNamePaternal: formData.lastNamePaternal,
-          lastNameMaternal: formData.lastNameMaternal,
-          gender: formData.gender,
-          birthDate: formData.birthDate,
-          mobileNumber: formData.mobileNumber,
-        }}
-        handleInputChange={handleInputChange}
-        errors={errors}
-      />
-      <GeneralInfoForm
-        formData={{
-          idNumber: formData.idNumber,
-          phoneNumber: formData.phoneNumber,
-          address: formData.address,
-        }}
-        handleInputChange={handleInputChange}
-        errors={errors}
-      />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
-        <Button label="Cancelar" color='error' variant="outlined" onClick={handleCancel} />
-        <Button
-          label="Guardar"
-          variant="contained"
-          sx={{ bgcolor: '#f5a623', color: 'black' }}
-          onClick={handleSubmit}
+    <>
+      {isNavigating && <ECGLoader message="Volviendo a pacientes..." />}
+      <Box sx={{ p: 3, minHeight: '100vh' }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
+          Registro de Paciente
+        </Typography>
+        <PersonalInfoForm
+          formData={{
+            names: formData.names,
+            lastNamePaternal: formData.lastNamePaternal,
+            lastNameMaternal: formData.lastNameMaternal,
+            gender: formData.gender,
+            birthDate: formData.birthDate,
+            mobileNumber: formData.mobileNumber,
+          }}
+          handleInputChange={handleInputChange}
+          errors={errors}
         />
+        <GeneralInfoForm
+          formData={{
+            idNumber: formData.idNumber,
+            phoneNumber: formData.phoneNumber,
+            address: formData.address,
+          }}
+          handleInputChange={handleInputChange}
+          errors={errors}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+          <Button label="Cancelar" color='error' variant="outlined" onClick={handleCancel} />
+          <Button
+            label="Guardar"
+            variant="contained"
+            sx={{ bgcolor: '#f5a623', color: 'black' }}
+            onClick={handleSubmit}
+          />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

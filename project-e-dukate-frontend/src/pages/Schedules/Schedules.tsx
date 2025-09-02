@@ -16,6 +16,7 @@ import { dayTranslation } from '@/utils/scheduleUtils';
 import { formatTimeSlot } from '@/utils/scheduleUtils';
 import slugify from 'slugify';
 import { useDebounce } from '@/hooks/useDebounce';
+import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
 
 const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string => {
   const dayInEnglish = Object.keys(dayTranslation).find(
@@ -32,6 +33,7 @@ const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string 
 export const Schedules: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const { data, error, totalPages, currentPage, loading, fetchData } = useApi<Specialist>('specialists');
@@ -88,6 +90,7 @@ export const Schedules: React.FC = () => {
 
   const handleEdit = true
     ? (item: Specialist) => {
+        setIsNavigating(true);
         setEditData(item.id, 'Specialist', 'user');
         const specialistName = `${item.names} ${item.lastNamePaternal} ${item.lastNameMaternal || ''}`.toLowerCase();
         const slug = slugify(specialistName, { lower: true, strict: true });
@@ -96,46 +99,49 @@ export const Schedules: React.FC = () => {
     : undefined;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
-        Horarios
-      </Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <TextField
-          placeholder="Buscar especialista"
-          value={searchTerm}
-          onChange={handleSearchTermChange}
-          startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
-          sx={{
-              bgcolor: "#ffffff",
-              borderRadius: "10px",
-              width: "300px",
-              "& .MuiInputBase-root": {
-                height: "45px",
-                padding: "10px 14px",
-              },
-              "& .MuiInputBase-input": {
-                padding: "0",
-              },
-            }}
-        />
+    <>
+      {isNavigating && <ECGLoader message="Cargando horarios..." />}
+      <Box sx={{ p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black' }}>
+          Horarios
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            placeholder="Buscar especialista"
+            value={searchTerm}
+            onChange={handleSearchTermChange}
+            startAdornment={<SearchIcon sx={{ color: 'gray' }} />}
+            sx={{
+                bgcolor: "#ffffff",
+                borderRadius: "10px",
+                width: "300px",
+                "& .MuiInputBase-root": {
+                  height: "45px",
+                  padding: "10px 14px",
+                },
+                "& .MuiInputBase-input": {
+                  padding: "0",
+                },
+              }}
+          />
+          </Box>
         </Box>
+        <Table
+          items={loading ? [] : data}
+          columns={columns}
+          error={error}
+          onEdit={handleEdit}
+          totalPages={totalPages}
+          currentPage={currentPage}
+          pageSize={10}
+          onPageChange={handlePageChange}
+          loading={loading}
+          enableEdit={true}
+          enableDelete={false}
+        />
       </Box>
-      <Table
-        items={loading ? [] : data}
-        columns={columns}
-        error={error}
-        onEdit={handleEdit}
-        totalPages={totalPages}
-        currentPage={currentPage}
-        pageSize={10}
-        onPageChange={handlePageChange}
-        loading={loading}
-        enableEdit={true}
-        enableDelete={false}
-      />
-    </Box>
+    </>
   );
 };
 

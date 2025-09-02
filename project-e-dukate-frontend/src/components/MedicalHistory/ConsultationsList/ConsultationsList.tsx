@@ -29,6 +29,7 @@ import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 import { showNotification } from "@/services/notificationService";
 import { PDFViewer } from "@/components/PdfViewer/PdfViewer";
 import { IoRefreshOutline } from "react-icons/io5";
+import { BsFillFileEarmarkPdfFill } from "react-icons/bs";
 
 interface Consultation {
   id: string;
@@ -453,27 +454,31 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
               {documents.map((doc) => (
                 <ListItem
                   key={doc.id}
-                  sx={{ borderBottom: "1px solid #8B8989" }}
+                  sx={{ borderBottom: "1px solid #8B8989", display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 >
-                  <ListItemText
-                    primary={doc.fileName}
-                    secondary={new Date(doc.uploadDate).toLocaleDateString(
-                      "es-ES"
-                    )}
-                    sx={{ color: "black" }}
-                  />
-                  <Tooltip title="Vista Previa" placement="bottom">
-                    <IconButton onClick={() => handleViewDocument(doc.id)}>
-                      <FaRegEye />
-                    </IconButton>
-                  </Tooltip>
-                  {canDeleteDocument && (
-                    <Tooltip title="Eliminar" placement="bottom">
-                      <IconButton onClick={() => handleDeleteDocument(doc.id)}>
-                        <DeleteOutlineIcon sx={{ color: "red" }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <BsFillFileEarmarkPdfFill size={26} color="#FF0000" />
+                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "left" }}>
+                      <Typography sx={{ color: "black" }}>{doc.fileName}</Typography>
+                      <Typography variant="body2" sx={{ color: "black" }}>
+                        {new Date(doc.uploadDate).toLocaleDateString("es-ES")}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <Tooltip title="Vista Previa" placement="bottom">
+                      <IconButton onClick={() => handleViewDocument(doc.id)}>
+                        <FaRegEye />
                       </IconButton>
                     </Tooltip>
-                  )}
+                    {canDeleteDocument && (
+                      <Tooltip title="Eliminar" placement="bottom">
+                        <IconButton onClick={() => handleDeleteDocument(doc.id)}>
+                          <DeleteOutlineIcon sx={{ color: "red" }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
                 </ListItem>
               ))}
             </List>
