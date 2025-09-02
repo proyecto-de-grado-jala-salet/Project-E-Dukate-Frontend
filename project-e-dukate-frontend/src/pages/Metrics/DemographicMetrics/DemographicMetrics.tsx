@@ -5,13 +5,34 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import { GenericFilterContainer } from '@/components/GenericFilters';
-import { DemographicMetricsCharts } from '@/components/Metrics/DemographicMetrics';
 import { fetchDemographicMetrics } from '@/services/demographicMetricsService';
 import { FilterOption } from '@/types/filterOption';
 import { DemographicFilterDto, DemographicMetricsDto } from '@/types/metricas';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 import { PDFPreviewDialog } from '@/components/PDF';
+import dynamic from 'next/dynamic';
+
+const GenericFilterContainer = dynamic(() => 
+  import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const DemographicMetricsCharts = dynamic(() => 
+  import('@/components/Metrics/DemographicMetrics/DemographicMetricsCharts').then(mod => mod.DemographicMetricsCharts), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 export const DemographicMetrics: React.FC = () => {
   const [filter, setFilter] = useState<DemographicFilterDto>({});

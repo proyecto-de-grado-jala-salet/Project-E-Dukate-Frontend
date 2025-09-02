@@ -49,6 +49,7 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         setTotalPages(result.totalPages);
         setCurrentPage(result.pageNumber);
         setError(null);
+        return result; // ← Devuelve el resultado para uso inmediato
       } catch (err: unknown) {
         const errorMessage =
           err instanceof Error ? err.message : "Error al cargar los datos";
@@ -56,6 +57,7 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         if (!queryParams) {
           showNotification(errorMessage, "error");
         }
+        throw err; // ← Propaga el error
       } finally {
         setLoading(false);
       }
@@ -64,7 +66,11 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
   );
 
   useEffect(() => {
-    fetchData();
+    const initialFetch = async () => {
+      await fetchData(1, "");
+    };
+    
+    initialFetch();
   }, [fetchData]);
 
   const addItem = useCallback(async (item: Partial<T>) => {

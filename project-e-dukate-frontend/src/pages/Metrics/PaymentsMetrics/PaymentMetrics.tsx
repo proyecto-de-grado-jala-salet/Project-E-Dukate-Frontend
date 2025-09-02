@@ -5,15 +5,75 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { usePaymentMetrics } from '@/hooks/usePaymentMetrics';
-import {
-  MetricCard,
-  TotalIncomeChart,
-  StatusCountsChart,
-  PendingVsCompletedChart,
-} from '@/components/Metrics/PaymentMetrics';
-import { GenericFilterContainer } from '@/components/GenericFilters';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
-import { PDFPreviewDialog } from '@/components/PDF';
+import CircularProgress from '@mui/material/CircularProgress';
+import dynamic from 'next/dynamic';
+
+const GenericFilterContainer = dynamic(() => 
+  import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const MetricCard = dynamic(() => 
+  import('@/components/Metrics/PaymentMetrics/MetricCard').then(mod => mod.MetricCard), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const TotalIncomeChart = dynamic(() => 
+  import('@/components/Metrics/PaymentMetrics/TotalIncomeChart').then(mod => mod.TotalIncomeChart), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const StatusCountsChart = dynamic(() => 
+  import('@/components/Metrics/PaymentMetrics/StatusCountsChart').then(mod => mod.StatusCountsChart), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const PendingVsCompletedChart = dynamic(() => 
+  import('@/components/Metrics/PaymentMetrics/PendingVsCompletedChart').then(mod => mod.PendingVsCompletedChart), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const PDFPreviewDialog = dynamic(() => 
+  import('@/components/PDF/PDFPreviewDialog').then(mod => mod.PDFPreviewDialog), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 export const PaymentMetrics: React.FC = () => {
   const {
@@ -290,7 +350,7 @@ export const PaymentMetrics: React.FC = () => {
         previewImage={previewImage}
         onClose={handleClosePreview}
         onConfirm={handleConfirmDownload}
-        initialZoom={2.4}
+        initialZoom={1.8}
       />
     </>
   );

@@ -1,11 +1,23 @@
 "use client"
 import React from "react";
-import { ScheduleForm } from "@/components/ScheduleForm";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useSpecialist } from "@/hooks/useSpecialist";
 import { Dayjs } from "dayjs";
 import { calculateNextTimeSlot } from "@/utils/scheduleUtils";
 import { showNotification } from "@/services/notificationService";
+import CircularProgress from '@mui/material/CircularProgress';
+import dynamic from 'next/dynamic';
+
+const ScheduleForm = dynamic(() => 
+  import('@/components/ScheduleForm/ScheduleForm').then(mod => mod.ScheduleForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 export const ScheduleEdit: React.FC = () => {
   const { schedules, setSchedules, loading, handleSubmit } = useSchedules();

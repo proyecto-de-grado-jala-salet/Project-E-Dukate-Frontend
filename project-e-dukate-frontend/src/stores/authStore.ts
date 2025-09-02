@@ -1,8 +1,10 @@
+// project-e-dukate-frontend/src/stores/authStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { createJSONStorage } from 'zustand/middleware';
 import { PersistOptions } from 'zustand/middleware';
 import { jwtDecode } from 'jwt-decode';
+import { useEffect, useState } from 'react';
 
 interface DecodedToken {
   sub: string;
@@ -19,9 +21,21 @@ interface AuthState {
   userId: string | null;
   setAuth: (token: string) => void;
   clearAuth: () => void;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
 }
 
 type AuthPersist = PersistOptions<AuthState>;
+
+// Función segura para SSR
+const safeJwtDecode = (token: string) => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return jwtDecode<DecodedToken>(token);
+  } catch {
+    return null;
+  }
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -30,8 +44,12 @@ export const useAuthStore = create<AuthState>()(
       userRole: null,
       userName: null,
       userId: null,
+      _hasHydrated: false,
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
       setAuth: (token: string) => {
-        const decoded = jwtDecode<DecodedToken>(token);
+        const decoded = safeJwtDecode(token);
+        if (!decoded) return;
+        
         set({
           token,
           userRole: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'Unknown',
@@ -45,7 +63,39 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => {
+        if (typeof window === 'undefined') {
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          };
+        }
+        return sessionStorage;
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     } as AuthPersist
   )
 );
+
+// Hook para uso seguro en componentes
+export const useAuth = () => {
+  const store = useAuthStore();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return {
+    ...store,
+    // Solo devolver valores después de la hidratación
+    token: isClient ? store.token : null,
+    userRole: isClient ? store.userRole : null,
+    userName: isClient ? store.userName : null,
+    userId: isClient ? store.userId : null,
+    isHydrated: store._hasHydrated,
+  };
+};

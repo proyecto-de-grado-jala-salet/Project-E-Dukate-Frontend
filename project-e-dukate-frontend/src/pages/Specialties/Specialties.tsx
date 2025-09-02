@@ -3,6 +3,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
@@ -12,7 +13,6 @@ import { Modal } from '@/components/Modal';
 import { Table } from '@/components/Table';
 import { useApi } from '@/hooks/useApi';
 import { Specialty } from '@/types/table';
-import { ColumnConfig } from '@/types/table';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export const Specialties: React.FC = () => {
@@ -24,7 +24,7 @@ export const Specialties: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [editError, setEditError] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const [, setInitialLoad] = useState(true);
   const [mounted, setMounted] = useState(false);
   const {
     data: specialties,
@@ -39,11 +39,11 @@ export const Specialties: React.FC = () => {
     deleteItem: deleteSpecialty,
   } = useApi<Specialty>("specialties");
 
-  const specialtyColumns: ColumnConfig<Specialty>[] = [
+  const specialtyColumns = useMemo(() => [
     { header: '', key: 'spacerLeft', width: '5%' },
     { header: 'Especialidad', key: 'typeOfSpecialty', width: '5%' },
     { header: '', key: 'spacerRight', width: '65%' },
-  ];
+  ], []);
 
   useEffect(() => {
     setMounted(true);
@@ -51,11 +51,15 @@ export const Specialties: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (mounted && initialLoad) {
-      fetchSpecialties(1, "");
-      setInitialLoad(false);
-    }
-  }, [mounted, initialLoad, fetchSpecialties]);
+    const loadData = async () => {
+      if (mounted) {
+        await fetchSpecialties(1, "");
+        setInitialLoad(false);
+      }
+    };
+    
+    loadData();
+  }, [mounted, fetchSpecialties]);
 
   useEffect(() => {
     fetchSpecialties(1, debouncedSearchTerm);

@@ -1,5 +1,9 @@
-import { Users } from '../../../pages/Users';
+import UsersPage from '@/components/client/usersPage/UsersPage'
 
-export default function UsersPage() {
-  return <Users />;
+const Users = () => {
+  return (
+    <UsersPage/>
+  )
 }
+
+export default Users

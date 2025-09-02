@@ -5,13 +5,34 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import { GenericFilterContainer } from '@/components/GenericFilters';
-import { MedicalHistoryMetricsCharts } from '@/components/Metrics/MedicalHistoryMetrics';
 import { fetchMedicalHistoryMetrics } from '@/services/metricsService';
 import { MedicalHistoryFilterDto, MedicalHistoryMetricsDto } from '@/types/medicalHistory';
 import { statuses, formatStatusLabel } from '@/utils/medicalHistoryConstants';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 import { PDFPreviewDialog } from '@/components/PDF';
+import dynamic from 'next/dynamic';
+
+const GenericFilterContainer = dynamic(() => 
+  import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
+  {
+    loading: () => <>
+        <CircularProgress /> 
+        <br/>
+      </>,
+    ssr: false
+  }
+);
+
+const MedicalHistoryMetricsCharts = dynamic(() => 
+  import('@/components/Metrics/MedicalHistoryMetrics/MedicalHistoryMetricsCharts').then(mod => mod.MedicalHistoryMetricsCharts), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 export const MedicalHistoryMetrics: React.FC = () => {
   const [filter, setFilter] = useState<MedicalHistoryFilterDto>({});

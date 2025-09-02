@@ -5,12 +5,33 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { PaymentTable } from '@/components/Payments/PaymentTable';
-import { GenericFilterContainer } from '@/components/GenericFilters';
 import { Pagination } from '@/components/Pagination';
 import { usePayments } from '@/hooks/usePayments';
-
+import CircularProgress from '@mui/material/CircularProgress';
 dayjs.locale('es');
+import dynamic from 'next/dynamic';
+
+const PaymentTable = dynamic(() => 
+  import('@/components/Payments/PaymentTable').then(mod => mod.PaymentTable), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const GenericFilterContainer = dynamic(() => 
+  import('@/components/GenericFilters').then(mod => mod.GenericFilterContainer), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 const formatDate = (date: string | null): string => {
   if (!date) return '-';

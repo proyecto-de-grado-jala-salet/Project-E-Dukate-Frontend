@@ -51,7 +51,6 @@ export const Modal = React.memo<ModalProps>(({
   </MuiModal>
 ));
 
-// Asignar el displayName después de memo
 Modal.displayName = 'Modal';
 
 export default Modal;

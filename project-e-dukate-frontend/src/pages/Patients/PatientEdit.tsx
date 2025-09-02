@@ -5,11 +5,33 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
-import { PersonalInfoForm } from '@/components/FormComponents/PersonalInfoForm';
-import { GeneralInfoForm } from '@/components/FormComponents/GeneralInfoForm';
 import { Patient } from '@/types/userTypes';
 import { mapGenderToRadioValue } from '@/utils/formUtils';
 import { mapRadioValueToGender } from '@/utils/formUtils';
+import CircularProgress from '@mui/material/CircularProgress';
+import dynamic from 'next/dynamic';
+
+const PersonalInfoForm = dynamic(() => 
+  import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const GeneralInfoForm = dynamic(() => 
+  import('@/components/FormComponents/GeneralInfoForm').then(mod => mod.GeneralInfoForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 interface PatientEditProps {
   formData: Patient | null;

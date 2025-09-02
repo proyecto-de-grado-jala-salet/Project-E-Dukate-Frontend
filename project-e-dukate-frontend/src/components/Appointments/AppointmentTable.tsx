@@ -4,8 +4,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Table } from '../Table';
-import { Appointment } from '../../types/appointment';
-import { ColumnConfig } from '../../types/table';
+import { Appointment } from '@/types/appointment';
+import { ColumnConfig } from '@/types/table';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { ConfirmationDialog } from '../ConfirmationDialog';

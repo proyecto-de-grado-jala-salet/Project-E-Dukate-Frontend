@@ -3,10 +3,42 @@
 import React, { useState, useEffect } from "react";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { PatientInfo } from "@/components/MedicalHistory/PatientInfo";
-import { SpecialistStatusForm } from "@/components/MedicalHistory/SpecialistStatusForm";
-import { ConsultationsList } from "@/components/MedicalHistory/ConsultationsList";
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
+import CircularProgress from '@mui/material/CircularProgress';
+import dynamic from 'next/dynamic';
+
+const PatientInfo = dynamic(() => 
+  import('@/components/MedicalHistory/PatientInfo').then(mod => mod.PatientInfo), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const SpecialistStatusForm = dynamic(() => 
+  import('@/components/MedicalHistory/SpecialistStatusForm').then(mod => mod.SpecialistStatusForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const ConsultationsList = dynamic(() => 
+  import('@/components/MedicalHistory/ConsultationsList').then(mod => mod.ConsultationsList), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 export const MedicalHistory: React.FC = () => {
   const [newConsultationId, setNewConsultationId] = useState<string | null>(null);
@@ -118,3 +150,5 @@ export const MedicalHistory: React.FC = () => {
     </Box>
   );
 };
+
+export default MedicalHistory;

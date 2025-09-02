@@ -23,23 +23,34 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { setAuth } = useAuthStore();
   const router = useRouter();
 
   const handleLogin = async () => {
     setLoading(true);
     setError(null);
+    setIsRedirecting(true);
 
     try {
       const response = await apiRequest<LoginResponse>('login', 'POST', {
         email,
         password,
       });
+      
       const { token } = response;
       setAuthToken(token);
       setAuth(token);
+      
+      await Promise.all([
+        fetch('/api/some-critical-data').catch(() => {}),
+        new Promise(resolve => setTimeout(resolve, 100))
+      ]);
+      
       router.push('/dashboard/especialidades');
+      
     } catch (err: any) {
+      setIsRedirecting(false);
       const errorData = err.response?.data || {};
       const errorMessage = typeof errorData === 'string' ? errorData : (errorData.Error || 'Error al iniciar sesión');
       setError(errorMessage);
@@ -76,7 +87,7 @@ export const Login: React.FC = () => {
         }}
       >
         <Image
-          src="/E-Dukate_Logo_Auth.png"
+          src="/E-Dukate_Logo_Auth.webp"
           alt="E-Dukate Logo"
           width={250}
           height={80}
@@ -153,10 +164,10 @@ export const Login: React.FC = () => {
           </Typography>
         )}
         <Button
-          label={loading ? 'Iniciando...' : 'Iniciar sesión'}
+          label={loading ? 'Iniciando...' : (isRedirecting ? 'Cargando...' : 'Iniciar sesión')}
           variant="contained"
           onClick={handleLogin}
-          disabled={loading}
+          disabled={loading || isRedirecting}
           sx={{
             bgcolor: '#013c28',
             color: 'white',
@@ -164,8 +175,9 @@ export const Login: React.FC = () => {
             py: 1.5,
             borderRadius: '8px',
             '&:hover': { bgcolor: '#025c3f' },
+            '&:disabled': { bgcolor: '#cccccc' },
           }}
-          startIcon={loading ? <CircularProgress size={20} /> : undefined}
+          startIcon={(loading || isRedirecting) ? <CircularProgress size={20} /> : undefined}
         />
       </Box>
     </Box>

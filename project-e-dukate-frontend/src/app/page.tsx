@@ -1,4 +1,4 @@
-import HomeClient from '@/components/client/HomeClient'
+import HomeClient from '@/components/client/homeClient/HomeClient'
 
 const Page = () => {
   return (

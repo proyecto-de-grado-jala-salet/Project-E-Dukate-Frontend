@@ -176,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
       <Box>
         <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
           <Image
-            src="/E-Dukate_Logo.png"
+            src="/E-Dukate_Logo.webp"
             alt="E-Dukate Logo"
             width={70}
             height={60}

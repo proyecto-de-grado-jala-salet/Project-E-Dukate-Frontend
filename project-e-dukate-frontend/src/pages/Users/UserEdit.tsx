@@ -4,15 +4,57 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/navigation';
-import { PersonalInfoForm } from '@/components/FormComponents/PersonalInfoForm';
-import { GeneralInfoForm } from '@/components/FormComponents/GeneralInfoForm';
-import { AdministratorForm } from '@/components/FormComponents/AdministratorForm';
-import { SpecialistForm } from '@/components/FormComponents/SpecialistForm';
 import { BaseUser } from '@/types/userTypes';
 import { UserRole } from '@/types/userTypes';
 import { Specialist } from '@/types/userTypes';
 import { mapRadioValueToGender } from '@/utils/formUtils';
 import { mapGenderToRadioValue } from '@/utils/formUtils';
+import CircularProgress from '@mui/material/CircularProgress';
+import dynamic from 'next/dynamic';
+
+const PersonalInfoForm = dynamic(() => 
+  import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const GeneralInfoForm = dynamic(() => 
+  import('@/components/FormComponents/GeneralInfoForm').then(mod => mod.GeneralInfoForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const AdministratorForm = dynamic(() => 
+  import('@/components/FormComponents/AdministratorForm').then(mod => mod.AdministratorForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const SpecialistForm = dynamic(() => 
+  import('@/components/FormComponents/SpecialistForm').then(mod => mod.SpecialistForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 interface UserEditProps<T extends BaseUser> {
   formData: T | null;

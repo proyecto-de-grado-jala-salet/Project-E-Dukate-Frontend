@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import Box from "@mui/material/Box";
@@ -6,27 +5,37 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { GenericFilterContainer } from "@/components/GenericFilters/GenericFilterContainer";
 import { useAuthStore } from "@/stores/authStore";
 import { useAppointments } from "@/hooks/useAppointments";
 import SearchIcon from "@mui/icons-material/Search";
 import { showNotification } from "@/services/notificationService";
 import { Appointment } from "@/types/appointment";
 import dynamic from 'next/dynamic';
-import { ComponentType } from 'react';
 
-// Especifica explícitamente el tipo de retorno para las importaciones dinámicas
-const AppointmentTable = dynamic(
-  () => import('@/components/Appointments/AppointmentTable')
-    .then(mod => mod.AppointmentTable as ComponentType<any>),
-  { ssr: false }
+const GenericFilterContainer = dynamic(() => 
+  import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
+  {
+    loading: () => <CircularProgress />,
+    ssr: false
+  }
 );
 
-const AddAppointmentDialog = dynamic(
-  () => import('@/components/Appointments/AddAppointmentDialog')
-    .then(mod => mod.AddAppointmentDialog as ComponentType<any>),
-  { ssr: false }
+const AppointmentTable = dynamic(() => 
+  import('@/components/Appointments/AppointmentTable').then(mod => mod.AppointmentTable), 
+  {
+    loading: () => <CircularProgress />,
+    ssr: false
+  }
 );
+
+const AddAppointmentDialog = dynamic(() => 
+  import('@/components/Appointments/AddAppointmentDialog').then(mod => mod.AddAppointmentDialog), 
+  {
+    loading: () => <CircularProgress />,
+    ssr: false
+  }
+);
+
 
 const Appointments: React.FC = () => {
   const { userRole } = useAuthStore();

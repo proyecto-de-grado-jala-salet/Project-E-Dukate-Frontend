@@ -1,11 +1,9 @@
-import { Login } from '@/pages/Login';
-import Link from 'next/link';
+import LoginPage from '@/components/client/loginPage/LoginPage'
 
-export default function LoginPage() {
+const Login = () => {
   return (
-    <>
-      <Link href="/dashboard/especialidades" prefetch={true} style={{ display: 'none' }} />
-      <Login />
-    </>
-  );
+    <LoginPage/>
+  )
 }
+
+export default Login

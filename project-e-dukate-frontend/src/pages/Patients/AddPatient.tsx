@@ -3,14 +3,36 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { PersonalInfoForm } from '@/components/FormComponents/PersonalInfoForm';
-import { GeneralInfoForm } from '@/components/FormComponents/GeneralInfoForm';
 import { Button } from '@/components/Button';
 import { useApi } from '@/hooks/useApi';
 import { useRouter } from 'next/navigation';
 import { validatePatient } from '@/utils/validators';
 import { showNotification } from '@/services/notificationService';
 import dayjs from 'dayjs';
+import CircularProgress from '@mui/material/CircularProgress';
+import dynamic from 'next/dynamic';
+
+const PersonalInfoForm = dynamic(() => 
+  import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
+
+const GeneralInfoForm = dynamic(() => 
+  import('@/components/FormComponents/GeneralInfoForm').then(mod => mod.GeneralInfoForm), 
+  {
+    loading: () => <>
+      <CircularProgress /> 
+      <br/>
+    </>,
+    ssr: false
+  }
+);
 
 interface PatientFormData {
   names: string;
