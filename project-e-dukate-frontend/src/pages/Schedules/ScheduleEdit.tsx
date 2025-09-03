@@ -9,7 +9,7 @@ import { showNotification } from "@/services/notificationService";
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
+import ECGLoader from '@/components/Loader/ECGLoader';
 
 const ScheduleForm = dynamic(() => 
   import('@/components/ScheduleForm/ScheduleForm').then(mod => mod.ScheduleForm), 
@@ -26,7 +26,7 @@ export const ScheduleEdit: React.FC = () => {
   const router = useRouter();
   const { schedules, setSchedules, loading, handleSubmit } = useSchedules();
   const { specialistName } = useSpecialist();
-  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleAttendsChange = (dayIndex: number, checked: boolean) => {
     setSchedules((prev) =>
@@ -116,13 +116,12 @@ export const ScheduleEdit: React.FC = () => {
       setIsNavigating(true);
       router.push('/dashboard/horarios');
     } catch (error) {
-      // El error ya se maneja en handleSubmit
     }
   };
 
   return (
     <>
-      {isNavigating && <ECGLoader message="Volviendo a horarios..." />}
+      {isNavigating && <ECGLoader message="Volviendo a horarios" />}
       <ScheduleForm
         specialistName={specialistName}
         schedules={schedules}

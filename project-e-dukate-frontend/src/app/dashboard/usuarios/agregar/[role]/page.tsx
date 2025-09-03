@@ -1,4 +1,4 @@
-import { AddUser } from '../../../../../pages/Users/AddUser';
+import { AddUser } from '@/pages/Users/AddUser';
 
 interface RolePageParams {
   params: Promise<{ role: string }>;

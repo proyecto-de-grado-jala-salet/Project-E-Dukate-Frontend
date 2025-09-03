@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
@@ -8,8 +8,10 @@ import 'dayjs/locale/es';
 import { Pagination } from '@/components/Pagination';
 import { usePayments } from '@/hooks/usePayments';
 import CircularProgress from '@mui/material/CircularProgress';
-dayjs.locale('es');
 import dynamic from 'next/dynamic';
+import { useNavigation } from '@/contexts/NavigationContext';
+
+dayjs.locale('es');
 
 const PaymentTable = dynamic(() => 
   import('@/components/Payments/PaymentTable').then(mod => mod.PaymentTable), 
@@ -68,6 +70,14 @@ const Payments: React.FC = () => {
     handleResetFilter,
     editedValues,
   } = usePayments();
+
+  const { setIsNavigating } = useNavigation();
+  
+  useEffect(() => {
+    if (!loading) {
+      setIsNavigating(false);
+    }
+  }, [loading, setIsNavigating]);
 
   const filterConfig = [
     {

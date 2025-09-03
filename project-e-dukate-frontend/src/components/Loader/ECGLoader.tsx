@@ -1,8 +1,9 @@
-// components/ECGLoader.tsx
 "use client";
 
 import React from 'react';
 import Box from '@mui/material/Box';
+import { FaHeartPulse } from "react-icons/fa6";
+import { TbStethoscope } from "react-icons/tb";
 
 interface ECGLoaderProps {
   message?: string;
@@ -23,6 +24,8 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
         right: 0,
         bottom: 0,
         zIndex: 9999,
+        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+        padding: '20px',
       }}
     >
       <Box
@@ -31,7 +34,7 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
           maxWidth: 500,
           width: '100%',
           padding: 3,
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: '#ffffff',
           borderRadius: '15px',
           boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
           border: '2px solid #00593B',
@@ -46,8 +49,29 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
           }}
         >
           <Box
+            sx={{
+              position: 'absolute',
+              bottom: 40,
+              left: 0,
+              width: '100%',
+              height: '4px',
+              backgroundColor: '#000000',
+              borderRadius: '2px',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(90deg, transparent, #F4A601, transparent)',
+                animation: 'ecgMove 2s linear infinite',
+              },
+            }}
+          />
+          
+          <Box
             component="svg"
-            className="heartbeat"
             viewBox="0 0 400 80"
             xmlns="http://www.w3.org/2000/svg"
             preserveAspectRatio="none"
@@ -61,16 +85,6 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
               strokeDashoffset: 800,
               animation: 'draw 3s linear infinite, heartbeat 1.2s linear infinite',
               filter: 'drop-shadow(0 0 5px #F4A601)',
-              '@keyframes draw': {
-                '0%': { strokeDashoffset: 800 },
-                '50%': { strokeDashoffset: 0 },
-                '100%': { strokeDashoffset: -800 },
-              },
-              '@keyframes heartbeat': {
-                '0%, 50%, 100%': { transform: 'scale(1)' },
-                '25%': { transform: 'scale(1.05)' },
-                '75%': { transform: 'scale(0.95)' },
-              },
             }}
           >
             <path
@@ -91,10 +105,9 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
             margin: '20px 0',
           }}
         >
-          {[1, 2, 3].map((i) => (
+          {[0, 1, 2].map((i) => (
             <Box
               key={i}
-              className="dot"
               sx={{
                 width: 12,
                 height: 12,
@@ -102,16 +115,6 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
                 backgroundColor: '#00593B',
                 animation: 'pulse 1.5s infinite ease-in-out',
                 animationDelay: `${i * 0.2}s`,
-                '@keyframes pulse': {
-                  '0%, 100%': {
-                    transform: 'scale(1)',
-                    opacity: 0.7,
-                  },
-                  '50%': {
-                    transform: 'scale(1.5)',
-                    opacity: 1,
-                  },
-                },
               }}
             />
           ))}
@@ -119,7 +122,6 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
 
         <Box
           component="p"
-          className="loading-text"
           sx={{
             color: '#00593B',
             fontSize: '22px',
@@ -130,16 +132,168 @@ const ECGLoader: React.FC<ECGLoaderProps> = ({ message = "Cargando" }) => {
               content: '""',
               animation: 'dots 1.5s steps(5, end) infinite',
             },
-            '@keyframes dots': {
-              '0%, 20%': { content: '"."' },
-              '40%': { content: '".."' },
-              '60%, 100%': { content: '"..."' },
-            },
           }}
         >
           {message}
         </Box>
+        
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            marginTop: '25px',
+            opacity: 0.8,
+          }}
+        >
+          <Box
+            sx={{
+              color: '#00593B',
+              fontSize: '28px',
+              animation: 'float 3s ease-in-out infinite',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <FaHeartPulse />
+          </Box>
+          
+          <Box
+            sx={{
+              color: '#00593B',
+              fontSize: '28px',
+              animation: 'float 3s ease-in-out infinite',
+              animationDelay: '1s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            ⚕
+          </Box>
+          
+          <Box
+            sx={{
+              color: '#00593B',
+              fontSize: '28px',
+              animation: 'float 3s ease-in-out infinite',
+              animationDelay: '2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <TbStethoscope />
+          </Box>
+        </Box>
       </Box>
+
+      <style jsx global>{`
+        @keyframes ecgMove {
+          0% {
+            left: -100%;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+        
+        @keyframes draw {
+          0% {
+            stroke-dashoffset: 800;
+          }
+          50% {
+            stroke-dashoffset: 0;
+          }
+          100% {
+            stroke-dashoffset: -800;
+          }
+        }
+        
+        @keyframes heartbeat {
+          0%, 50%, 100% {
+            transform: scale(1);
+          }
+          25% {
+            transform: scale(1.05);
+          }
+          75% {
+            transform: scale(0.95);
+          }
+        }
+        
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.7;
+          }
+          50% {
+            transform: scale(1.5);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes dots {
+          0%, 20% { content: "."; }
+          40% { content: ".."; }
+          60%, 100% { content: "..."; }
+        }
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+          .loader-container {
+            padding: 20px;
+          }
+          
+          .ecg-loader {
+            height: 100px;
+            margin-bottom: 20px;
+          }
+          
+          .heartbeat {
+            height: 60px;
+          }
+          
+          .loading-text {
+            font-size: 18px;
+          }
+          
+          .symbol {
+            font-size: 24px;
+          }
+        }
+        
+        @media (max-width: 400px) {
+          .loader-container {
+            padding: 15px;
+          }
+          
+          .ecg-loader {
+            height: 80px;
+          }
+          
+          .heartbeat {
+            height: 50px;
+          }
+          
+          .loading-text {
+            font-size: 16px;
+          }
+          
+          .symbol {
+            font-size: 20px;
+          }
+        }
+      `}</style>
     </Box>
   );
 };

@@ -44,7 +44,7 @@ const ConsultationsList = dynamic(() =>
 export const MedicalHistory: React.FC = () => {
   const [newConsultationId, setNewConsultationId] = useState<string | null>(null);
   const [selectedSpecialistId, setSelectedSpecialistId] = useState<string>("");
-  const [isNavigating] = useState(false); // Estado para controlar la navegación
+  const [isNavigating] = useState(false);
   const {
     medicalHistory,
     patientData,
@@ -114,7 +114,7 @@ export const MedicalHistory: React.FC = () => {
 
   return (
     <>
-      {isNavigating && <ECGLoader message="Volviendo a pacientes..." />}
+      {isNavigating && <ECGLoader message="Volviendo a pacientes" />}
       <Box sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography

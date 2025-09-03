@@ -1,4 +1,3 @@
-// project-e-dukate-frontend/src/app/layout.tsx
 import type { Metadata } from 'next';
 import ClientWrapper from '@/components/client/layout/ClientWrapper';
 

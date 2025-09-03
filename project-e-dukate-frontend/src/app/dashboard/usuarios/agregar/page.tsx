@@ -1,9 +1,5 @@
-import AddUserPage from '@/components/client/usersPage/AddUserPage'
+import { AddUser } from '@/pages/Users/AddUser';
 
-const AddUser = () => {
-  return (
-    <AddUserPage/>
-  )
+export default function AddUserPage() {
+  return <AddUser />;
 }
-
-export default AddUser

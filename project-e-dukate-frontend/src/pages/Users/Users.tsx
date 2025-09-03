@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '@/types/table';
 import { useEditStore } from '@/stores/editStore';
 import { useDebounce } from '@/hooks/useDebounce';
-import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
+import { useNavigation } from '@/contexts/NavigationContext';
 
 interface User {
   id: string;
@@ -26,9 +26,9 @@ interface User {
 export const Users: React.FC = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
+  const { setIsNavigating } = useNavigation();
   const {
     data: users,
     error: usersError,
@@ -39,6 +39,12 @@ export const Users: React.FC = () => {
     fetchData: fetchUsers,
     deleteItem: deleteUser,
   } = useApi<User>("users");
+  
+  useEffect(() => {
+    if (!usersLoading) {
+      setIsNavigating(false);
+    }
+  }, [usersLoading, setIsNavigating]);
 
   const userColumns: ColumnConfig<User>[] = [
     { header: "Nombre(s)", key: "names", width: "20%" },
@@ -132,68 +138,65 @@ export const Users: React.FC = () => {
   };
 
   return (
-    <>
-      {isNavigating && <ECGLoader message="Cargando usuario..." />}
-      <Box sx={{ p: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
-          }}
-        >
-          <Typography variant="h4" sx={{ fontWeight: "bold", color: "black" }}>
-            Usuarios
-          </Typography>
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              placeholder="Buscar usuario"
-              value={searchTerm}
-              onChange={handleSearchTermChange}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: "gray" }} />,
-              }}
-              sx={{
-                bgcolor: "#ffffff",
-                borderRadius: "10px",
-                width: "300px",
-                "& .MuiInputBase-root": {
-                  height: "45px",
-                  padding: "10px 14px",
-                },
-                "& .MuiInputBase-input": {
-                  padding: "0",
-                },
-              }}
-            />
-            <Button
-              label="Añadir Usuario"
-              variant="contained"
-              sx={{
-                bgcolor: "#f5a623",
-                color: "black",
+    <Box sx={{ p: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: "bold", color: "black" }}>
+          Usuarios
+        </Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <TextField
+            placeholder="Buscar usuario"
+            value={searchTerm}
+            onChange={handleSearchTermChange}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ color: "gray" }} />,
+            }}
+            sx={{
+              bgcolor: "#ffffff",
+              borderRadius: "10px",
+              width: "300px",
+              "& .MuiInputBase-root": {
                 height: "45px",
                 padding: "10px 14px",
-              }}
-              onClick={handleAddUser}
-            />
-          </Box>
+              },
+              "& .MuiInputBase-input": {
+                padding: "0",
+              },
+            }}
+          />
+          <Button
+            label="Añadir Usuario"
+            variant="contained"
+            sx={{
+              bgcolor: "#f5a623",
+              color: "black",
+              height: "45px",
+              padding: "10px 14px",
+            }}
+            onClick={handleAddUser}
+          />
         </Box>
-        <Table
-          items={users ?? []}
-          columns={userColumns}
-          error={usersError}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          totalPages={usersTotalPages}
-          currentPage={usersCurrentPage}
-          pageSize={usersPageSize}
-          onPageChange={handlePageChange}
-          loading={usersLoading}
-        />
       </Box>
-    </>
+      <Table
+        items={users ?? []}
+        columns={userColumns}
+        error={usersError}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        totalPages={usersTotalPages}
+        currentPage={usersCurrentPage}
+        pageSize={usersPageSize}
+        onPageChange={handlePageChange}
+        loading={usersLoading}
+      />
+    </Box>
   );
 };
 

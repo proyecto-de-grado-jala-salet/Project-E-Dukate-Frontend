@@ -1,4 +1,3 @@
-// project-e-dukate-frontend/src/components/client/layout/ClientWrapper.tsx
 "use client";
 
 import { ThemeProvider } from '@mui/material/styles';
@@ -10,6 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { theme } from '@/utils/theme';
 import { useState, useEffect } from 'react';
+import { NavigationProvider } from '@/contexts/NavigationContext';
 
 const makeQueryClient = () => {
   return new QueryClient({
@@ -52,14 +52,16 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <CssBaseline />
-          {children}
-          <ToastContainer 
-            position="top-right" 
-            autoClose={5000} 
-            hideProgressBar={false}
-            theme="colored"
-          />
+          <NavigationProvider>
+            <CssBaseline />
+            {children}
+            <ToastContainer 
+              position="top-right" 
+              autoClose={5000} 
+              hideProgressBar={false}
+              theme="colored"
+            />
+          </NavigationProvider>
         </LocalizationProvider>
       </ThemeProvider>
     </QueryClientProvider>

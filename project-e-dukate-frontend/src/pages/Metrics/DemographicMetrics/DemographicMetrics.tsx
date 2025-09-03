@@ -11,6 +11,7 @@ import { DemographicFilterDto, DemographicMetricsDto } from '@/types/metricas';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 import { PDFPreviewDialog } from '@/components/PDF';
 import dynamic from 'next/dynamic';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 const GenericFilterContainer = dynamic(() => 
   import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
@@ -41,6 +42,7 @@ export const DemographicMetrics: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
   const pdfContentRef = useRef<HTMLDivElement>(null);
+  const { setIsNavigating } = useNavigation();
   const {
     previewOpen,
     previewImage,
@@ -76,9 +78,10 @@ export const DemographicMetrics: React.FC = () => {
       const data = await fetchDemographicMetrics(filter);
       setMetricsData(data);
       setLoading(false);
+      setIsNavigating(false);
     };
     fetchMetrics();
-  }, [filter]);
+  }, [filter, setIsNavigating]);
 
   const handleFilterChange = (field: keyof DemographicFilterDto) => (value: string | string[]) => {
     setFilter(prev => {

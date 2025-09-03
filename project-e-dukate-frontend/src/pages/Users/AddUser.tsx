@@ -13,7 +13,7 @@ import { SpecialistDto } from '@/types/user';
 import { AdministratorDto } from '@/types/user';
 import dynamic from 'next/dynamic';
 import CircularProgress from '@mui/material/CircularProgress';
-import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
+import ECGLoader from '@/components/Loader/ECGLoader';
 
 const RoleSelector = dynamic(() => 
   import('@/components/FormComponents/RoleSelector').then(mod => mod.RoleSelector), 
@@ -96,7 +96,7 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [backendError, setBackendError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleInputChange = useCallback((field: keyof typeof formData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -171,8 +171,7 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
         }
         await addSpecialist(specialistData);
       }
-
-      // Mostrar el loader durante la navegación
+      
       setIsNavigating(true);
       router.push('/dashboard/usuarios');
     } catch (err) {
@@ -200,7 +199,7 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
 
   return (
     <>
-      {isNavigating && <ECGLoader message="Volviendo a usuarios..." />}
+      {isNavigating && <ECGLoader message="Volviendo a usuarios" />}
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
           Añadir Usuario

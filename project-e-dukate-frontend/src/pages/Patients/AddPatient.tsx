@@ -11,7 +11,7 @@ import { showNotification } from '@/services/notificationService';
 import dayjs from 'dayjs';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
+import ECGLoader from '@/components/Loader/ECGLoader';
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -62,7 +62,7 @@ export const AddPatient: React.FC = () => {
     address: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handleInputChange = (field: keyof PatientFormData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -96,7 +96,7 @@ const handleSubmit = async () => {
   
     try {
       await addItem(patientDto);
-      setIsNavigating(true); // Mostrar loader durante navegación
+      setIsNavigating(true);
       router.push('/dashboard/pacientes');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al añadir paciente';
@@ -105,13 +105,13 @@ const handleSubmit = async () => {
   };
 
   const handleCancel = () => {
-    setIsNavigating(true); // Mostrar loader durante navegación
+    setIsNavigating(true);
     router.push('/dashboard/pacientes');
   };
 
   return (
     <>
-      {isNavigating && <ECGLoader message="Volviendo a pacientes..." />}
+      {isNavigating && <ECGLoader message="Volviendo a pacientes" />}
       <Box sx={{ p: 3, minHeight: '100vh' }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
           Registro de Paciente

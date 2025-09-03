@@ -31,6 +31,7 @@ interface InstitutionEarnings {
 }
 
 export const usePaymentMetrics = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const [totalIncomePeriodType, setTotalIncomePeriodType] = useState<string>('weekly');
   const [totalIncomeStartYear, setTotalIncomeStartYear] = useState<string>('');
   const [totalIncomeEndYear, setTotalIncomeEndYear] = useState<string>('');
@@ -53,6 +54,7 @@ export const usePaymentMetrics = () => {
   const [error, setError] = useState<string | null>(null);
 
   const retryFetch = () => {
+    setLoading(true);
     setError(null);
     fetchAvailableYears(setAvailableYears, setError);
     fetchTotalIncome(
@@ -87,53 +89,77 @@ export const usePaymentMetrics = () => {
   };
 
   useEffect(() => {
-    fetchAvailableYears(setAvailableYears, setError);
-    fetchPendingVsCompleted(
-      metricCardStartDate,
-      metricCardEndDate,
-      setMetricCardPendingVsCompletedData,
-      setError
-    );
-    fetchPendingVsCompleted(
-      pendingVsCompletedStartDate,
-      pendingVsCompletedEndDate,
-      setPendingVsCompletedData,
-      setError
-    );
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        await fetchAvailableYears(setAvailableYears, setError);
+        await fetchPendingVsCompleted(
+          metricCardStartDate,
+          metricCardEndDate,
+          setMetricCardPendingVsCompletedData,
+          setError
+        );
+        await fetchPendingVsCompleted(
+          pendingVsCompletedStartDate,
+          pendingVsCompletedEndDate,
+          setPendingVsCompletedData,
+          setError
+        );
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
   }, [metricCardEndDate, metricCardStartDate, pendingVsCompletedEndDate, pendingVsCompletedStartDate]);
 
   useEffect(() => {
-    if (availableYears.length > 0) {
-      fetchTotalIncome(
-        totalIncomePeriodType,
-        totalIncomeWeekRange,
-        totalIncomeStartDate,
-        totalIncomeEndDate,
-        totalIncomeStartYear,
-        totalIncomeEndYear,
-        setTotalIncomeData,
-        setError
-      );
-      fetchStatusCounts(statusCountsStartDate, statusCountsEndDate, setStatusCountsData, setError);
-      fetchInstitutionEarnings(
-        metricCardStartDate,
-        metricCardEndDate,
-        setInstitutionEarningsData,
-        setError
-      );
-      fetchPendingVsCompleted(
-        metricCardStartDate,
-        metricCardEndDate,
-        setMetricCardPendingVsCompletedData,
-        setError
-      );
-      fetchPendingVsCompleted(
-        pendingVsCompletedStartDate,
-        pendingVsCompletedEndDate,
-        setPendingVsCompletedData,
-        setError
-      );
-    }
+    const fetchAdditionalData = async () => {
+      if (availableYears.length > 0) {
+        setLoading(true);
+        try {
+          await Promise.all([
+            fetchTotalIncome(
+              totalIncomePeriodType,
+              totalIncomeWeekRange,
+              totalIncomeStartDate,
+              totalIncomeEndDate,
+              totalIncomeStartYear,
+              totalIncomeEndYear,
+              setTotalIncomeData,
+              setError
+            ),
+            fetchStatusCounts(statusCountsStartDate, statusCountsEndDate, setStatusCountsData, setError),
+            fetchInstitutionEarnings(
+              metricCardStartDate,
+              metricCardEndDate,
+              setInstitutionEarningsData,
+              setError
+            ),
+            fetchPendingVsCompleted(
+              metricCardStartDate,
+              metricCardEndDate,
+              setMetricCardPendingVsCompletedData,
+              setError
+            ),
+            fetchPendingVsCompleted(
+              pendingVsCompletedStartDate,
+              pendingVsCompletedEndDate,
+              setPendingVsCompletedData,
+              setError
+            )
+          ]);
+        } catch (error) {
+          console.error('Error fetching additional data:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAdditionalData();
   }, [
     totalIncomePeriodType,
     totalIncomeStartYear,
@@ -337,5 +363,6 @@ export const usePaymentMetrics = () => {
     resetMetricCardFilters,
     resetPendingVsCompletedFilters,
     retryFetch,
+    loading,
   };
 };

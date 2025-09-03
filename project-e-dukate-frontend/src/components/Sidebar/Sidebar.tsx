@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { clearAuthToken } from '@/services/api';
 import Image from 'next/image';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 interface SubMenuItem {
   label: string;
@@ -52,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const [openSettingsMenu, setOpenSettingsMenu] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
   const settingsAnchorRef = useRef<HTMLDivElement>(null);
+  const { setIsNavigating } = useNavigation();
 
   const menuItems: MenuItem[] = [
     {
@@ -140,13 +142,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
     setOpenSettingsMenu(false);
   };
 
+  const handleNavigation = (path: string) => {
+    setIsNavigating(true);
+    router.push(path);
+  };
+
   const handleSubitemClick = (value: string) => {
-    router.push(`/dashboard/${value}`);
+    handleNavigation(`/dashboard/${value}`);
     setOpenSubmenu(false);
   };
 
   const handlePrivacyPolicyClick = () => {
-    router.push('/dashboard/politica-privacidad');
+    handleNavigation('/dashboard/politica-privacidad');
     setOpenSettingsMenu(false);
   };
 
@@ -192,7 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
                     if (item.value === 'metricas') {
                       handleToggleSubmenu();
                     } else {
-                      router.push(`/dashboard/${item.value}`);
+                      handleNavigation(`/dashboard/${item.value}`);
                     }
                   }}
                   sx={{

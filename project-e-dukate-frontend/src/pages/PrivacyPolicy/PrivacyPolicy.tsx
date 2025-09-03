@@ -1,10 +1,19 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 const PrivacyPolicy: React.FC = () => {
+  const { setIsNavigating } = useNavigation();
+  
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [setIsNavigating]);
+
   return (
     <Container maxWidth="xl" sx={{ py: 5 }}>
       <Box sx={{ bgcolor: 'white', p: 4, borderRadius: 2, boxShadow: 3 }}>
@@ -55,7 +64,7 @@ const PrivacyPolicy: React.FC = () => {
           No compartimos tus datos personales con terceros, salvo en los siguientes casos:
           <ul>
             <li>Con especialistas externos (por ejemplo, laboratorios o médicos referidos), previa autorización del paciente o tutor legal.</li>
-            <li>Con autoridades legales, si así lo exige la normativa boliviana.</li>
+            <li>Con autoridades legales, if así lo exige la normativa boliviana.</li>
           </ul>
         </Typography>
 

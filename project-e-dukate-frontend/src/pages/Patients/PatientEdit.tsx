@@ -10,7 +10,7 @@ import { mapGenderToRadioValue } from '@/utils/formUtils';
 import { mapRadioValueToGender } from '@/utils/formUtils';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import ECGLoader from '@/components/Loader/ECGLoader'; // Importar el loader
+import ECGLoader from '@/components/Loader/ECGLoader';
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -43,7 +43,7 @@ interface PatientEditProps {
 
 export const PatientEdit: React.FC<PatientEditProps> = ({ formData, handleSubmit, setFormData, isSubmitting }) => {
   const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false); // Estado para controlar la navegación
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const handlePersonalInfoChange = (
     field: 'names' | 'lastNamePaternal' | 'lastNameMaternal' | 'mobileNumber' | 'gender' | 'birthDate'
@@ -87,7 +87,7 @@ export const PatientEdit: React.FC<PatientEditProps> = ({ formData, handleSubmit
 
   return (
     <>
-      {isNavigating && <ECGLoader message="Volviendo atrás..." />}
+      {isNavigating && <ECGLoader message="Volviendo atrás" />}
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 3 }}>
           Actualizar Datos del Paciente

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -8,6 +8,7 @@ import { usePaymentMetrics } from '@/hooks/usePaymentMetrics';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 const GenericFilterContainer = dynamic(() => 
   import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
@@ -94,8 +95,10 @@ export const PaymentMetrics: React.FC = () => {
     resetMetricCardFilters,
     resetPendingVsCompletedFilters,
     retryFetch,
+    loading,
   } = usePaymentMetrics();
 
+  const { setIsNavigating } = useNavigation();
   const componentRef = useRef<HTMLDivElement>(null);
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const {
@@ -106,6 +109,12 @@ export const PaymentMetrics: React.FC = () => {
     handleConfirmDownload,
     handleClosePreview,
   } = usePDFGenerator({ contentRef: pdfContentRef, fileName: 'Informe_de_métricas_de_pago' });
+  
+  useEffect(() => {
+    if (!loading) {
+      setIsNavigating(false);
+    }
+  }, [loading, setIsNavigating]);
 
   const chartDataPendingVsCompleted = pendingVsCompletedData
     ? [
@@ -222,12 +231,12 @@ export const PaymentMetrics: React.FC = () => {
                   </>
                 ) : (
                   <Typography
-                    color="textSecondary"
-                    align="center"
-                    sx={{ width: '100%' }}
-                  >
-                    No hay datos disponibles para los montos.
-                  </Typography>
+                        color="textSecondary"
+                        align="center"
+                        sx={{ width: '100%' }}
+                      >
+                        No hay datos disponibles para los montos.
+                      </Typography>
                 )}
               </Box>
             </Box>

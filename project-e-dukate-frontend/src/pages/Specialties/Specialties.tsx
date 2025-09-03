@@ -14,6 +14,7 @@ import { Table } from '@/components/Table';
 import { useApi } from '@/hooks/useApi';
 import { Specialty } from '@/types/table';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 export const Specialties: React.FC = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
@@ -26,6 +27,7 @@ export const Specialties: React.FC = () => {
   const [addError, setAddError] = useState<string | null>(null);
   const [, setInitialLoad] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const { setIsNavigating } = useNavigation();
   const {
     data: specialties,
     error: specialtiesError,
@@ -38,6 +40,12 @@ export const Specialties: React.FC = () => {
     updateItem: updateSpecialty,
     deleteItem: deleteSpecialty,
   } = useApi<Specialty>("specialties");
+  
+  useEffect(() => {
+    if (!specialtiesLoading) {
+      setIsNavigating(false);
+    }
+  }, [specialtiesLoading, setIsNavigating]);
 
   const specialtyColumns = useMemo(() => [
     { header: '', key: 'spacerLeft', width: '5%' },
