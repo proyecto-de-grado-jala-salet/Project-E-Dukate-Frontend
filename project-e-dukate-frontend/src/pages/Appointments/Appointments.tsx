@@ -3,11 +3,9 @@ import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useAuthStore } from "@/stores/authStore";
 import { useAppointments } from "@/hooks/useAppointments";
-import SearchIcon from "@mui/icons-material/Search";
 import { showNotification } from "@/services/notificationService";
 import { Appointment } from "@/types/appointment";
 import dynamic from 'next/dynamic';
@@ -55,11 +53,9 @@ const Appointments: React.FC = () => {
     filterConfig,
     handlePageChange,
     handleResetFilters,
-    handlePatientSearchChange,
     addAppointment,
     reloadWithCurrentFilters,
     fetchAppointmentsData,
-    buildQueryParams,
   } = useAppointments();
   
   useEffect(() => {
@@ -69,7 +65,7 @@ const Appointments: React.FC = () => {
   }, [loading, setIsNavigating]);
 
   const refreshAppointments = () => {
-    fetchAppointmentsData(currentPage, buildQueryParams(currentPage));
+    fetchAppointmentsData(currentPage);
   };
 
   const handleAddAppointment = async (appointment: {
@@ -101,7 +97,7 @@ const Appointments: React.FC = () => {
         status: "Scheduled",
       };
       await addAppointment(newAppointment);
-      await fetchAppointmentsData(1, buildQueryParams(1));
+      await fetchAppointmentsData(1);
       setOpenDialog(false);
     } catch (err) {
       console.error("Error agregando cita:", err);
@@ -116,25 +112,6 @@ const Appointments: React.FC = () => {
           Citas
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <TextField
-            placeholder="Buscar paciente"
-            value={filters.patientSearch}
-            onChange={(e) => handlePatientSearchChange(e.target.value)}
-            InputProps={{ startAdornment: <SearchIcon sx={{ color: "gray" }} /> }}
-            sx={{
-              bgcolor: "#ffffff",
-              borderRadius: "12px",
-              width: "300px",
-              "& .MuiInputBase-root": {
-                height: "45px",
-                padding: "10px 14px",
-                borderRadius: "12px",
-              },
-              "& .MuiInputBase-input": {
-                padding: "0",
-              },
-            }}
-          />
           {isAdmin && (
             <Button
               variant="contained"

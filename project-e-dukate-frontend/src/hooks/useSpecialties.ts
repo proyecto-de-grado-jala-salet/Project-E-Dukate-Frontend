@@ -18,9 +18,9 @@ export const useSpecialties = (page: number = 1, search: string = '') => {
   const { data, isLoading: loading, error } = useQuery<SpecialtyResponse, Error>({
     queryKey: ['specialties', page, search],
     queryFn: () => fetchSpecialties(page, search),
-    placeholderData: (previousData) => previousData, // Reemplaza keepPreviousData
-    staleTime: 5 * 60 * 1000, // Cache 5 minutos
-    enabled: page >= 1 && !!search !== undefined, // Solo fetch si page y search están definidos
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000,
+    enabled: page >= 1 && !!search !== undefined,
   });
 
   return {

@@ -10,7 +10,6 @@ interface FetchAppointmentsParams {
   specialtyId?: string;
   date?: string;
   status?: string;
-  patientSearch?: string;
   pageNumber?: number;
   pageSize?: number;
 }
@@ -21,7 +20,6 @@ export const fetchAppointments = async ({
   specialtyId,
   date,
   status,
-  patientSearch,
   pageNumber = 1,
   pageSize = 10,
 }: FetchAppointmentsParams): Promise<{
@@ -38,7 +36,6 @@ export const fetchAppointments = async ({
     if (specialtyId) queryParams.append("specialtyId", specialtyId);
     if (date) queryParams.append("date", date);
     if (status) queryParams.append("status", status);
-    if (patientSearch) queryParams.append("patientSearch", patientSearch);
     queryParams.append("PageNumber", pageNumber.toString());
     queryParams.append("PageSize", pageSize.toString());
 

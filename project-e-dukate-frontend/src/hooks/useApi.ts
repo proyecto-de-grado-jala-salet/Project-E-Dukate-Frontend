@@ -14,12 +14,22 @@ interface PagedResponse<T> {
   totalPages: number;
 }
 
-export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOINTS) => {
+interface UseApiOptions {
+  useSearchEndpoint?: boolean;
+  defaultPageSize?: number;
+}
+
+export const useApi = <T extends GenericItem>(
+  endpoint: keyof typeof API_ENDPOINTS, 
+  options: UseApiOptions = {}
+) => {
+  const { useSearchEndpoint = true, defaultPageSize = 10 } = options;
+  
   const [data, setData] = useState<T[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
+  const [pageSize] = useState<number>(defaultPageSize);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -28,16 +38,25 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
       setLoading(true);
       try {
         const paginationParams = `PageNumber=${page}&PageSize=${pageSize}`;
-        const fullQuery = queryParams 
-          ? `?${paginationParams}&${queryParams}` 
-          : `?${paginationParams}`;
+        
+        let fullQuery: string;
+        let searchPath: string = "";
+        
+        if (useSearchEndpoint && queryParams) {
+          searchPath = "/search";
+          fullQuery = `?${paginationParams}&searchTerm=${encodeURIComponent(queryParams)}`;
+        } else if (!useSearchEndpoint && queryParams) {
+          fullQuery = `?${paginationParams}&${queryParams}`;
+        } else {
+          fullQuery = `?${paginationParams}`;
+        }
           
         const result = await apiRequest<PagedResponse<T>>(
           endpoint,
           "GET",
           undefined,
           undefined,
-          fullQuery
+          `${searchPath}${fullQuery}`
         );
         
         if (!result || !result.items) {
@@ -49,7 +68,7 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         setTotalPages(result.totalPages);
         setCurrentPage(result.pageNumber);
         setError(null);
-        return result; // ← Devuelve el resultado para uso inmediato
+        return result;
       } catch (err: unknown) {
         const errorMessage =
           err instanceof Error ? err.message : "Error al cargar los datos";
@@ -57,12 +76,12 @@ export const useApi = <T extends GenericItem>(endpoint: keyof typeof API_ENDPOIN
         if (!queryParams) {
           showNotification(errorMessage, "error");
         }
-        throw err; // ← Propaga el error
+        throw err;
       } finally {
         setLoading(false);
       }
     },
-    [endpoint, pageSize]
+    [endpoint, pageSize, useSearchEndpoint]
   );
 
   useEffect(() => {

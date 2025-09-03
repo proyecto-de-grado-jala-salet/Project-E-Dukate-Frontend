@@ -5,7 +5,6 @@ import { AppointmentFilter, Appointment } from "@/types/appointment";
 import { Specialist } from "@/types/userTypes";
 import { Specialty } from "@/types/specialty";
 import { Filter } from "@/types/filterOption";
-import { useDebounce } from "./useDebounce";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 
@@ -27,10 +26,8 @@ export const useAppointments = () => {
     specialtyId: "",
     date: initialDate,
     status: "",
-    patientSearch: "",
   });
 
-  const debouncedPatientSearch = useDebounce(filters.patientSearch, 500);
   const { data: patients } = useApi<Patient>("patients");
   const { data: specialties } = useApi<Specialty>("specialties");
   const { data: specialists } = useApi<Specialist>("specialists");
@@ -45,10 +42,10 @@ export const useAppointments = () => {
     fetchData: fetchAppointmentsData,
     addItem: addAppointment,
     deleteItem: deleteAppointment,
-  } = useApi<Appointment>("appointments");
+  } = useApi<Appointment>("appointments", { useSearchEndpoint: false });
 
   const reloadWithCurrentFilters = () => {
-    fetchAppointmentsData(currentPage, buildQueryParams(currentPage));
+    fetchAppointmentsData(currentPage, buildQueryParams());
   };
 
   const patientOptions = patients.map((p) => ({
@@ -108,37 +105,39 @@ export const useAppointments = () => {
     },
   ];
 
-  const buildQueryParams = (page: number) => {
+  const buildQueryParams = () => {
     const queryParams = new URLSearchParams();
     if (filters.patientId) queryParams.append("patientId", filters.patientId);
     if (filters.specialistId) queryParams.append("specialistId", filters.specialistId);
+    if (filters.specialtyId) queryParams.append("specialtyId", filters.specialtyId);
     if (filters.date) {
       const dateStr = dayjs(filters.date).format("YYYY-MM-DD");
       queryParams.append("date", dateStr);
     }
     if (filters.status) queryParams.append("status", filters.status);
-    if (debouncedPatientSearch) queryParams.append("patientSearch", debouncedPatientSearch);
-    queryParams.append("PageNumber", page.toString());
-    queryParams.append("PageSize", pageSize.toString());
     return queryParams.toString();
   };
 
+  const fetchAppointmentsWithFilters = async (page: number = 1) => {
+    const queryParams = buildQueryParams();
+    await fetchAppointmentsData(page, queryParams);
+  };
+
   useEffect(() => {
-    fetchAppointmentsData(1, buildQueryParams(1));
+    fetchAppointmentsWithFilters(1);
   }, [
     filters.patientId,
     filters.specialistId,
+    filters.specialtyId,
     filters.date,
     filters.status,
-    debouncedPatientSearch,
-    fetchAppointmentsData,
     pageSize,
   ]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        fetchAppointmentsData(currentPage, buildQueryParams(currentPage));
+        fetchAppointmentsWithFilters(currentPage);
       }
     };
     
@@ -147,10 +146,10 @@ export const useAppointments = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [currentPage, fetchAppointmentsData, buildQueryParams]);
+  }, [currentPage, buildQueryParams]);
 
   const handlePageChange = (page: number) => {
-    fetchAppointmentsData(page, buildQueryParams(page));
+    fetchAppointmentsWithFilters(page);
   };
 
   const handleResetFilters = () => {
@@ -161,12 +160,7 @@ export const useAppointments = () => {
       specialtyId: "",
       date: newDate,
       status: "",
-      patientSearch: "",
     });
-  };
-
-  const handlePatientSearchChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, patientSearch: value }));
   };
 
   return {
@@ -184,11 +178,10 @@ export const useAppointments = () => {
     filterConfig,
     handlePageChange,
     handleResetFilters,
-    handlePatientSearchChange,
     addAppointment,
     deleteAppointment,
     reloadWithCurrentFilters,
-    fetchAppointmentsData,
+    fetchAppointmentsData: fetchAppointmentsWithFilters,
     buildQueryParams,
   };
 };
