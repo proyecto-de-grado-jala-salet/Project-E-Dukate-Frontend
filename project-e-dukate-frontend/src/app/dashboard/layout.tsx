@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { userRole, token } = useAuthStore();
   const [, setIsLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
-  const { isNavigating, setIsNavigating } = useNavigation();
+  const { isNavigating } = useNavigation();
   const [shouldRedirect, setShouldRedirect] = useState(false);
 
   useEffect(() => {
@@ -45,9 +45,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const defaultTab = userRole === 'Administrator' ? 'especialidades' : 'pacientes';
 
         if (currentTab === 'dashboard' || !allowedTabs.includes(currentTab)) {
-          setIsNavigating(true);
           await router.push(`/dashboard/${defaultTab}`);
-          setIsNavigating(false);
         }
       } catch (error) {
         console.error('Error initializing dashboard:', error);
@@ -57,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
 
     initializeDashboard();
-  }, [token, userRole, pathname, router, isClient, setIsNavigating]);
+  }, [token, userRole, pathname, router, isClient]);
 
   useEffect(() => {
     if (shouldRedirect) {

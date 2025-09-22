@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import ECGLoader from '@/components/Loader/ECGLoader';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 const PatientInfo = dynamic(() => 
   import('@/components/MedicalHistory/PatientInfo').then(mod => mod.PatientInfo), 
@@ -44,7 +44,7 @@ const ConsultationsList = dynamic(() =>
 export const MedicalHistory: React.FC = () => {
   const [newConsultationId, setNewConsultationId] = useState<string | null>(null);
   const [selectedSpecialistId, setSelectedSpecialistId] = useState<string>("");
-  const [isNavigating] = useState(false);
+  const { setIsNavigating } = useNavigation();
   const {
     medicalHistory,
     patientData,
@@ -68,6 +68,12 @@ export const MedicalHistory: React.FC = () => {
     handleAddConsultation,
     refreshConsultations,
   } = useMedicalHistory();
+  
+  useEffect(() => {
+    if (!specialistsLoading && !loadingConsultations) {
+      setIsNavigating(false);
+    }
+  }, [specialistsLoading, loadingConsultations, setIsNavigating]);
 
   useEffect(() => {
     if (selectedConsultationSpecialist) {
@@ -90,9 +96,9 @@ export const MedicalHistory: React.FC = () => {
 
   if (specialistsLoading) {
     return (
-      <Typography variant="h6" sx={{ color: "#000000" }}>
-        Cargando...
-      </Typography>
+      <Box sx={{ p: 3 }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
@@ -106,54 +112,51 @@ export const MedicalHistory: React.FC = () => {
 
   if (!medicalHistory || !patientData) {
     return (
-      <Typography variant="h6" sx={{ color: "#000000" }}>
-        Cargando...
-      </Typography>
+      <Box sx={{ p: 3 }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
   return (
-    <>
-      {isNavigating && <ECGLoader message="Volviendo a pacientes" />}
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: "bold", color: "#000000" }}
-          >
-            Historial Medico {patientData.names} {patientData.lastNamePaternal}
-          </Typography>
-        </Box>
-        <PatientInfo patient={patientData} />
-        <SpecialistStatusForm
-          specialists={specialists || []}
-          selectedSpecialists={selectedSpecialists}
-          setSelectedSpecialists={setSelectedSpecialists}
-          selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
-          onAddConsultation={handleAddConsultationWithId}
-          specialistsWithPermission={specialistsWithPermission}
-          selectedConsultationSpecialist={selectedSpecialistId}
-          setSelectedConsultationSpecialist={setSelectedSpecialistId}
-          isStatusDropdownDisabled={isStatusDropdownDisabled}
-          canEditSelectedSpecialist={canEditSelectedSpecialist}
-        />
-        {selectedSpecialistId && (
-          <Box sx={{ mt: 3 }}>
-            <ConsultationsList
-              consultations={consultations}
-              loadingConsultations={loadingConsultations}
-              errorConsultations={errorConsultations}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-              onConsultationsUpdate={refreshConsultations}
-              newConsultationId={newConsultationId}
-              selectedSpecialistId={selectedSpecialistId}
-            />
-          </Box>
-        )}
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: "bold", color: "#000000" }}
+        >
+          Historial Medico {patientData.names} {patientData.lastNamePaternal}
+        </Typography>
       </Box>
-    </>
+      <PatientInfo patient={patientData} />
+      <SpecialistStatusForm
+        specialists={specialists || []}
+        selectedSpecialists={selectedSpecialists}
+        setSelectedSpecialists={setSelectedSpecialists}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        onAddConsultation={handleAddConsultationWithId}
+        specialistsWithPermission={specialistsWithPermission}
+        selectedConsultationSpecialist={selectedSpecialistId}
+        setSelectedConsultationSpecialist={setSelectedSpecialistId}
+        isStatusDropdownDisabled={isStatusDropdownDisabled}
+        canEditSelectedSpecialist={canEditSelectedSpecialist}
+      />
+      {selectedSpecialistId && (
+        <Box sx={{ mt: 3 }}>
+          <ConsultationsList
+            consultations={consultations}
+            loadingConsultations={loadingConsultations}
+            errorConsultations={errorConsultations}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            onConsultationsUpdate={refreshConsultations}
+            newConsultationId={newConsultationId}
+            selectedSpecialistId={selectedSpecialistId}
+          />
+        </Box>
+      )}
+    </Box>
   );
 };
 

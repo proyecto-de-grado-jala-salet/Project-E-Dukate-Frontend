@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   appointmentArchive: 'http://localhost:5275/api/Appointments/sessions',
   cancelSession: 'http://localhost:5275/api/Appointments/appointment',
   rescheduleSession: 'http://localhost:5275/api/Appointments/reschedule-session',
+  paymentQRs: 'http://localhost:5275/api/PaymentQRs',
 };
 
 export const setAuthToken = (token: string) => {
@@ -46,16 +47,18 @@ export const apiRequest = async <T>(
   id?: string,
   query?: string
 ): Promise<T> => {
+  const skipCache = endpoint === 'specialties';
   const url = id ? `${API_ENDPOINTS[endpoint]}/${id}${query || ''}` : `${API_ENDPOINTS[endpoint]}${query || ''}`;
   const cacheKey = `${method}:${url}`;
-  if (method === 'GET' && requestCache.has(cacheKey)) {
+  if (method === 'GET' && requestCache.has(cacheKey) && !skipCache) {
     return requestCache.get(cacheKey);
   }
   const token = getAuthToken();
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
+  const headers: HeadersInit = {};
+  if (body && !(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -64,8 +67,8 @@ export const apiRequest = async <T>(
   const options: RequestInit = {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
-    cache: 'default',
+    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
+    cache: 'default' as RequestCache,
   };
 
   const response = await fetch(url, options);
@@ -97,6 +100,8 @@ export const apiRequest = async <T>(
   const contentType = response.headers.get('content-type');
   if (contentType && contentType.includes('application/json')) {
     return response.status === 204 ? ({} as T) : await response.json();
+  } else if (contentType && contentType.includes('image')) {
+    return response.blob() as unknown as T;
   } else {
     return (await response.text()) as unknown as T;
   }
@@ -104,14 +109,12 @@ export const apiRequest = async <T>(
 
 export const clearApiCache = (endpoint?: keyof typeof API_ENDPOINTS) => {
   if (endpoint) {
-    // Eliminar todas las entradas de caché para este endpoint
     for (const key of requestCache.keys()) {
       if (key.includes(endpoint)) {
         requestCache.delete(key);
       }
     }
   } else {
-    // Limpiar todo el caché
     requestCache.clear();
   }
 };

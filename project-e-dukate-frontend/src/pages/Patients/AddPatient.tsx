@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Button } from '@/components/Button';
@@ -11,7 +11,7 @@ import { showNotification } from '@/services/notificationService';
 import dayjs from 'dayjs';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import ECGLoader from '@/components/Loader/ECGLoader';
+import { useNavigation } from '@/contexts/NavigationContext';
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -62,14 +62,18 @@ export const AddPatient: React.FC = () => {
     address: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isNavigating, setIsNavigating] = useState(false);
+  const { setIsNavigating } = useNavigation();
+  
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [setIsNavigating]);
 
   const handleInputChange = (field: keyof PatientFormData) => (value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: '' }));
   };
 
-const handleSubmit = async () => {
+  const handleSubmit = async () => {
     const birthDate = formData.birthDate ? dayjs(formData.birthDate).format('YYYY-MM-DD') : '';
     const age = formData.birthDate
       ? dayjs().diff(dayjs(formData.birthDate), 'year')
@@ -110,44 +114,41 @@ const handleSubmit = async () => {
   };
 
   return (
-    <>
-      {isNavigating && <ECGLoader message="Volviendo a pacientes" />}
-      <Box sx={{ p: 3, minHeight: '100vh' }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
-          Registro de Paciente
-        </Typography>
-        <PersonalInfoForm
-          formData={{
-            names: formData.names,
-            lastNamePaternal: formData.lastNamePaternal,
-            lastNameMaternal: formData.lastNameMaternal,
-            gender: formData.gender,
-            birthDate: formData.birthDate,
-            mobileNumber: formData.mobileNumber,
-          }}
-          handleInputChange={handleInputChange}
-          errors={errors}
+    <Box sx={{ p: 3, minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'black', mb: 3 }}>
+        Registro de Paciente
+      </Typography>
+      <PersonalInfoForm
+        formData={{
+          names: formData.names,
+          lastNamePaternal: formData.lastNamePaternal,
+          lastNameMaternal: formData.lastNameMaternal,
+          gender: formData.gender,
+          birthDate: formData.birthDate,
+          mobileNumber: formData.mobileNumber,
+        }}
+        handleInputChange={handleInputChange}
+        errors={errors}
+      />
+      <GeneralInfoForm
+        formData={{
+          idNumber: formData.idNumber,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+        }}
+        handleInputChange={handleInputChange}
+        errors={errors}
+      />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+        <Button label="Cancelar" color='error' variant="outlined" onClick={handleCancel} />
+        <Button
+          label="Guardar"
+          variant="contained"
+          sx={{ bgcolor: '#f5a623', color: 'black' }}
+          onClick={handleSubmit}
         />
-        <GeneralInfoForm
-          formData={{
-            idNumber: formData.idNumber,
-            phoneNumber: formData.phoneNumber,
-            address: formData.address,
-          }}
-          handleInputChange={handleInputChange}
-          errors={errors}
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
-          <Button label="Cancelar" color='error' variant="outlined" onClick={handleCancel} />
-          <Button
-            label="Guardar"
-            variant="contained"
-            sx={{ bgcolor: '#f5a623', color: 'black' }}
-            onClick={handleSubmit}
-          />
-        </Box>
       </Box>
-    </>
+    </Box>
   );
 };
 

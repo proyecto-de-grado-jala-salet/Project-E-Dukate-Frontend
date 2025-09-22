@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from "react";
+import { useState } from "react";
 import { fetchSpecialties } from '@/services/specialtyService';
 
 interface Specialty {
@@ -14,22 +15,37 @@ interface SpecialtyResponse {
   totalPages: number;
 }
 
-export const useSpecialties = (page: number = 1, search: string = '') => {
-  const { data, isLoading: loading, error } = useQuery<SpecialtyResponse, Error>({
-    queryKey: ['specialties', page, search],
-    queryFn: () => fetchSpecialties(page, search),
-    placeholderData: (previousData) => previousData,
-    staleTime: 5 * 60 * 1000,
-    enabled: page >= 1 && !!search !== undefined,
-  });
+export const useSpecialties = () => {
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  return {
-    specialties: data?.items ?? [],
-    totalCount: data?.totalCount ?? 0,
-    totalPages: data?.totalPages ?? 0,
-    pageNumber: data?.pageNumber ?? 1,
-    pageSize: data?.pageSize ?? 10,
-    loading,
-    error: error ? (error instanceof Error ? error.message : 'Error fetching specialties') : null,
+  const fetchAllSpecialties = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let allSpecialties: Specialty[] = [];
+      let page = 1;
+      let totalPages = 1;
+      
+      while (page <= totalPages) {
+        const response = await fetchSpecialties() as SpecialtyResponse;
+        allSpecialties = [...allSpecialties, ...response.items];
+        totalPages = response.totalPages;
+        page += 1;
+      }
+
+      setSpecialties(allSpecialties);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error fetching specialties');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchAllSpecialties();
+  }, []);
+
+  return { specialties, loading, error };
 };

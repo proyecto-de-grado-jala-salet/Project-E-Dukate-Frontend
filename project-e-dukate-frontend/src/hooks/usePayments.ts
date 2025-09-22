@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState} from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useApi } from "./useApi";
 import { useDebounce } from "./useDebounce";
 import { apiRequest } from "@/services/api";
@@ -9,6 +8,11 @@ import { showNotification } from "@/services/notificationService";
 import { Payment } from "@/types/payments";
 import { Specialist } from "@/types/userTypes";
 import { Patient } from "@/types/userTypes";
+
+interface QRResponse {
+  QRId?: string;
+  Message?: string;
+}
 
 export const usePayments = () => {
   const [specialistId, setSpecialistId] = useState("");
@@ -19,6 +23,7 @@ export const usePayments = () => {
   const [editedValues, setEditedValues] = useState<{
     [key: string]: { sessionCost: string; amountPaid: string };
   }>({});
+  const [qrExists, setQrExists] = useState<boolean>(false);
 
   const {
     data: payments,
@@ -28,7 +33,7 @@ export const usePayments = () => {
     loading,
     error,
     fetchData,
-  } = useApi<Payment>("paymentsFilter");
+  } = useApi<Payment>("paymentsFilter", { useSearchEndpoint: false });
 
   const {
     data: specialistsData,
@@ -172,6 +177,58 @@ export const usePayments = () => {
     fetchData(1, "?PageNumber=1&PageSize=10");
   };
 
+  const checkQRExists = useCallback(async () => {
+    try {
+      await apiRequest("paymentQRs", "GET");
+      setQrExists(true);
+    } catch (err) {
+      setQrExists(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkQRExists();
+  }, [checkQRExists]);
+
+  const uploadQR = useCallback(async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await apiRequest<QRResponse>("paymentQRs", "POST", formData);
+      showNotification(response.Message || "QR subido exitosamente", "success");
+      setQrExists(true);
+      return response;
+    } catch (err) {
+      showNotification("Error al subir el QR", "error");
+      throw err;
+    }
+  }, []);
+
+  const updateQR = useCallback(async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      await apiRequest<QRResponse>("paymentQRs", "PUT", formData);
+      showNotification("QR actualizado exitosamente", "success");
+      return { success: true };
+    } catch (err) {
+      showNotification("Error al actualizar el QR", "error");
+      throw err;
+    }
+  }, []);
+
+  const deleteQR = useCallback(async () => {
+    try {
+      await apiRequest("paymentQRs", "DELETE");
+      showNotification("QR eliminado exitosamente", "success");
+      setQrExists(false);
+      return { success: true };
+    } catch (err) {
+      showNotification("Error al eliminar el QR", "error");
+      throw err;
+    }
+  }, []);
+
   return {
     specialistId,
     setSpecialistId,
@@ -196,5 +253,9 @@ export const usePayments = () => {
     handleValueChange,
     handleResetFilter,
     editedValues,
+    qrExists,
+    uploadQR,
+    updateQR,
+    deleteQR,
   };
 };

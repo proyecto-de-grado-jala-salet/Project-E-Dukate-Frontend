@@ -11,8 +11,6 @@ export default function HomeClient() {
   useEffect(() => {
     if (token) {
       router.push('/dashboard');
-    } else {
-      router.push('/login');
     }
   }, [token, router]);
 
