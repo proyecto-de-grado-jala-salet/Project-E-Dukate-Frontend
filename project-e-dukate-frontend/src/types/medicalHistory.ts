@@ -1,7 +1,7 @@
 export enum MedicalHistoryStatus {
   ContinuaEnTratamiento = 'ContinuaEnTratamiento',
   AltaDefinitiva = 'AltaDefinitiva',
-  AltaTemporal = 'AltaTemporal',
+  AltaPorSolicitud = 'AltaPorSolicitud',
   AltaAbandono = 'AltaAbandono',
 }
 

@@ -13,14 +13,14 @@ export const MenuProps = {
 export const statuses = [
   'ContinuaEnTratamiento',
   'AltaDefinitiva',
-  'AltaTemporal',
+  'AltaPorSolicitud',
   'AltaAbandono',
 ] as const;
 
 export const statusColors: { [key: string]: string } = {
   ContinuaEnTratamiento: '#76CAFF',
   AltaDefinitiva: '#009F1D',
-  AltaTemporal: '#FFA719',
+  AltaPorSolicitud: '#FFA719',
   AltaAbandono: '#F24B4B',
 };
 
@@ -28,5 +28,5 @@ export const formatStatusLabel = (status: string): string =>
   status
     .replace('ContinuaEnTratamiento', 'Continúa en Tratamiento')
     .replace('AltaDefinitiva', 'Alta Definitiva')
-    .replace('AltaTemporal', 'Alta Temporal')
+    .replace('AltaPorSolicitud', 'Alta por solicitud')
     .replace('AltaAbandono', 'Alta por Abandono');

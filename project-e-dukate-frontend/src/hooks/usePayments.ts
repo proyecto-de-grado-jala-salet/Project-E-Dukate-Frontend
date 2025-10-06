@@ -8,6 +8,7 @@ import { showNotification } from "@/services/notificationService";
 import { Payment } from "@/types/payments";
 import { Specialist } from "@/types/userTypes";
 import { Patient } from "@/types/userTypes";
+import { useAuthStore } from "@/stores/authStore";
 
 interface QRResponse {
   QRId?: string;
@@ -24,6 +25,8 @@ export const usePayments = () => {
     [key: string]: { sessionCost: string; amountPaid: string };
   }>({});
   const [qrExists, setQrExists] = useState<boolean>(false);
+  const { userRole, userId } = useAuthStore();
+  const isAdmin = userRole === 'Administrator';
 
   const {
     data: payments,
@@ -47,15 +50,17 @@ export const usePayments = () => {
     error: patientsError,
   } = useApi<Patient>("patients");
 
-  const specialists = specialistsData
+  const specialists = isAdmin 
     ? [
         { value: "", label: "Especialistas" },
-        ...specialistsData.map((spec) => ({
+        ...(specialistsData?.map((spec) => ({
           value: spec.id,
           label: `${spec.names} ${spec.lastNamePaternal} ${spec.lastNameMaternal || ""}`.trim(),
-        })),
+        })) || []),
       ]
-    : [{ value: "", label: "Especialistas" }];
+    : [
+        { value: userId || "", label: "Mi perfil" },
+      ];
 
   const patients = patientsData
     ? patientsData.map((patient) => ({
@@ -65,6 +70,7 @@ export const usePayments = () => {
     : [];
 
   const statuses = [
+    { value: "", label: "Estados" },
     { value: "Pending", label: "Pendiente" },
     { value: "Completed", label: "Completado" },
   ];
@@ -96,6 +102,11 @@ export const usePayments = () => {
       amountPaid: string
     ) => {
       try {
+        if (!isAdmin) {
+          showNotification("No tiene permisos para editar pagos", "error");
+          return;
+        }
+
         const sessionCostNum = parseFloat(sessionCost);
         const amountPaidNum = parseFloat(amountPaid);
         if (isNaN(sessionCostNum) || isNaN(amountPaidNum)) {
@@ -128,7 +139,7 @@ export const usePayments = () => {
         updatePayment(id, values.sessionCost, values.amountPaid);
       }
     });
-  }, [debouncedEditedValues, payments]);
+  }, [debouncedEditedValues, payments, isAdmin]);
 
   const buildQueryParams = (page: number = 1) => {
     const params = new URLSearchParams({
@@ -136,7 +147,12 @@ export const usePayments = () => {
       PageSize: pageSize.toString(),
     });
 
-    if (specialistId) params.append("SpecialistId", specialistId);
+    if (!isAdmin && userId) {
+      params.append("SpecialistId", userId);
+    } else if (specialistId) {
+      params.append("SpecialistId", specialistId);
+    }
+
     if (year) params.append("Year", year);
     if (month) params.append("Month", month);
     if (day) params.append("Day", day);
@@ -152,13 +168,18 @@ export const usePayments = () => {
 
   useEffect(() => {
     fetchDataWithCurrentFilters(1);
-  }, [specialistId, year, month, day, status]);
+  }, [specialistId, year, month, day, status, isAdmin, userId]);
 
   const handleValueChange = (
     id: string,
     field: "sessionCost" | "amountPaid",
     value: string
   ) => {
+    if (!isAdmin) {
+      showNotification("No tiene permisos para editar pagos", "error");
+      return;
+    }
+
     setEditedValues((prev) => ({
       ...prev,
       [id]: {
@@ -174,7 +195,7 @@ export const usePayments = () => {
     setMonth("");
     setDay("");
     setStatus("");
-    fetchData(1, "?PageNumber=1&PageSize=10");
+    fetchDataWithCurrentFilters(1);
   };
 
   const checkQRExists = useCallback(async () => {
@@ -192,6 +213,11 @@ export const usePayments = () => {
 
   const uploadQR = useCallback(async (file: File) => {
     try {
+      if (!isAdmin) {
+        showNotification("No tiene permisos para realizar esta acción", "error");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       const response = await apiRequest<QRResponse>("paymentQRs", "POST", formData);
@@ -202,10 +228,15 @@ export const usePayments = () => {
       showNotification("Error al subir el QR", "error");
       throw err;
     }
-  }, []);
+  }, [isAdmin]);
 
   const updateQR = useCallback(async (file: File) => {
     try {
+      if (!isAdmin) {
+        showNotification("No tiene permisos para realizar esta acción", "error");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       await apiRequest<QRResponse>("paymentQRs", "PUT", formData);
@@ -215,10 +246,15 @@ export const usePayments = () => {
       showNotification("Error al actualizar el QR", "error");
       throw err;
     }
-  }, []);
+  }, [isAdmin]);
 
   const deleteQR = useCallback(async () => {
     try {
+      if (!isAdmin) {
+        showNotification("No tiene permisos para realizar esta acción", "error");
+        return;
+      }
+
       await apiRequest("paymentQRs", "DELETE");
       showNotification("QR eliminado exitosamente", "success");
       setQrExists(false);
@@ -227,7 +263,7 @@ export const usePayments = () => {
       showNotification("Error al eliminar el QR", "error");
       throw err;
     }
-  }, []);
+  }, [isAdmin]);
 
   return {
     specialistId,
@@ -257,5 +293,6 @@ export const usePayments = () => {
     uploadQR,
     updateQR,
     deleteQR,
+    isAdmin,
   };
 };

@@ -7,6 +7,7 @@ import { Specialty } from "@/types/specialty";
 import { Filter } from "@/types/filterOption";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
+import { useAuthStore } from "@/stores/authStore";
 
 interface Patient {
   id: string;
@@ -20,6 +21,8 @@ interface Patient {
 
 export const useAppointments = () => {
   const initialDate = dayjs().startOf("day").toDate();
+  const { userRole, userId } = useAuthStore();
+  const isAdmin = userRole === "Administrator";
   const [filters, setFilters] = useState<AppointmentFilter>({
     patientId: "",
     specialistId: "",
@@ -58,10 +61,14 @@ export const useAppointments = () => {
     label: s.typeOfSpecialty,
   }));
 
-  const specialistOptions = specialists.map((s) => ({
-    value: s.id,
-    label: `${s.names} ${s.lastNamePaternal} ${s.lastNameMaternal ? s.lastNameMaternal : ""}`,
-  }));
+  const specialistOptions = isAdmin 
+    ? specialists.map((s) => ({
+        value: s.id,
+        label: `${s.names} ${s.lastNamePaternal} ${s.lastNameMaternal ? s.lastNameMaternal : ""}`,
+      }))
+    : [
+        { value: userId || "", label: "Mi perfil" },
+      ];
 
   const statusOptions = [
     { value: "Scheduled", label: "Programada" },
@@ -76,15 +83,15 @@ export const useAppointments = () => {
       value: filters.patientId || "",
       onChange: (value: string) => setFilters((prev) => ({ ...prev, patientId: value })),
       options: [...patientOptions],
-      type: "dropdown",
+      type: "dropdown" as const,
     },
-    {
+    ...(isAdmin ? [{
       label: "Especialista",
       value: filters.specialistId || '',
       onChange: (value: string) => setFilters(prev => ({ ...prev, specialistId: value })),
       options: [...specialistOptions],
-      type: "dropdown"
-    },
+      type: "dropdown" as const
+    }] : []),
     {
       label: "Fecha",
       value: filters.date ? dayjs(filters.date).format("YYYY-MM-DD") : "",
@@ -94,21 +101,26 @@ export const useAppointments = () => {
           date: value ? dayjs(value).startOf("day").toDate() : null,
         }));
       },
-      type: "date",
+      type: "date" as const,
     },
     {
       label: "Estado",
       value: filters.status || "",
       onChange: (value: string) => setFilters((prev) => ({ ...prev, status: value })),
       options: [...statusOptions],
-      type: "dropdown",
+      type: "dropdown" as const,
     },
   ];
 
   const buildQueryParams = () => {
     const queryParams = new URLSearchParams();
     if (filters.patientId) queryParams.append("patientId", filters.patientId);
-    if (filters.specialistId) queryParams.append("specialistId", filters.specialistId);
+    if (!isAdmin && userId) {
+      queryParams.append("specialistId", userId);
+    } else if (filters.specialistId) {
+      queryParams.append("specialistId", filters.specialistId);
+    }
+    
     if (filters.specialtyId) queryParams.append("specialtyId", filters.specialtyId);
     if (filters.date) {
       const dateStr = dayjs(filters.date).format("YYYY-MM-DD");
@@ -132,6 +144,8 @@ export const useAppointments = () => {
     filters.date,
     filters.status,
     pageSize,
+    isAdmin,
+    userId,
   ]);
 
   useEffect(() => {
@@ -183,5 +197,6 @@ export const useAppointments = () => {
     reloadWithCurrentFilters,
     fetchAppointmentsData: fetchAppointmentsWithFilters,
     buildQueryParams,
+    isAdmin,
   };
 };

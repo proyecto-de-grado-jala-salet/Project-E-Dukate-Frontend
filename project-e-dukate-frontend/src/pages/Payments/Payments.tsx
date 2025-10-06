@@ -82,13 +82,13 @@ const Payments: React.FC = () => {
     qrExists,
     uploadQR,
     updateQR,
+    isAdmin,
   } = usePayments();
 
   const { setIsNavigating } = useNavigation();
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
   const { userRole } = useAuthStore();
-  const isAdmin = userRole === 'Administrator';
 
   useEffect(() => {
     if (!loading) {
@@ -97,13 +97,13 @@ const Payments: React.FC = () => {
   }, [loading, setIsNavigating]);
 
   const filterConfig = [
-    {
+    ...(isAdmin ? [{
       type: 'dropdown' as const,
       label: 'Especialista',
       value: specialistId,
       onChange: setSpecialistId,
       options: specialists,
-    },
+    }] : []),
     {
       type: 'year' as const,
       label: 'Años',
@@ -285,6 +285,7 @@ const Payments: React.FC = () => {
           patients.find((p) => p.value === patientId)?.label || patientId
         }
         formatDate={formatDate}
+        isAdmin={isAdmin}
       />
       {payments && payments.length > 0 && (
         <Pagination

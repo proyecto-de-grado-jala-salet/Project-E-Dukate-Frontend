@@ -153,6 +153,7 @@ export const MedicalHistory: React.FC = () => {
             onConsultationsUpdate={refreshConsultations}
             newConsultationId={newConsultationId}
             selectedSpecialistId={selectedSpecialistId}
+            canEditSelectedSpecialist={canEditSelectedSpecialist}
           />
         </Box>
       )}

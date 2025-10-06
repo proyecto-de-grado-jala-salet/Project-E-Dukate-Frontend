@@ -1,4 +1,3 @@
-// project-e-dukate-frontend/src/stores/authStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { createJSONStorage } from 'zustand/middleware';
@@ -27,7 +26,6 @@ interface AuthState {
 
 type AuthPersist = PersistOptions<AuthState>;
 
-// Función segura para SSR
 const safeJwtDecode = (token: string) => {
   if (typeof window === 'undefined') return null;
   try {
@@ -80,7 +78,6 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// Hook para uso seguro en componentes
 export const useAuth = () => {
   const store = useAuthStore();
   const [isClient, setIsClient] = useState(false);
@@ -89,13 +86,20 @@ export const useAuth = () => {
     setIsClient(true);
   }, []);
 
+  const getDefaultRoute = () => {
+    if (store.userRole === 'Specialist') {
+      return '/dashboard/pacientes';
+    }
+    return '/dashboard/especialidades';
+  };
+
   return {
     ...store,
-    // Solo devolver valores después de la hidratación
     token: isClient ? store.token : null,
     userRole: isClient ? store.userRole : null,
     userName: isClient ? store.userName : null,
     userId: isClient ? store.userId : null,
     isHydrated: store._hasHydrated,
+    defaultRoute: getDefaultRoute(),
   };
 };

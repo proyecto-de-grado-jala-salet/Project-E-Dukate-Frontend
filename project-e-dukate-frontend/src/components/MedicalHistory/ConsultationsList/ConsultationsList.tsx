@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -22,13 +22,13 @@ import Tooltip from "@mui/material/Tooltip";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { FaRegEye } from "react-icons/fa6";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { HiOutlineDocumentArrowUp } from "react-icons/hi2";
 import { SimpleEditor } from "@/components/tiptap/tiptap-templates/simple/simple-editor";
 import { apiRequest, API_ENDPOINTS, getAuthToken } from "@/services/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 import { showNotification } from "@/services/notificationService";
 import { PDFViewer } from "@/components/PdfViewer/PdfViewer";
-import { IoRefreshOutline } from "react-icons/io5";
 import { BsFillFileEarmarkPdfFill } from "react-icons/bs";
 
 interface Consultation {
@@ -62,6 +62,7 @@ interface ConsultationsListProps {
   onConsultationsUpdate: () => void;
   newConsultationId?: string | null;
   selectedSpecialistId: string;
+  canEditSelectedSpecialist: boolean;
 }
 
 export const ConsultationsList: React.FC<ConsultationsListProps> = ({
@@ -73,13 +74,16 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
   onConsultationsUpdate,
   newConsultationId,
   selectedSpecialistId,
+  canEditSelectedSpecialist,
 }) => {
   const [expandedConsultationId, setExpandedConsultationId] = useState<string | null>(null);
   const [editorContent, setEditorContent] = useState<string>("");
   const { userRole, userId } = useAuthStore();
-  const { medicalHistory, handleDeleteDocument, canEditSelectedSpecialist, loadingDocuments, refreshDocuments } = useMedicalHistory();
+  const { medicalHistory, handleDeleteDocument, handleUploadDocument, loadingDocuments, refreshDocuments } = useMedicalHistory();
   const [showPDFViewer, setShowPDFViewer] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (newConsultationId) {
@@ -99,6 +103,34 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
+
+  const handleUpload = async () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const selectedFile = event.target.files[0];
+      setIsUploading(true);
+      
+      try {
+        await handleUploadDocument(selectedFile);
+        await refreshDocuments();
+        
+      } catch (error) {
+        showNotification("Error al subir el documento", "error");
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    } else {
+      showNotification("Por favor selecciona un archivo PDF", "error");
+    }
+  };
 
   if (loadingConsultations) {
     return (
@@ -423,26 +455,49 @@ export const ConsultationsList: React.FC<ConsultationsListProps> = ({
 
       {selectedSpecialistId && (
         <Box sx={{ mt: 4 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <Box sx={{ 
+            display: "flex", 
+            justifyContent: "space-between",
+            alignItems: "center", 
+            mb: 2 
+          }}>
             <Typography variant="h5" fontWeight="bold" sx={{ color: "black" }}>
               Documentos Médicos
             </Typography>
-            {userRole !== "Administrator" && (
-              <IconButton
-                onClick={refreshDocuments}
-                sx={{
-                  backgroundColor: "#F4A601",
-                  color: "#000",
-                  borderRadius: "10px",
-                  px: 3,
-                  py: 1,
-                  fontSize: "14px",
-                  "&:hover": { backgroundColor: "#e69500" },
-                }}
-              >
-                <IoRefreshOutline size={24} />
-                Refrescar
-              </IconButton>
+            
+            {canEditSelectedSpecialist && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  disabled={isUploading}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleUpload}
+                  disabled={isUploading}
+                  startIcon={<HiOutlineDocumentArrowUp size={20} />}
+                  sx={{
+                    backgroundColor: isUploading ? "#cccccc" : "#F4A601",
+                    color: "#000",
+                    borderRadius: "10px",
+                    px: 3,
+                    py: 1,
+                    fontSize: "14px",
+                    "&:hover": { 
+                      backgroundColor: isUploading ? "#cccccc" : "#e69500" 
+                    },
+                    "& .MuiButton-startIcon": {
+                      marginRight: 1,
+                    }
+                  }}
+                >
+                  {isUploading ? "Subiendo..." : "Añadir PDF"}
+                </Button>
+              </Box>
             )}
           </Box>
           {loadingDocuments ? (

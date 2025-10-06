@@ -37,9 +37,10 @@ const AddAppointmentDialog = dynamic(() =>
 
 const Appointments: React.FC = () => {
   const { userRole } = useAuthStore();
-  const isAdmin = userRole === "Administrator" || userRole === "Specialist";
+  const isAdmin = userRole === "Administrator";
   const [openDialog, setOpenDialog] = useState(false);
   const { setIsNavigating } = useNavigation();
+  
   const {
     filters,
     appointments,
@@ -56,6 +57,7 @@ const Appointments: React.FC = () => {
     addAppointment,
     reloadWithCurrentFilters,
     fetchAppointmentsData,
+    isAdmin: isAdminFromHook,
   } = useAppointments();
   
   useEffect(() => {
@@ -141,19 +143,21 @@ const Appointments: React.FC = () => {
           currentPage={currentPage}
           onPageChange={handlePageChange}
           enableEdit={isAdmin}
-          enableReschedule={isAdmin}
+          enableReschedule={isAdminFromHook}
           onRefresh={refreshAppointments}
           selectedDate={filters.date}
         />
       )}
-      <AddAppointmentDialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        onSave={handleAddAppointment}
-        patientOptions={patientOptions}
-        specialtyOptions={specialtyOptions}
-        reloadAppointments={reloadWithCurrentFilters}
-      />
+      {isAdmin && (
+        <AddAppointmentDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          onSave={handleAddAppointment}
+          patientOptions={patientOptions}
+          specialtyOptions={specialtyOptions}
+          reloadAppointments={reloadWithCurrentFilters}
+        />
+      )}
     </Box>
   );
 };

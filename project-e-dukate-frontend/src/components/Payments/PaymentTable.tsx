@@ -19,6 +19,7 @@ interface PaymentTableProps {
   ) => void;
   getPatientName: (patientId: string) => string;
   formatDate: (date: string | null) => string;
+  isAdmin: boolean;
 }
 
 export const PaymentTable: React.FC<PaymentTableProps> = ({
@@ -27,6 +28,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
   onValueChange,
   getPatientName,
   formatDate,
+  isAdmin,
 }) => {
   return (
     <TableContainer
@@ -185,6 +187,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
                 onValueChange={onValueChange}
                 getPatientName={getPatientName}
                 formatDate={formatDate}
+                isAdmin={isAdmin}
               />
             ))
           ) : (

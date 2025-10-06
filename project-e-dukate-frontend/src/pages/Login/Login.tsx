@@ -13,6 +13,8 @@ import { setAuthToken } from '@/services/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { jwtDecode } from 'jwt-decode';
+import { DecodedToken } from '@/utils/useAuthStoreConstants';
 
 interface LoginResponse {
   token: string;
@@ -42,12 +44,14 @@ export const Login: React.FC = () => {
       setAuthToken(token);
       setAuth(token);
       
-      await Promise.all([
-        fetch('/api/some-critical-data').catch(() => {}),
-        new Promise(resolve => setTimeout(resolve, 100))
-      ]);
+      const decoded = jwtDecode<DecodedToken>(token);
+      const userRole = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
       
-      router.push('/dashboard/especialidades');
+      if (userRole === 'Specialist') {
+        router.push('/dashboard/pacientes');
+      } else {
+        router.push('/dashboard/especialidades');
+      }
       
     } catch (err: any) {
       setIsRedirecting(false);
@@ -80,7 +84,7 @@ export const Login: React.FC = () => {
           height: '500px',
           backgroundColor: '#013c28',
           borderRadius: '50%',
-          border: '30px solid #f5c71a',
+          border: '30px solid #f5a623',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -104,7 +108,7 @@ export const Login: React.FC = () => {
           height: '500px',
           backgroundColor: '#013c28',
           borderRadius: '50%',
-          border: '30px solid #f5c71a',
+          border: '30px solid #f5a623',
         }}
       />
 
@@ -116,7 +120,7 @@ export const Login: React.FC = () => {
           px: 10,
           width: '100%',
           maxWidth: 600,
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
