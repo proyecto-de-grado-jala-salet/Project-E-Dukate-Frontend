@@ -9,7 +9,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSearchParams } from "next/navigation";
 import { useUserEdit } from "@/hooks/useUserEdit";
-import { UserEdit } from "@/pages/Users";
+import { UserEdit } from "@/pages/Users/UserEdit";
 import { User } from "@/types/userTypes";
 import { UserRole } from "@/types/userTypes";
 import { useEditStore } from "@/stores/editStore";
