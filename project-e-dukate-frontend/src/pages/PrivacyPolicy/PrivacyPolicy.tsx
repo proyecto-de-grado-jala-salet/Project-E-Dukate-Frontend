@@ -5,10 +5,10 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const PrivacyPolicy: React.FC = () => {
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   
   useEffect(() => {
     setIsNavigating(false);

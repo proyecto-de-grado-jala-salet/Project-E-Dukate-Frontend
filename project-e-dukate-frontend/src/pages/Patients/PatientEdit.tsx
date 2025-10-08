@@ -10,7 +10,7 @@ import { mapGenderToRadioValue } from '@/utils/formUtils';
 import { mapRadioValueToGender } from '@/utils/formUtils';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -43,7 +43,7 @@ interface PatientEditProps {
 
 export const PatientEdit: React.FC<PatientEditProps> = ({ formData, handleSubmit, setFormData, isSubmitting }) => {
   const router = useRouter();
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   
   useEffect(() => {
     setIsNavigating(false);

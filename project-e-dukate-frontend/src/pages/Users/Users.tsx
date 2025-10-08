@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { ColumnConfig } from '@/types/table';
 import { useEditStore } from '@/stores/editStore';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 interface User {
   id: string;
@@ -28,7 +28,7 @@ export const Users: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const {
     data: users,
     error: usersError,

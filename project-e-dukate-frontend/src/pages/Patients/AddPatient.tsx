@@ -11,7 +11,7 @@ import { showNotification } from '@/services/notificationService';
 import dayjs from 'dayjs';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -62,7 +62,7 @@ export const AddPatient: React.FC = () => {
     address: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   
   useEffect(() => {
     setIsNavigating(false);

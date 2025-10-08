@@ -13,7 +13,7 @@ import { ColumnConfig } from '@/types/table';
 import { useEditStore } from '@/stores/editStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 interface Patient {
   id: string;
@@ -31,7 +31,7 @@ export const Patients: React.FC = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
   const { userRole } = useAuthStore();
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const isAdmin = userRole === 'Administrator';
 
   const {

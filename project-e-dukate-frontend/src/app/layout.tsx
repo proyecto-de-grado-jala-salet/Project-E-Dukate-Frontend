@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ClientWrapper from '@/components/client/layout/ClientWrapper';
+import { NavigationProvider } from '@/contexts/NavigationContext';
 
 export const metadata: Metadata = {
   title: {
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <body>
+        <NavigationProvider>
           <ClientWrapper>{children}</ClientWrapper>
+        </NavigationProvider>
       </body>
     </html>
   );

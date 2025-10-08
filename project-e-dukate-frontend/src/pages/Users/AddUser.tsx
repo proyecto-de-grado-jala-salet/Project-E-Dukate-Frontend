@@ -13,7 +13,7 @@ import { SpecialistDto } from '@/types/user';
 import { AdministratorDto } from '@/types/user';
 import dynamic from 'next/dynamic';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const RoleSelector = dynamic(() => 
   import('@/components/FormComponents/RoleSelector').then(mod => mod.RoleSelector), 
@@ -96,7 +96,7 @@ export const AddUser: React.FC<AddUserProps> = ({ initialRole = null }) => {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [backendError, setBackendError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   
   useEffect(() => {
     setIsNavigating(false);

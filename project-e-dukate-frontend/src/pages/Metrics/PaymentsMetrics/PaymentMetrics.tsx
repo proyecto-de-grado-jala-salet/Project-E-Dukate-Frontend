@@ -8,7 +8,8 @@ import { usePaymentMetrics } from '@/hooks/usePaymentMetrics';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+// import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const GenericFilterContainer = dynamic(() => 
   import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
@@ -98,7 +99,7 @@ export const PaymentMetrics: React.FC = () => {
     loading,
   } = usePaymentMetrics();
 
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const componentRef = useRef<HTMLDivElement>(null);
   const pdfContentRef = useRef<HTMLDivElement>(null);
   const {

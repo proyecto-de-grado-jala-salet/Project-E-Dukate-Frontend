@@ -9,7 +9,7 @@ import { useAppointments } from "@/hooks/useAppointments";
 import { showNotification } from "@/services/notificationService";
 import { Appointment } from "@/types/appointment";
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const GenericFilterContainer = dynamic(() => 
   import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
@@ -39,7 +39,7 @@ const Appointments: React.FC = () => {
   const { userRole } = useAuthStore();
   const isAdmin = userRole === "Administrator";
   const [openDialog, setOpenDialog] = useState(false);
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   
   const {
     filters,

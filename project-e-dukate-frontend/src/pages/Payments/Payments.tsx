@@ -16,7 +16,7 @@ import { Pagination } from '@/components/Pagination';
 import { usePayments } from '@/hooks/usePayments';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 import { getAuthToken } from '@/services/api';
 import { showNotification } from '@/services/notificationService';
 import Image from 'next/image';
@@ -85,7 +85,7 @@ const Payments: React.FC = () => {
     isAdmin,
   } = usePayments();
 
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
   const { userRole } = useAuthStore();

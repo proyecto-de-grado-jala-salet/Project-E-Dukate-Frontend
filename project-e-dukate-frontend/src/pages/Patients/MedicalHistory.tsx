@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import { useMedicalHistory } from "@/hooks/useMedicalHistory";
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const PatientInfo = dynamic(() => 
   import('@/components/MedicalHistory/PatientInfo').then(mod => mod.PatientInfo), 
@@ -44,7 +44,7 @@ const ConsultationsList = dynamic(() =>
 export const MedicalHistory: React.FC = () => {
   const [newConsultationId, setNewConsultationId] = useState<string | null>(null);
   const [selectedSpecialistId, setSelectedSpecialistId] = useState<string>("");
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const {
     medicalHistory,
     patientData,

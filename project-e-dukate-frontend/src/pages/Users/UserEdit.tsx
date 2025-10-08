@@ -12,7 +12,7 @@ import { mapRadioValueToGender } from '@/utils/formUtils';
 import { mapGenderToRadioValue } from '@/utils/formUtils';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const PersonalInfoForm = dynamic(() => 
   import('@/components/FormComponents/PersonalInfoForm').then(mod => mod.PersonalInfoForm), 
@@ -68,7 +68,7 @@ interface UserEditProps<T extends BaseUser> {
 
 export const UserEdit = <T extends BaseUser>({ formData, role, handleSubmit, setFormData, isSubmitting }: UserEditProps<T>) => {
   const router = useRouter();
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   
   useEffect(() => {
     setIsNavigating(false);

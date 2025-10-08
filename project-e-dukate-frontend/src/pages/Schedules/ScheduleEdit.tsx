@@ -9,7 +9,7 @@ import { showNotification } from "@/services/notificationService";
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const ScheduleForm = dynamic(() => 
   import('@/components/ScheduleForm/ScheduleForm').then(mod => mod.ScheduleForm), 
@@ -26,7 +26,7 @@ export const ScheduleEdit: React.FC = () => {
   const router = useRouter();
   const { schedules, setSchedules, loading, handleSubmit } = useSchedules();
   const { specialistName } = useSpecialist();
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
 
   useEffect(() => {
     if (!loading) {

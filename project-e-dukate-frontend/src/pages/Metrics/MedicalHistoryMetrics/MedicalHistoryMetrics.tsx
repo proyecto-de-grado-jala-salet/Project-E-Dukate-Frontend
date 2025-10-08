@@ -11,7 +11,8 @@ import { statuses, formatStatusLabel } from '@/utils/medicalHistoryConstants';
 import { usePDFGenerator } from '@/hooks/usePDFGenerator';
 import { PDFPreviewDialog } from '@/components/PDF';
 import dynamic from 'next/dynamic';
-import { useNavigation } from '@/contexts/NavigationContext';
+// import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const GenericFilterContainer = dynamic(() => 
   import('@/components/GenericFilters/GenericFilterContainer').then(mod => mod.GenericFilterContainer), 
@@ -42,7 +43,7 @@ export const MedicalHistoryMetrics: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
   const pdfContentRef = useRef<HTMLDivElement>(null);
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const {
     previewOpen,
     previewImage,

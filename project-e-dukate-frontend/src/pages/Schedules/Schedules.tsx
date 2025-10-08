@@ -16,7 +16,7 @@ import { dayTranslation } from '@/utils/scheduleUtils';
 import { formatTimeSlot } from '@/utils/scheduleUtils';
 import slugify from 'slugify';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useSafeNavigation } from '@/hooks/useSafeNavigation';
 
 const getScheduleForDay = (schedules: Schedule[], dayInSpanish: string): string => {
   const dayInEnglish = Object.keys(dayTranslation).find(
@@ -35,7 +35,7 @@ export const Schedules: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const { setEditData } = useEditStore();
-  const { setIsNavigating } = useNavigation();
+  const { setIsNavigating } = useSafeNavigation();
   const { data, error, totalPages, currentPage, loading, fetchData } = useApi<Specialist>('specialists');
   
   useEffect(() => {
