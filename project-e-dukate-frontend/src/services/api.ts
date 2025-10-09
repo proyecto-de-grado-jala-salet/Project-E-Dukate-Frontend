@@ -3,31 +3,28 @@
 import Cookies from 'js-cookie';
 
 export const API_ENDPOINTS = {
-  specialties: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Specialties`,
-  users: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Users`,
-  administrators: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Administrators`,
-  specialists: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Specialists`,
-  patients: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Patients`,
-  schedules: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Schedules`,
-  login: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Auth/login`,
-  medicalhistories: `${process.env.NEXT_PUBLIC_API_BASE_URL}/MedicalHistories`,
-  medicalconsultations: `${process.env.NEXT_PUBLIC_API_BASE_URL}/MedicalConsultations`,
-  paymentsFilter: `${process.env.NEXT_PUBLIC_API_BASE_URL}/payments/filter`,
-  payments: `${process.env.NEXT_PUBLIC_API_BASE_URL}/payments`,
-  medicalHistoryMetrics: `${process.env.NEXT_PUBLIC_API_BASE_URL}/metrics/medical-histories`,
-  demographicMetrics: `${process.env.NEXT_PUBLIC_API_BASE_URL}/metrics/demographics/`,
-  paymentMetrics: `${process.env.NEXT_PUBLIC_API_BASE_URL}/metrics/payments`,
-  appointments: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Appointments`,
-  specialistsBySpecialty: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Schedules/specialists-by-specialty`,
-  appointmentPreview: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Appointments/preview`,
-  appointmentArchive: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Appointments/sessions`,
-  cancelSession: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Appointments/appointment`,
-  rescheduleSession: `${process.env.NEXT_PUBLIC_API_BASE_URL}/Appointments/reschedule-session`,
-  paymentQRs: `${process.env.NEXT_PUBLIC_API_BASE_URL}/PaymentQRs`,
+  specialties: `${process.env.API_BASE_URL}/Specialties`,
+  users: `${process.env.API_BASE_URL}/Users`,
+  administrators: `${process.env.API_BASE_URL}/Administrators`,
+  specialists: `${process.env.API_BASE_URL}/Specialists`,
+  patients: `${process.env.API_BASE_URL}/Patients`,
+  schedules: `${process.env.API_BASE_URL}/Schedules`,
+  login: `${process.env.API_BASE_URL}/Auth/login`,
+  medicalhistories: `${process.env.API_BASE_URL}/MedicalHistories`,
+  medicalconsultations: `${process.env.API_BASE_URL}/MedicalConsultations`,
+  paymentsFilter: `${process.env.API_BASE_URL}/payments/filter`,
+  payments: `${process.env.API_BASE_URL}/payments`,
+  medicalHistoryMetrics: `${process.env.API_BASE_URL}/metrics/medical-histories`,
+  demographicMetrics: `${process.env.API_BASE_URL}/metrics/demographics/`,
+  paymentMetrics: `${process.env.API_BASE_URL}/metrics/payments`,
+  appointments: `${process.env.API_BASE_URL}/Appointments`,
+  specialistsBySpecialty: `${process.env.API_BASE_URL}/Schedules/specialists-by-specialty`,
+  appointmentPreview: `${process.env.API_BASE_URL}/Appointments/preview`,
+  appointmentArchive: `${process.env.API_BASE_URL}/Appointments/sessions`,
+  cancelSession: `${process.env.API_BASE_URL}/Appointments/appointment`,
+  rescheduleSession: `${process.env.API_BASE_URL}/Appointments/reschedule-session`,
+  paymentQRs: `${process.env.API_BASE_URL}/PaymentQRs`,
 };
-
-console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
-console.log('Login URL:', API_ENDPOINTS.login);
 
 export const setAuthToken = (token: string) => {
   Cookies.set('authToken', token, { expires: 1, secure: true, sameSite: 'strict' });
