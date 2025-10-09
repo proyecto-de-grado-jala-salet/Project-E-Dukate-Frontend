@@ -26,6 +26,9 @@ export const API_ENDPOINTS = {
   paymentQRs: `${process.env.NEXT_PUBLIC_API_BASE_URL}/PaymentQRs`,
 };
 
+console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+console.log('Login URL:', API_ENDPOINTS.login);
+
 export const setAuthToken = (token: string) => {
   Cookies.set('authToken', token, { expires: 1, secure: true, sameSite: 'strict' });
 };
