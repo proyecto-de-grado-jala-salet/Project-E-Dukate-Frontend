@@ -2,28 +2,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Cookies from 'js-cookie';
 
+const getApiBaseUrl = (): string => {
+  const defaultUrl = 'https://project-e-dukate-backend-production.up.railway.app/api';
+
+  if (typeof window === 'undefined') {
+    return defaultUrl;
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:5275/api';
+  }
+  
+  if (hostname.includes('test')) {
+    return 'https://project-e-dukate-backend-test.up.railway.app/api';
+  }
+  
+  return defaultUrl;
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 export const API_ENDPOINTS = {
-  specialties: `${process.env.API_BASE_URL}/Specialties`,
-  users: `${process.env.API_BASE_URL}/Users`,
-  administrators: `${process.env.API_BASE_URL}/Administrators`,
-  specialists: `${process.env.API_BASE_URL}/Specialists`,
-  patients: `${process.env.API_BASE_URL}/Patients`,
-  schedules: `${process.env.API_BASE_URL}/Schedules`,
-  login: `${process.env.API_BASE_URL}/Auth/login`,
-  medicalhistories: `${process.env.API_BASE_URL}/MedicalHistories`,
-  medicalconsultations: `${process.env.API_BASE_URL}/MedicalConsultations`,
-  paymentsFilter: `${process.env.API_BASE_URL}/payments/filter`,
-  payments: `${process.env.API_BASE_URL}/payments`,
-  medicalHistoryMetrics: `${process.env.API_BASE_URL}/metrics/medical-histories`,
-  demographicMetrics: `${process.env.API_BASE_URL}/metrics/demographics/`,
-  paymentMetrics: `${process.env.API_BASE_URL}/metrics/payments`,
-  appointments: `${process.env.API_BASE_URL}/Appointments`,
-  specialistsBySpecialty: `${process.env.API_BASE_URL}/Schedules/specialists-by-specialty`,
-  appointmentPreview: `${process.env.API_BASE_URL}/Appointments/preview`,
-  appointmentArchive: `${process.env.API_BASE_URL}/Appointments/sessions`,
-  cancelSession: `${process.env.API_BASE_URL}/Appointments/appointment`,
-  rescheduleSession: `${process.env.API_BASE_URL}/Appointments/reschedule-session`,
-  paymentQRs: `${process.env.API_BASE_URL}/PaymentQRs`,
+  specialties: `${API_BASE_URL}/Specialties`,
+  users: `${API_BASE_URL}/Users`,
+  administrators: `${API_BASE_URL}/Administrators`,
+  specialists: `${API_BASE_URL}/Specialists`,
+  patients: `${API_BASE_URL}/Patients`,
+  schedules: `${API_BASE_URL}/Schedules`,
+  login: `${API_BASE_URL}/Auth/login`,
+  medicalhistories: `${API_BASE_URL}/MedicalHistories`,
+  medicalconsultations: `${API_BASE_URL}/MedicalConsultations`,
+  paymentsFilter: `${API_BASE_URL}/payments/filter`,
+  payments: `${API_BASE_URL}/payments`,
+  medicalHistoryMetrics: `${API_BASE_URL}/metrics/medical-histories`,
+  demographicMetrics: `${API_BASE_URL}/metrics/demographics/`,
+  paymentMetrics: `${API_BASE_URL}/metrics/payments`,
+  appointments: `${API_BASE_URL}/Appointments`,
+  specialistsBySpecialty: `${API_BASE_URL}/Schedules/specialists-by-specialty`,
+  appointmentPreview: `${API_BASE_URL}/Appointments/preview`,
+  appointmentArchive: `${API_BASE_URL}/Appointments/sessions`,
+  cancelSession: `${API_BASE_URL}/Appointments/appointment`,
+  rescheduleSession: `${API_BASE_URL}/Appointments/reschedule-session`,
+  paymentQRs: `${API_BASE_URL}/PaymentQRs`,
 };
 
 export const setAuthToken = (token: string) => {
