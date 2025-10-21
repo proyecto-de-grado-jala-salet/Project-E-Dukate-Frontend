@@ -99,34 +99,33 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
+  // Función getPatientInfo alternativa - más robusta
   const getPatientInfo = (appointmentData: any) => {
     try {
-
       const data =
         typeof appointmentData === "string"
           ? JSON.parse(appointmentData)
           : appointmentData;
-      
+
       const patient = data.patient || {};
       const specialty = data.specialty || {};
       const specialist = data.specialist || {};
       const selectedSlots = data.selectedSlots || [];
       const previewDates = data.previewDates || [];
 
-      const firstDate = previewDates.length > 0 ? previewDates[0] : null;
-      const appointmentDate = firstDate
-        ? new Date(firstDate.start).toLocaleDateString()
-        : "N/A";
-      const appointmentTime = firstDate
-        ? new Date(firstDate.start).toLocaleTimeString("es-ES", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "N/A";
+      const timeRange =
+        selectedSlots.length > 0
+          ? `${selectedSlots[0].startTime.slice(0, 5)} a ${selectedSlots[0].endTime.slice(0, 5)}`
+          : "N/A";
       
-      const scheduleInfo = selectedSlots.length > 0 ? selectedSlots[0] : null;
-      const dayOfWeek = scheduleInfo?.dayOfWeek || "N/A";
-      const timeRange = scheduleInfo?.displayText || "N/A";
+      const formattedDates = previewDates.map((date: any, index: number) => {
+        const slot = selectedSlots[index] || selectedSlots[0] || {};
+        const dateObj = new Date(date.start);
+
+        return {
+          display: `${dateObj.toLocaleDateString("es-ES")} de ${slot.startTime?.slice(0, 5) || "N/A"} a ${slot.endTime?.slice(0, 5) || "N/A"}`,
+        };
+      });
 
       return {
         patientName: patient.Names || patient.names || "N/A",
@@ -136,35 +135,22 @@ const NotificationsPage: React.FC = () => {
           specialty.TypeOfSpecialty || specialty.typeOfSpecialty || "N/A",
         specialistName:
           `${specialist.Names || specialist.names || ""} ${specialist.LastNamePaternal || specialist.lastNamePaternal || ""}`.trim(),
-        appointmentDate,
-        appointmentTime,
-        dayOfWeek,
-        timeRange,
         consultationsNumber: data.consultationsNumber || 0,
-        totalCost: data.totalCost || 0,
-        paymentRequired: data.paymentRequired || 0,
-        amount: data.paymentRequired || data.totalCost || 0,
-        previewDates: previewDates,
+        timeRange: timeRange,
+        formattedDates: formattedDates,
         selectedSlots: selectedSlots,
       };
     } catch (error) {
       console.error("❌ Error parsing appointmentData:", error);
-      console.error("❌ Raw data that failed:", appointmentData);
 
       return {
         patientName: "N/A",
         patientLastName: "",
         specialty: "N/A",
         specialistName: "N/A",
-        appointmentDate: "N/A",
-        appointmentTime: "N/A",
-        dayOfWeek: "N/A",
-        timeRange: "N/A",
         consultationsNumber: 0,
-        totalCost: 0,
-        paymentRequired: 0,
-        amount: 0,
-        previewDates: [],
+        timeRange: "N/A",
+        formattedDates: [],
         selectedSlots: [],
       };
     }
@@ -286,30 +272,12 @@ const NotificationsPage: React.FC = () => {
                       </Typography>
 
                       <Typography variant="body2" color="textSecondary">
-                        <strong>Primera cita:</strong>{" "}
-                        {patientInfo.appointmentDate}{" "}
-                        {patientInfo.appointmentTime}
-                      </Typography>
-
-                      <Typography variant="body2" color="textSecondary">
-                        <strong>Horario:</strong> {patientInfo.timeRange}
-                      </Typography>
-
-                      <Typography variant="body2" color="textSecondary">
                         <strong>N° de consultas:</strong>{" "}
                         {patientInfo.consultationsNumber}
                       </Typography>
 
                       <Typography variant="body2" color="textSecondary">
                         <strong>WhatsApp:</strong> {notification.whatsAppNumber}
-                      </Typography>
-
-                      <Typography
-                        variant="body1"
-                        fontWeight="medium"
-                        sx={{ mt: 1 }}
-                      >
-                        Monto a pagar: S/ {patientInfo.paymentRequired}
                       </Typography>
 
                       <Chip
@@ -408,15 +376,11 @@ const NotificationsPage: React.FC = () => {
                   <>
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="h6" gutterBottom>
-                        Información del Paciente
+                        Información de la Cita
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         <strong>Paciente:</strong> {patientInfo.patientName}{" "}
                         {patientInfo.patientLastName}
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        <strong>WhatsApp:</strong>{" "}
-                        {selectedNotification.whatsAppNumber}
                       </Typography>
                       <Typography variant="body1" gutterBottom>
                         <strong>Especialidad:</strong> {patientInfo.specialty}
@@ -430,19 +394,8 @@ const NotificationsPage: React.FC = () => {
                         {patientInfo.consultationsNumber}
                       </Typography>
                       <Typography variant="body1" gutterBottom>
-                        <strong>Horario:</strong> {patientInfo.timeRange}
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        <strong>Primera cita:</strong>{" "}
-                        {patientInfo.appointmentDate}{" "}
-                        {patientInfo.appointmentTime}
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        <strong>Monto requerido:</strong> S/{" "}
-                        {patientInfo.paymentRequired}
-                      </Typography>
-                      <Typography variant="body1" gutterBottom>
-                        <strong>Costo total:</strong> S/ {patientInfo.totalCost}
+                        <strong>WhatsApp:</strong>{" "}
+                        {selectedNotification.whatsAppNumber}
                       </Typography>
                     </Box>
 
@@ -450,14 +403,10 @@ const NotificationsPage: React.FC = () => {
                       <Typography variant="h6" gutterBottom>
                         Todas las fechas programadas
                       </Typography>
-                      {patientInfo.previewDates.map(
+                      {patientInfo.formattedDates.map(
                         (date: any, index: number) => (
                           <Typography key={index} variant="body2" gutterBottom>
-                            • {new Date(date.start).toLocaleDateString()}{" "}
-                            {new Date(date.start).toLocaleTimeString("es-ES", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            • {date.display}
                           </Typography>
                         )
                       )}
