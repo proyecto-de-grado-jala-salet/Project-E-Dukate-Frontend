@@ -1,15 +1,13 @@
 import QRPayment from '@/pages/QRPayment/QRPayment'
 
-interface PageProps {
-  params: {
-    appointmentId: string
-  }
+type PageProps = {
+  params: Promise<{ appointmentId: string }>;
 }
 
-const QRPaymentPage = ({ params }: PageProps) => {
+export default async function QRPaymentPage({ params }: PageProps) {
+  const { appointmentId } = await params;
+
   return (
-    <QRPayment appointmentId={params.appointmentId} />
+    <QRPayment appointmentId={appointmentId} />
   )
 }
-
-export default QRPaymentPage
