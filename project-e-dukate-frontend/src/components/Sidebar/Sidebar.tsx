@@ -26,6 +26,10 @@ import { useAuthStore } from '@/stores/authStore';
 import { clearAuthToken } from '@/services/api';
 import Image from 'next/image';
 import { useNavigation } from '@/contexts/NavigationContext';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface SubMenuItem {
   label: string;
@@ -55,65 +59,94 @@ export const Sidebar: React.FC<SidebarProps> = ({ selectedTab, sx }) => {
   const settingsAnchorRef = useRef<HTMLDivElement>(null);
   const { setIsNavigating } = useNavigation();
 
+  const { unreadCount } = useNotifications();
+
   const menuItems: MenuItem[] = [
     {
-      label: 'Especialidades',
+      label: "Especialidades",
       icon: <FaStethoscope size={20} />,
-      value: 'especialidades',
-      roles: ['Administrator'],
+      value: "especialidades",
+      roles: ["Administrator"],
     },
     {
-      label: 'Usuarios',
+      label: "Usuarios",
       icon: <PeopleAltOutlinedIcon />,
-      value: 'usuarios',
-      roles: ['Administrator'],
+      value: "usuarios",
+      roles: ["Administrator"],
     },
     {
-      label: 'Pacientes',
+      label: "Pacientes",
       icon: <RiUserHeartLine size={25} />,
-      value: 'pacientes',
-      roles: ['Administrator', 'Specialist'],
+      value: "pacientes",
+      roles: ["Administrator", "Specialist"],
     },
     {
-      label: 'Pagos',
+      label: "Pagos",
       icon: <PaymentsOutlinedIcon />,
-      value: 'pagos',
-      roles: ['Administrator', 'Specialist'],
+      value: "pagos",
+      roles: ["Administrator", "Specialist"],
     },
     {
-      label: 'Citas',
+      label: "Citas",
       icon: <CalendarMonthOutlinedIcon />,
-      value: 'citas',
-      roles: ['Administrator', 'Specialist'],
+      value: "citas",
+      roles: ["Administrator", "Specialist"],
     },
     {
-      label: 'Horarios',
+      label: "Horarios",
       icon: <LiaBusinessTimeSolid size={23} />,
-      value: 'horarios',
-      roles: ['Administrator'],
+      value: "horarios",
+      roles: ["Administrator"],
     },
     {
-      label: 'Metricas',
+      label: "Metricas",
       icon: <BarChartIcon />,
-      value: 'metricas',
-      roles: ['Administrator'],
+      value: "metricas",
+      roles: ["Administrator"],
       subItems: [
         {
-          label: 'Historial médico',
-          value: 'metricas/historial-medico',
+          label: "Historial médico",
+          value: "metricas/historial-medico",
           icon: <RiFolderChartLine size={20} />,
         },
         {
-          label: 'Demografía',
-          value: 'metricas/demografia',
+          label: "Demografía",
+          value: "metricas/demografia",
           icon: <IoPeopleOutline size={20} />,
         },
         {
-          label: 'Pagos',
-          value: 'metricas/pagos',
+          label: "Pagos",
+          value: "metricas/pagos",
           icon: <PaymentsOutlinedIcon />,
         },
       ],
+    },
+    {
+      label: "Notificaciones",
+      icon: (
+        <Badge
+          badgeContent={unreadCount}
+          color="error"
+          sx={{
+            "& .MuiBadge-badge": {
+              backgroundColor: "#ff4444",
+              color: "white",
+              fontSize: "0.7rem",
+              height: "18px",
+              minWidth: "18px",
+              transform: "scale(1) translate(50%, -50%)",
+            },
+          }}
+        >
+          {unreadCount > 0 ? (
+            <NotificationsIcon sx={{ color: "inherit" }} />
+          ) : (
+            <NotificationsNoneOutlinedIcon sx={{ color: "inherit" }} />
+          )}
+        </Badge>
+      ),
+      value: "notificaciones",
+      roles: ["Administrator"],
     },
   ];
 

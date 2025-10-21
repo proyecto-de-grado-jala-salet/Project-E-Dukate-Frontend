@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const currentTab = pathSegments[1] || 'dashboard';
         const allowedTabs =
           userRole === 'Administrator'
-            ? ['especialidades', 'usuarios', 'pacientes', 'pagos', 'horarios', 'metricas', 'citas', 'politica-privacidad']
+            ? ['especialidades', 'usuarios', 'pacientes', 'pagos', 'horarios', 'metricas', 'citas', 'politica-privacidad', 'notificaciones']
             : ['pacientes', 'pagos', 'citas', 'politica-privacidad'];
         const defaultTab = userRole === 'Administrator' ? 'especialidades' : 'pacientes';
 
@@ -69,7 +69,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const mainTab = pathSegments[1];
     const validTabs =
       userRole === 'Administrator'
-        ? ['especialidades', 'usuarios', 'pacientes', 'pagos', 'horarios', 'metricas', 'citas', 'politica-privacidad']
+        ? ['especialidades', 'usuarios', 'pacientes', 'pagos', 'horarios', 'metricas', 'citas', 'politica-privacidad', 'notificaciones']
         : ['pacientes', 'pagos', 'citas', 'politica-privacidad'];
     return validTabs.includes(mainTab) ? mainTab : userRole === 'Administrator' ? 'especialidades' : 'pacientes';
   };
