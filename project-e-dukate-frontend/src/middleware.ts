@@ -40,6 +40,6 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/login',
-    '/pago'
+    '/pago/:path*'
   ],
 };

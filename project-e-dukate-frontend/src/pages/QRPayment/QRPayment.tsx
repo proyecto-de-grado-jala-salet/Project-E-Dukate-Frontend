@@ -3,12 +3,12 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/services/api';
 import { showNotification } from '@/services/notificationService';
 import { temporaryAppointmentService, TemporaryAppointmentResponseDto } from '@/services/temporaryAppointmentService';
@@ -17,16 +17,14 @@ interface QRPaymentProps {
   appointmentId?: string;
 }
 
-const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId }) => {
+const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId }) => {
   const [qrImageUrl, setQrImageUrl] = useState<string | null>(null);
   const [loadingQR, setLoadingQR] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [appointmentData, setAppointmentData] = useState<TemporaryAppointmentResponseDto | null>(null);
-
-  const searchParams = useSearchParams();
-  const queryAppointmentId = searchParams ? searchParams.get('appointmentId') : null;
-  const appointmentId = propAppointmentId || queryAppointmentId;
+  const [loadingAppointment, setLoadingAppointment] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,16 +34,23 @@ const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId 
             const appointment = await temporaryAppointmentService.getTemporaryAppointment(appointmentId);
             setAppointmentData(appointment);
           } catch (error) {
-            console.error('Error cargando datos de la cita:', error);
+            console.error('❌ Error cargando datos de la cita:', error);
             showNotification('Error al cargar los datos de la cita', 'error');
+            setTimeout(() => {
+              router.push('/error?message=Cita no encontrada');
+            }, 3000);
+          } finally {
+            setLoadingAppointment(false);
           }
+        } else {
+          setLoadingAppointment(false);
         }
-        
+
         const response = await apiRequest<Blob>("paymentQRs", "GET");
         const url = URL.createObjectURL(response);
         setQrImageUrl(url);
       } catch (err) {
-        console.error("Error fetching QR:", err);
+        console.error("❌ Error fetching QR:", err);
         showNotification("Error al obtener el QR.", "error");
       } finally {
         setLoadingQR(false);
@@ -57,7 +62,7 @@ const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId 
     return () => {
       if (qrImageUrl) URL.revokeObjectURL(qrImageUrl);
     };
-  }, [appointmentId]);
+  }, [appointmentId, router]);
 
   const handleFileSelect = () => {
     const input = document.createElement("input");
@@ -66,8 +71,19 @@ const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId 
     input.onchange = (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          showNotification("El archivo es demasiado grande. Máximo 5MB.", "error");
+          return;
+        }
+        
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+        if (!allowedTypes.includes(file.type)) {
+          showNotification("Tipo de archivo no permitido. Use JPG, PNG, GIF o PDF.", "error");
+          return;
+        }
+        
         setSelectedFile(file);
-        showNotification("Archivo seleccionado. Haz clic en 'Enviar comprobante' para subirlo.", "info");
+        showNotification("Archivo seleccionado. Haz clic en 'Enviar comprobante' para subirlo.", "success");
       }
     };
     input.click();
@@ -91,10 +107,9 @@ const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId 
       showNotification("✅ Comprobante subido exitosamente. Tu pago está en verificación.", "success");
       
       setSelectedFile(null);
-      setAppointmentData(null);
 
     } catch (err: any) {
-      console.error("Error uploading comprobante:", err);
+      console.error("❌ Error uploading comprobante:", err);
       
       let errorMessage = "Error al subir el comprobante. Intenta nuevamente.";
       if (err.response?.data?.error) {
@@ -192,10 +207,18 @@ const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId 
     );
   };
 
-  if (loadingQR) {
+  if (loadingQR || loadingAppointment) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '60vh',
+        flexDirection: 'column',
+        gap: 2
+      }}>
         <CircularProgress />
+        <Typography>Cargando información de pago...</Typography>
       </Box>
     );
   }
@@ -228,6 +251,7 @@ const QRPayment: React.FC<QRPaymentProps> = ({ appointmentId: propAppointmentId 
             alt="E-Dukate Logo"
             width={180}
             height={60}
+            priority
           />
         </Box>
       </Box>
