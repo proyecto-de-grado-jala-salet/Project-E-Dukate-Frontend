@@ -10,5 +10,5 @@ const defaultOptions: ToastOptions = {
   theme: "light",
 };
 
-export const showNotification = (message: string, type: "success" | "error", options: Partial<ToastOptions> = {}) =>
+export const showNotification = (message: string, type: "success" | "error" | "warning" | "info", options: Partial<ToastOptions> = {}) =>
   toast[type](message, { ...defaultOptions, position: "bottom-right",...options });

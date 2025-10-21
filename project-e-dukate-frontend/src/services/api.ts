@@ -46,6 +46,9 @@ export const API_ENDPOINTS = {
   cancelSession: `${API_BASE_URL}/Appointments/appointment`,
   rescheduleSession: `${API_BASE_URL}/Appointments/reschedule-session`,
   paymentQRs: `${API_BASE_URL}/PaymentQRs`,
+  temporaryAppointments: `${API_BASE_URL}/TemporaryAppointments`,
+  uploadComprobante: `${API_BASE_URL}/TemporaryAppointments/upload-comprobante`,
+  // reschedulePreview: `${API_BASE_URL}/Appointments/reschedule-preview`,
 };
 
 export const setAuthToken = (token: string) => {
