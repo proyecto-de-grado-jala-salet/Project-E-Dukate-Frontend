@@ -14,6 +14,21 @@ interface FetchAppointmentsParams {
   pageSize?: number;
 }
 
+export interface CreateAppointmentPayload {
+  patientId: string;
+  specialtyId: string;
+  specialistId: string;
+  sessionCount: number;
+  sessionCost: number;
+  scheduledSessions: {
+    timeSlotId: string;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    status: string;
+  }[];
+}
+
 export const fetchAppointments = async ({
   patientId,
   specialistId,
@@ -176,6 +191,28 @@ export const confirmSession = async (appointmentId: string, sessionId: string): 
       throw new Error(errorMessage);
     } else {
       const errorMessage = error.message || "Error al confirmar la sesión";
+      showNotification(errorMessage, "error");
+      throw new Error(errorMessage);
+    }
+  }
+};
+
+export const createAppointment = async (payload: CreateAppointmentPayload): Promise<void> => {
+  try {
+    
+    await apiRequest("appointments", "POST", payload);
+  } catch (error: any) {
+    console.error('❌ Error creating appointment:', error);
+    
+    const serverError = error.response?.data;
+    if (serverError) {
+      const errorMessage = Array.isArray(serverError.errors)
+        ? serverError.errors.join(", ")
+        : serverError.error || serverError.message || "Error desconocido al crear la cita";
+      showNotification(errorMessage, "error");
+      throw new Error(errorMessage);
+    } else {
+      const errorMessage = error.message || "Error al crear la cita";
       showNotification(errorMessage, "error");
       throw new Error(errorMessage);
     }

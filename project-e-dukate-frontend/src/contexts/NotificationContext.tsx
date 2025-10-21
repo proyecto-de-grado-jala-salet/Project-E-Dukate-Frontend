@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
-// contexts/NotificationContext.tsx - Versión mejorada
 'use client';
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiRequest } from '@/services/api';
 import { usePathname } from 'next/navigation';
+import { createAppointment, CreateAppointmentPayload } from '@/services/appointmentService';
 
 export interface PaymentNotification {
   id: string;
@@ -46,6 +46,43 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const isInDashboard = pathname?.includes('/dashboard') || false;
 
+  const createAppointmentPayload = (notification: PaymentNotification): CreateAppointmentPayload | null => {
+    try {
+      const data = typeof notification.appointmentData === 'string' 
+        ? JSON.parse(notification.appointmentData) 
+        : notification.appointmentData;
+
+      const patient = data.patient || {};
+      const specialty = data.specialty || {};
+      const specialist = data.specialist || {};
+      const selectedSlots = data.selectedSlots || [];
+      const consultationsNumber = data.consultationsNumber || 0;
+      const totalCost = data.totalCost || 0;
+
+      const sessionCost = consultationsNumber > 0 ? totalCost / consultationsNumber : 65;
+
+      const scheduledSessions = selectedSlots.map((slot: any) => ({
+        timeSlotId: slot.timeSlotId,
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime?.slice(0, 5) || 'N/A',
+        endTime: slot.endTime?.slice(0, 5) || 'N/A',
+        status: 'Scheduled'
+      }));
+
+      return {
+        patientId: patient.Id || patient.id,
+        specialtyId: specialty.Id || specialty.id,
+        specialistId: specialist.Id || specialist.id,
+        sessionCount: consultationsNumber,
+        sessionCost: sessionCost,
+        scheduledSessions: scheduledSessions
+      };
+    } catch (error) {
+      console.error('❌ Error creating appointment payload:', error);
+      return null;
+    }
+  };
+
   const fetchNotifications = async (silent: boolean = false) => {
     if (!isInDashboard && !silent) return;
     
@@ -81,12 +118,14 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
 
-  // Polling silencioso cada 30 segundos cuando estamos en dashboard
+  useEffect(() => {
+    if (isInDashboard) {
+      fetchNotifications();
+    }
+  }, [isInDashboard]);
+
   useEffect(() => {
     if (!isInDashboard) return;
-
-    // Cargar inmediatamente
-    fetchNotifications(true);
 
     const interval = setInterval(() => {
       fetchNotifications(true);
@@ -95,7 +134,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     return () => clearInterval(interval);
   }, [isInDashboard]);
 
-  // También cargar cuando específicamente entramos a notificaciones
   useEffect(() => {
     if (pathname?.includes('/notificaciones')) {
       fetchNotifications();
@@ -106,6 +144,21 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     try {
       setLoading(true);
       
+      const notification = notifications.find(n => n.id === notificationId);
+      if (!notification) {
+        throw new Error('Notificación no encontrada');
+      }
+
+      if (status === 'approved') {
+        const appointmentPayload = createAppointmentPayload(notification);
+        
+        if (!appointmentPayload) {
+          throw new Error('No se pudo crear el payload para la cita');
+        }
+
+        await createAppointment(appointmentPayload);
+      }
+
       await apiRequest(
         'temporaryAppointments', 
         'POST', 
@@ -129,7 +182,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       setUnreadCount(prev => Math.max(0, prev - 1));
 
     } catch (err) {
-      console.error('Error updating notification status:', err);
+      console.error('❌ Error in updateNotificationStatus:', err);
       setError('Error al actualizar el estado de la notificación');
       throw err;
     } finally {
@@ -151,10 +204,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     setUnreadCount(0);
   };
 
-  const refreshNotifications = async () => {
-    await fetchNotifications();
-  };
-
   return (
     <NotificationContext.Provider value={{
       notifications,
@@ -165,7 +214,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       updateNotificationStatus,
       loading,
       error,
-      refreshNotifications,
+      refreshNotifications: fetchNotifications,
       lastUpdate,
     }}>
       {children}
