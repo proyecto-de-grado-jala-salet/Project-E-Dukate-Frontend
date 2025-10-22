@@ -98,8 +98,7 @@ const NotificationsPage: React.FC = () => {
       default: return status;
     }
   };
-
-  // Función getPatientInfo alternativa - más robusta
+  
   const getPatientInfo = (appointmentData: any) => {
     try {
       const data =

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { apiRequest } from '@/services/api';
 import { usePathname } from 'next/navigation';
 import { createAppointment, CreateAppointmentPayload } from '@/services/appointmentService';
+import { translateDayToEnglish } from '@/utils/dayTranslations';
 
 export interface PaymentNotification {
   id: string;
@@ -59,17 +60,35 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       const consultationsNumber = data.consultationsNumber || 0;
       const totalCost = data.totalCost || 0;
 
+      if (!patient.Id && !patient.id) {
+        console.error('❌ Patient ID not found in appointment data');
+        return null;
+      }
+      if (!specialty.Id && !specialty.id) {
+        console.error('❌ Specialty ID not found in appointment data');
+        return null;
+      }
+      if (!specialist.Id && !specialist.id) {
+        console.error('❌ Specialist ID not found in appointment data');
+        return null;
+      }
+
       const sessionCost = consultationsNumber > 0 ? totalCost / consultationsNumber : 65;
 
-      const scheduledSessions = selectedSlots.map((slot: any) => ({
-        timeSlotId: slot.timeSlotId,
-        dayOfWeek: slot.dayOfWeek,
-        startTime: slot.startTime?.slice(0, 5) || 'N/A',
-        endTime: slot.endTime?.slice(0, 5) || 'N/A',
-        status: 'Scheduled'
-      }));
+      const scheduledSessions = selectedSlots.map((slot: any) => {
+        const dayInSpanish = slot.dayOfWeek;
+        const dayInEnglish = translateDayToEnglish(dayInSpanish);
+        
+        return {
+          timeSlotId: slot.timeSlotId,
+          dayOfWeek: dayInEnglish,
+          startTime: slot.startTime?.slice(0, 5) || 'N/A',
+          endTime: slot.endTime?.slice(0, 5) || 'N/A',
+          status: 'Scheduled'
+        };
+      });
 
-      return {
+      const payload: CreateAppointmentPayload = {
         patientId: patient.Id || patient.id,
         specialtyId: specialty.Id || specialty.id,
         specialistId: specialist.Id || specialist.id,
@@ -77,8 +96,12 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         sessionCost: sessionCost,
         scheduledSessions: scheduledSessions
       };
+      
+      return payload;
+
     } catch (error) {
       console.error('❌ Error creating appointment payload:', error);
+      console.error('❌ Raw notification data:', notification);
       return null;
     }
   };
