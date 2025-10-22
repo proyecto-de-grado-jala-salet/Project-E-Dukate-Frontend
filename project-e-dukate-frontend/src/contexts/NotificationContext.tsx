@@ -45,13 +45,16 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const pathname = usePathname();
 
-  const isInDashboard = pathname?.includes('/dashboard') || false;
+  const isInDashboard = pathname?.includes("/dashboard") || false;
 
-  const createAppointmentPayload = (notification: PaymentNotification): CreateAppointmentPayload | null => {
+  const createAppointmentPayload = (
+    notification: PaymentNotification
+  ): CreateAppointmentPayload | null => {
     try {
-      const data = typeof notification.appointmentData === 'string' 
-        ? JSON.parse(notification.appointmentData) 
-        : notification.appointmentData;
+      const data =
+        typeof notification.appointmentData === "string"
+          ? JSON.parse(notification.appointmentData)
+          : notification.appointmentData;
 
       const patient = data.patient || {};
       const specialty = data.specialty || {};
@@ -61,30 +64,31 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       const totalCost = data.totalCost || 0;
 
       if (!patient.Id && !patient.id) {
-        console.error('❌ Patient ID not found in appointment data');
+        console.error("❌ Patient ID not found in appointment data");
         return null;
       }
       if (!specialty.Id && !specialty.id) {
-        console.error('❌ Specialty ID not found in appointment data');
+        console.error("❌ Specialty ID not found in appointment data");
         return null;
       }
       if (!specialist.Id && !specialist.id) {
-        console.error('❌ Specialist ID not found in appointment data');
+        console.error("❌ Specialist ID not found in appointment data");
         return null;
       }
 
-      const sessionCost = consultationsNumber > 0 ? totalCost / consultationsNumber : 65;
+      const sessionCost =
+        consultationsNumber > 0 ? totalCost / consultationsNumber : 65;
 
       const scheduledSessions = selectedSlots.map((slot: any) => {
         const dayInSpanish = slot.dayOfWeek;
         const dayInEnglish = translateDayToEnglish(dayInSpanish);
-        
+
         return {
           timeSlotId: slot.timeSlotId,
           dayOfWeek: dayInEnglish,
-          startTime: slot.startTime?.slice(0, 5) || 'N/A',
-          endTime: slot.endTime?.slice(0, 5) || 'N/A',
-          status: 'Scheduled'
+          startTime: slot.startTime?.slice(0, 5) || "N/A",
+          endTime: slot.endTime?.slice(0, 5) || "N/A",
+          status: "Scheduled",
         };
       });
 
@@ -94,50 +98,198 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         specialistId: specialist.Id || specialist.id,
         sessionCount: consultationsNumber,
         sessionCost: sessionCost,
-        scheduledSessions: scheduledSessions
+        scheduledSessions: scheduledSessions,
       };
-      
-      return payload;
 
+      return payload;
     } catch (error) {
-      console.error('❌ Error creating appointment payload:', error);
-      console.error('❌ Raw notification data:', notification);
+      console.error("❌ Error creating appointment payload:", error);
+      console.error("❌ Raw notification data:", notification);
       return null;
     }
   };
 
   const fetchNotifications = async (silent: boolean = false) => {
     if (!isInDashboard && !silent) return;
-    
+
     if (!silent) setLoading(true);
     setError(null);
-    
+
     try {
       const pendingAppointments = await apiRequest<PaymentNotification[]>(
-        'temporaryAppointments', 
-        'GET', 
-        undefined, 
-        'pending'
+        "temporaryAppointments",
+        "GET",
+        undefined,
+        "pending"
       );
 
       const notificationsWithComprobante = pendingAppointments.filter(
-        appointment => 
-          appointment.comprobanteUrl && 
-          appointment.status === 'Payment_Uploaded' &&
+        (appointment) =>
+          appointment.comprobanteUrl &&
+          appointment.status === "Payment_Uploaded" &&
           !appointment.isProcessed
       );
 
       setNotifications(notificationsWithComprobante);
       setUnreadCount(notificationsWithComprobante.length);
       setLastUpdate(new Date());
-      
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+      console.error("Error fetching notifications:", err);
       if (!silent) {
-        setError('Error al cargar las notificaciones');
+        setError("Error al cargar las notificaciones");
       }
     } finally {
       if (!silent) setLoading(false);
+    }
+  };
+
+  // Agrega esta función en tu NotificationContext
+  const notifyChatbotAboutApproval = async (
+    notification: PaymentNotification,
+    patientPhone: string
+  ) => {
+    try {
+      // Extraer información del paciente de los datos de la cita
+      const patientInfo = getPatientInfoFromNotification(notification);
+
+      const notificationData = {
+        phone: patientPhone,
+        message:
+          `🎉 *¡BUENAS NOTICIAS Tu cita ha sido aprobada!*\n\n` +
+          `*📋 *Detalles de tu terapia:*\n` +
+          `*Paciente:* ${patientInfo.patientName} ${patientInfo.patientLastName}\n` +
+          `*Especialidad:* ${patientInfo.specialty}\n` +
+          `*Especialista:* ${patientInfo.specialistName}\n` +
+          `*N° de sesiones:* ${patientInfo.consultationsNumber}\n` +
+          `*Fechas programadas:*\n${patientInfo.formattedDates.map((date: any) => `• ${date.display}`).join("\n")}\n\n` +
+          `💡 *Recordatorio importante:*\n` +
+          `Te enviaremos un recordatorio 24 horas antes de cada sesión para que no se te olvide.\n` +
+          `• Tambien puedes cancelar o reprogramar tus sesiones, solo comunicate con nosotros\n\n` +
+          `¡Te esperamos! 🎉`,
+        notificationId: notification.id,
+        type: "appointment_approved",
+      };
+
+      // Enviar notificación al chatbot "https://tu-chatbot-url/api/notify-whatsapp"
+      await fetch("http://localhost:3000/api/notify-whatsapp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(notificationData),
+      });
+
+      console.log("✅ Notificación enviada al chatbot");
+    } catch (error) {
+      console.error("❌ Error enviando notificación al chatbot:", error);
+      // No lanzar error para no interrumpir el flujo principal
+    }
+  };
+
+  // Función auxiliar para extraer información del paciente
+  const getPatientInfoFromNotification = (
+    notification: PaymentNotification
+  ) => {
+    try {
+      const data =
+        typeof notification.appointmentData === "string"
+          ? JSON.parse(notification.appointmentData)
+          : notification.appointmentData;
+
+      const patient = data.patient || {};
+      const specialty = data.specialty || {};
+      const specialist = data.specialist || {};
+      const selectedSlots = data.selectedSlots || [];
+      const previewDates = data.previewDates || [];
+
+      const formattedDates = previewDates.map((date: any, index: number) => {
+        const slot = selectedSlots[index] || selectedSlots[0] || {};
+        const dateObj = new Date(date.start);
+        return {
+          display: `${dateObj.toLocaleDateString("es-ES")} de ${slot.startTime?.slice(0, 5) || "N/A"} a ${slot.endTime?.slice(0, 5) || "N/A"}`,
+        };
+      });
+
+      return {
+        patientName: patient.Names || patient.names || "N/A",
+        patientLastName:
+          patient.LastNamePaternal || patient.lastNamePaternal || "",
+        specialty:
+          specialty.TypeOfSpecialty || specialty.typeOfSpecialty || "N/A",
+        specialistName:
+          `${specialist.Names || specialist.names || ""} ${specialist.LastNamePaternal || specialist.lastNamePaternal || ""}`.trim(),
+        consultationsNumber: data.consultationsNumber || 0,
+        formattedDates: formattedDates,
+      };
+    } catch (error) {
+      console.error("❌ Error parsing notification data:", error);
+      return {
+        patientName: "N/A",
+        patientLastName: "",
+        specialty: "N/A",
+        specialistName: "N/A",
+        consultationsNumber: 0,
+        formattedDates: [],
+      };
+    }
+  };
+
+  // Modifica la función updateNotificationStatus para incluir la notificación al chatbot
+  const updateNotificationStatus = async (
+    notificationId: string,
+    status: "approved" | "rejected"
+  ) => {
+    try {
+      setLoading(true);
+
+      const notification = notifications.find((n) => n.id === notificationId);
+      if (!notification) {
+        throw new Error("Notificación no encontrada");
+      }
+
+      if (status === "approved") {
+        const appointmentPayload = createAppointmentPayload(notification);
+
+        if (!appointmentPayload) {
+          throw new Error("No se pudo crear el payload para la cita");
+        }
+
+        await createAppointment(appointmentPayload);
+
+        // 🔥 NUEVO: Notificar al chatbot para enviar mensaje WhatsApp
+        await notifyChatbotAboutApproval(
+          notification,
+          notification.whatsAppNumber
+        );
+      }
+
+      await apiRequest(
+        "temporaryAppointments",
+        "POST",
+        { isApproved: status === "approved" },
+        `${notificationId}/verify`
+      );
+
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === notificationId
+            ? {
+                ...notif,
+                status: status === "approved" ? "Approved" : "Rejected",
+                isProcessed: true,
+                processedAt: new Date().toISOString(),
+              }
+            : notif
+        )
+      );
+
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error("❌ Error in updateNotificationStatus:", err);
+      setError("Error al actualizar el estado de la notificación");
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -158,88 +310,40 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, [isInDashboard]);
 
   useEffect(() => {
-    if (pathname?.includes('/notificaciones')) {
+    if (pathname?.includes("/notificaciones")) {
       fetchNotifications();
     }
   }, [pathname]);
 
-  const updateNotificationStatus = async (notificationId: string, status: 'approved' | 'rejected') => {
-    try {
-      setLoading(true);
-      
-      const notification = notifications.find(n => n.id === notificationId);
-      if (!notification) {
-        throw new Error('Notificación no encontrada');
-      }
-
-      if (status === 'approved') {
-        const appointmentPayload = createAppointmentPayload(notification);
-        
-        if (!appointmentPayload) {
-          throw new Error('No se pudo crear el payload para la cita');
-        }
-
-        await createAppointment(appointmentPayload);
-      }
-
-      await apiRequest(
-        'temporaryAppointments', 
-        'POST', 
-        { isApproved: status === 'approved' }, 
-        `${notificationId}/verify`
-      );
-
-      setNotifications(prev =>
-        prev.map(notif =>
-          notif.id === notificationId 
-            ? { 
-                ...notif, 
-                status: status === 'approved' ? 'Approved' : 'Rejected',
-                isProcessed: true,
-                processedAt: new Date().toISOString()
-              } 
-            : notif
-        )
-      );
-
-      setUnreadCount(prev => Math.max(0, prev - 1));
-
-    } catch (err) {
-      console.error('❌ Error in updateNotificationStatus:', err);
-      setError('Error al actualizar el estado de la notificación');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
+    setNotifications((prev) =>
+      prev.map((notif) =>
         notif.id === notificationId ? { ...notif, read: true } : notif
       )
     );
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
     setUnreadCount(0);
   };
 
   return (
-    <NotificationContext.Provider value={{
-      notifications,
-      unreadCount,
-      socket: null,
-      markAsRead,
-      markAllAsRead,
-      updateNotificationStatus,
-      loading,
-      error,
-      refreshNotifications: fetchNotifications,
-      lastUpdate,
-    }}>
+    <NotificationContext.Provider
+      value={{
+        notifications,
+        unreadCount,
+        socket: null,
+        markAsRead,
+        markAllAsRead,
+        updateNotificationStatus,
+        loading,
+        error,
+        refreshNotifications: fetchNotifications,
+        lastUpdate,
+      }}
+    >
       {children}
     </NotificationContext.Provider>
   );
