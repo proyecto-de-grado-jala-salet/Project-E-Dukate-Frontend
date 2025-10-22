@@ -156,7 +156,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         phone: patientPhone,
         message:
           `🎉 *¡BUENAS NOTICIAS Tu cita ha sido aprobada!*\n\n` +
-          `*📋 *Detalles de tu terapia:*\n` +
+          `📋 *Detalles de tu terapia:*\n` +
           `*Paciente:* ${patientInfo.patientName} ${patientInfo.patientLastName}\n` +
           `*Especialidad:* ${patientInfo.specialty}\n` +
           `*Especialista:* ${patientInfo.specialistName}\n` +
