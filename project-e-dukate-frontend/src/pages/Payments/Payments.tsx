@@ -17,7 +17,7 @@ import { usePayments } from '@/hooks/usePayments';
 import CircularProgress from '@mui/material/CircularProgress';
 import dynamic from 'next/dynamic';
 import { useSafeNavigation } from '@/hooks/useSafeNavigation';
-import { getAuthToken } from '@/services/api';
+import { API_BASE_URL, getAuthToken } from '@/services/api';
 import { showNotification } from '@/services/notificationService';
 import Image from 'next/image';
 import { useAuthStore } from '@/stores/authStore';
@@ -199,7 +199,7 @@ const Payments: React.FC = () => {
     }
     
     try {
-      const response = await fetch('http://localhost:5275/api/PaymentQRs', {
+      const response = await fetch(`${API_BASE_URL}/PaymentQRs`, {
         headers: {
           Authorization: `Bearer ${getAuthToken()}`,
         },

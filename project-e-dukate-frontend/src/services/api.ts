@@ -5,24 +5,24 @@ import Cookies from 'js-cookie';
 const getApiBaseUrl = (): string => {
   const defaultUrl = 'https://project-e-dukate-backend-production.up.railway.app/api';
 
-  // if (typeof window === 'undefined') {
-  //   return defaultUrl;
-  // }
+  if (typeof window === 'undefined') {
+    return defaultUrl;
+  }
 
-  // const hostname = window.location.hostname.toLowerCase();
+  const hostname = window.location.hostname.toLowerCase();
 
-  // if (hostname === 'localhost' || hostname === '127.0.0.1') {
-  //   return 'http://localhost:5275/api';
-  // }
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:5275/api';
+  }
   
-  // if (hostname.includes('test')) {
-  //   return 'https://project-e-dukate-backend-test.up.railway.app/api';
-  // }
+  if (hostname.includes('test')) {
+    return 'https://project-e-dukate-backend-test.up.railway.app/api';
+  }
   
   return defaultUrl;
 };
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 export const API_ENDPOINTS = {
   specialties: `${API_BASE_URL}/Specialties`,
