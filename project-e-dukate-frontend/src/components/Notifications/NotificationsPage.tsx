@@ -98,7 +98,7 @@ const NotificationsPage: React.FC = () => {
       default: return status;
     }
   };
-  
+
   const getPatientInfo = (appointmentData: any) => {
     try {
       const data =
@@ -417,7 +417,7 @@ const NotificationsPage: React.FC = () => {
               <Box sx={{ mt: 3, textAlign: "center" }}>
                 {selectedNotification.comprobanteUrl ? (
                   <Image
-                    src={`https://project-e-dukate-backend-production.up.railway.app/${selectedNotification.comprobanteUrl}` || `http://localhost:3000/${selectedNotification.comprobanteUrl}`}
+                    src={selectedNotification.comprobanteUrl}
                     alt="Comprobante de pago"
                     width={600}
                     height={400}
