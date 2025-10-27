@@ -28,7 +28,7 @@ interface NotificationContextType {
   socket: null;
   markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
-  updateNotificationStatus: (notificationId: string, status: 'approved' | 'rejected') => void;
+  updateNotificationStatus: (notificationId: string, status: 'approved' | 'rejected', rejectionReason?: string) => void;
   loading: boolean;
   error: string | null;
   refreshNotifications: () => Promise<void>;
@@ -186,6 +186,50 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
 
+  const notifyChatbotAboutRejection = async (
+    notification: PaymentNotification,
+    patientPhone: string,
+    rejectionReason: string // 🔥 Nuevo parámetro
+  ) => {
+    try {
+      // Extraer información del paciente
+      const patientInfo = getPatientInfoFromNotification(notification);
+
+      const notificationData = {
+        phone: patientPhone,
+        message:
+          `❌ *LO SENTIMOS - Tu solicitud de cita ha sido rechazada*\n\n` +
+          `📋 *Detalles de la solicitud rechazada:*\n` +
+          `*Paciente:* ${patientInfo.patientName} ${patientInfo.patientLastName}\n` +
+          `*Especialidad:* ${patientInfo.specialty}\n` +
+          `*Especialista:* ${patientInfo.specialistName}\n` +
+          `*N° de sesiones:* ${patientInfo.consultationsNumber}\n\n` +
+          `⚠️ *Razón del rechazo:*\n` +
+          `${rejectionReason}\n\n` + // 🔥 Usar el motivo específico
+          `🔄 Por favor vuelve a intenta otra vez\n` +
+          `Si necesitas ayuda, contáctanos directamente`,
+        notificationId: notification.id,
+        type: "appointment_rejected",
+      };
+
+      // Enviar notificación al chatbot
+      await fetch("http://localhost:3000/api/notify-whatsapp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(notificationData),
+      });
+
+      console.log("✅ Notificación de rechazo enviada al chatbot");
+    } catch (error) {
+      console.error(
+        "❌ Error enviando notificación de rechazo al chatbot:",
+        error
+      );
+    }
+  };
+
   // Función auxiliar para extraer información del paciente
   const getPatientInfoFromNotification = (
     notification: PaymentNotification
@@ -234,10 +278,10 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     }
   };
 
-  // Modifica la función updateNotificationStatus para incluir la notificación al chatbot
   const updateNotificationStatus = async (
     notificationId: string,
-    status: "approved" | "rejected"
+    status: "approved" | "rejected",
+    rejectionReason?: string
   ) => {
     try {
       setLoading(true);
@@ -256,10 +300,16 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
         await createAppointment(appointmentPayload);
 
-        // 🔥 NUEVO: Notificar al chatbot para enviar mensaje WhatsApp
         await notifyChatbotAboutApproval(
           notification,
           notification.whatsAppNumber
+        );
+      } else if (status === "rejected") {
+        // 🔥 Pasar el motivo específico al chatbot
+        await notifyChatbotAboutRejection(
+          notification,
+          notification.whatsAppNumber,
+          rejectionReason || "Razón no especificada" // 🔥 Usar el motivo
         );
       }
 

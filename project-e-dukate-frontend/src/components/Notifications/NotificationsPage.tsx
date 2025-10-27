@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import React, { useState, useEffect } from 'react'; // Agregar useEffect
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -12,9 +12,12 @@ import {
   Chip,
   Dialog,
   DialogContent,
+  DialogActions,
+  DialogTitle,
   IconButton,
   CircularProgress,
   Alert,
+  TextField,
 } from '@mui/material';
 import { useNotifications, PaymentNotification } from '@/contexts/NotificationContext';
 import CloseIcon from '@mui/icons-material/Close';
@@ -37,6 +40,9 @@ const NotificationsPage: React.FC = () => {
   const { setIsNavigating } = useSafeNavigation();
   const [selectedNotification, setSelectedNotification] = useState<PaymentNotification | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [rejectionDialogOpen, setRejectionDialogOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [notificationToReject, setNotificationToReject] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading) {
@@ -63,12 +69,35 @@ const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleReject = async (notificationId: string) => {
+
+  const handleRejectClick = (notificationId: string) => {
+    setNotificationToReject(notificationId);
+    setRejectionReason('');
+    setRejectionDialogOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!notificationToReject) return;
+
     try {
-      await updateNotificationStatus(notificationId, 'rejected');
+      // Si no se ingresó motivo, usar uno por defecto
+      const reason = rejectionReason.trim() || 'Comprobante de pago no válido o información incorrecta';
+      
+      await updateNotificationStatus(notificationToReject, 'rejected', reason);
+      
+      // Cerrar el diálogo y limpiar estados
+      setRejectionDialogOpen(false);
+      setNotificationToReject(null);
+      setRejectionReason('');
     } catch (error) {
       console.error('Error rejecting notification:', error);
     }
+  };
+
+  const handleCancelReject = () => {
+    setRejectionDialogOpen(false);
+    setNotificationToReject(null);
+    setRejectionReason('');
   };
 
   const handleRefresh = async () => {
@@ -321,7 +350,7 @@ const NotificationsPage: React.FC = () => {
                           <IconButton
                             size="small"
                             color="error"
-                            onClick={() => handleReject(notification.id)}
+                            onClick={() => handleRejectClick(notification.id)}
                             sx={{
                               border: "1px solid",
                               borderColor: "error.main",
@@ -340,6 +369,47 @@ const NotificationsPage: React.FC = () => {
           })}
         </List>
       )}
+
+      <Dialog
+        open={rejectionDialogOpen}
+        onClose={handleCancelReject}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          Especificar motivo de rechazo
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+            Por favor, ingresa el motivo por el cual se rechaza esta solicitud de cita. 
+            Este mensaje será enviado al paciente.
+          </Typography>
+          <TextField
+            autoFocus
+            multiline
+            rows={4}
+            fullWidth
+            variant="outlined"
+            placeholder="Ejemplo: Comprobante de pago ilegible, monto incorrecto, fecha ya ocupada, etc."
+            value={rejectionReason}
+            onChange={(e) => setRejectionReason(e.target.value)}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelReject}>
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleConfirmReject} 
+            variant="contained" 
+            color="error"
+            disabled={!rejectionReason.trim()}
+          >
+            Confirmar Rechazo
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={openDialog}
