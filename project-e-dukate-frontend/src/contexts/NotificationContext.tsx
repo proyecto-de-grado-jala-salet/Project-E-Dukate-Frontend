@@ -171,7 +171,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       };
 
       // Enviar notificación al chatbot "https://tu-chatbot-url/api/notify-whatsapp"
-      await fetch("http://localhost:3000/api/notify-whatsapp", {
+      await fetch("http://localhost:3003/api/notify-whatsapp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
