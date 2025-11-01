@@ -179,14 +179,16 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({
       specialtyName: session.specialtyName,
       sessionCount: 1,
       status: session.status,
-      scheduledSessions: [{
-        id: session.sessionId || session.id,
-        timeSlotId: session.timeSlotId,
-        dayOfWeek: session.dayOfWeek,
-        startTime: session.startTime,
-        endTime: session.endTime,
-        status: session.sessionStatus || session.status
-      }]
+      scheduledSessions: [
+        {
+          id: session.sessionId || session.id,
+          timeSlotId: session.timeSlotId,
+          dayOfWeek: session.dayOfWeek,
+          startTime: session.startTime,
+          endTime: session.endTime,
+          status: session.sessionStatus || session.status,
+        },
+      ],
     };
 
     setSelectedAppointment(appointmentForState);

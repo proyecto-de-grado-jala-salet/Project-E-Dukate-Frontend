@@ -29,6 +29,31 @@ export interface CreateAppointmentPayload {
   }[];
 }
 
+export interface ReschedulePreviewRequest {
+  sessionId: string;
+  targetDayOfWeek?: string;
+  specificDate?: string;
+  lookAheadWeeks?: number;
+}
+
+export interface AvailableTimeSlot {
+  timeSlotId: string;
+  startDateTime: string;
+  endDateTime: string;
+  dayOfWeek: string;
+  formattedDate: string;
+  formattedTime: string;
+  isSameDay: boolean;
+  isNextWeek: boolean;
+}
+
+export interface RescheduleSessionPayload {
+  sessionId: string;
+  newTimeSlotId: string;
+  newStartDateTime: string;
+  newEndDateTime: string;
+}
+
 export const fetchAppointments = async ({
   patientId,
   specialistId,
@@ -140,32 +165,24 @@ export const cancelSession = async (appointmentId: string, sessionId: string): P
 };
 
 export const rescheduleSession = async (
-  appointmentId: string, 
-  sessionId: string,
-  dayOfWeek: string,
-  startTime: string,
-  endTime: string,
-  timeSlotId: string
+  appointmentId: string,
+  payload: RescheduleSessionPayload
 ): Promise<void> => {
   try {
-    const payload = {
-      sessionId,
-      dayOfWeek,
-      startTime,
-      endTime,
-      timeSlotId
-    };
-    
     await apiRequest(
-      "rescheduleSession", 
-      "PUT", 
-      payload, 
-      `${appointmentId}`
+      "appointments",
+      "PUT",
+      payload,
+      `reschedule-session/${appointmentId}`
     );
     
     showNotification("Sesión reprogramada exitosamente", "success");
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Error al reprogramar la sesión";
+  } catch (error: any) {
+    const serverError = error.response?.data;
+    const errorMessage = Array.isArray(serverError?.errors)
+      ? serverError.errors.join(", ")
+      : serverError?.error || serverError?.message || "Error al reprogramar la sesión";
+    
     showNotification(errorMessage, "error");
     throw new Error(errorMessage);
   }
@@ -216,5 +233,29 @@ export const createAppointment = async (payload: CreateAppointmentPayload): Prom
       showNotification(errorMessage, "error");
       throw new Error(errorMessage);
     }
+  }
+};
+
+export const fetchReschedulePreview = async (
+  appointmentId: string,
+  request: ReschedulePreviewRequest
+): Promise<AvailableTimeSlot[]> => {
+  try {
+    const response = await apiRequest<{ availableSlots: AvailableTimeSlot[] }>(
+      "appointments",
+      "POST",
+      request,
+      `${appointmentId}/reschedule-preview`
+    );
+    
+    return response.availableSlots || [];
+  } catch (error: any) {
+    const serverError = error.response?.data;
+    const errorMessage = Array.isArray(serverError?.errors)
+      ? serverError.errors.join(", ")
+      : serverError?.error || serverError?.message || "Error al obtener horarios disponibles";
+    
+    showNotification(errorMessage, "error");
+    throw new Error(errorMessage);
   }
 };

@@ -13,10 +13,12 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import { fetchSchedules } from "@/services/scheduleService";
-import { fetchAppointmentPreview, rescheduleSession } from "@/services/appointmentService";
-import { BackendSchedule, ScheduleDto } from "@/types/schedule";
-import { mapBackendSchedules } from "@/utils/scheduleUtils";
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import { fetchReschedulePreview, rescheduleSession, AvailableTimeSlot, RescheduleSessionPayload } from "@/services/appointmentService";
 import { dayTranslation } from "@/utils/scheduleUtils";
 import { Appointment } from "@/types/appointment";
 
@@ -35,180 +37,135 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
   session,
   onRescheduleSuccess,
 }) => {
-  const [schedules, setSchedules] = useState<ScheduleDto[]>([]);
-  const [previewData, setPreviewData] = useState<{ start: string; end: string }[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<AvailableTimeSlot[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<AvailableTimeSlot | null>(null);
+  const [searchOption, setSearchOption] = useState<'sameDay' | 'nextWeek' | 'specific'>('sameDay');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [form, setForm] = useState({
-    dayOfWeek: session.dayOfWeek || "",
-    timeSlotId: session.timeSlotId || "",
-    startTime: session.startTime || "",
-    endTime: session.endTime || "",
-  });
+  const [step, setStep] = useState<'options' | 'preview' | 'confirmation'>('options');
 
   useEffect(() => {
     if (open) {
-      setForm({
-        dayOfWeek: session.dayOfWeek || "",
-        timeSlotId: session.timeSlotId || "",
-        startTime: session.startTime || "",
-        endTime: session.endTime || "",
-      });
       setError(null);
-      setShowPreview(false);
-      setPreviewData([]);
-      setLoading(true);
-      
-      if (!appointment) {
-        setError("No se encontró la cita");
-        setLoading(false);
-        return;
-      }
-      
-      const specialistId = session.specialistId;
-      
-      if (!specialistId || specialistId === "undefined") {
-        setError("No se encontró el especialista para esta cita");
-        setLoading(false);
-        return;
-      }
-      
-      fetchSchedules(specialistId)
-        .then((backendSchedules: BackendSchedule[]) => {
-          const mappedSchedules = mapBackendSchedules(backendSchedules);
-          setSchedules(mappedSchedules);
-          
-          if (mappedSchedules.length === 0 || !mappedSchedules.some(s => s.attends && s.timeSlots.length > 0)) {
-            setError("El especialista no tiene horarios disponibles");
-          }
-        })
-        .catch((err) => {
-          setError("Error al cargar los horarios del especialista");
-          console.error("Error fetching schedules:", err);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      setAvailableSlots([]);
+      setSelectedSlot(null);
+      setStep('options');
+      setSearchOption('sameDay');
     }
-  }, [open, appointment, session]);
+  }, [open]);
 
-  const formatDateTime = (dateTimeString: string) => {
-    const [datePart, timePart] = dateTimeString.split("T");
-    const cleanTime = timePart.replace("Z", "");
-    return `${datePart} - ${cleanTime}`;
+  const handleSearchOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchOption(event.target.value as 'sameDay' | 'nextWeek' | 'specific');
   };
 
-  const handleChange = (field: string, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      [field]: value,
-      ...(field === 'dayOfWeek' && { 
-        timeSlotId: '', 
-        startTime: '', 
-        endTime: '' 
-      })
-    }));
+  const handleFindAvailableSlots = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const request = {
+        sessionId: session.sessionId || session.id,
+        targetDayOfWeek: session.dayOfWeek, // Mismo día de la semana
+        lookAheadWeeks: searchOption === 'sameDay' ? 1 : 2
+      };
+
+      const slots = await fetchReschedulePreview(appointment.id, request);
+      
+      if (slots.length === 0) {
+        setError("No se encontraron horarios disponibles para la fecha seleccionada");
+        return;
+      }
+
+      setAvailableSlots(slots);
+      setStep('preview');
+    } catch (err: any) {
+      setError(err.message || "Error al buscar horarios disponibles");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleTimeSlotChange = (value: string) => {
-    const selectedSchedule = schedules.find(s => s.dayOfWeek === form.dayOfWeek);
-    const selectedSlot = selectedSchedule?.timeSlots.find(ts => ts.id === value);
-    
+  const handleSlotSelect = (slot: AvailableTimeSlot) => {
+    setSelectedSlot(slot);
+  };
+
+  const handleConfirmSelection = () => {
     if (selectedSlot) {
-      setForm({
-        ...form,
-        timeSlotId: value,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
-      });
+      setStep('confirmation');
     }
   };
 
-  const handlePreview = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      if (!form.dayOfWeek || !form.timeSlotId) {
-        setError("Por favor, seleccione un día y horario");
-        setLoading(false);
-        return;
-      }
-      
-      const specialistId = session.specialistId;
-      
-      const preview = await fetchAppointmentPreview({
-        patientId: session.patientId,
-        specialtyId: session.specialtyId,
-        specialistId: specialistId,
-        sessionCount: 1,
-        sessionCost: session.sessionCost || 65,
-        scheduledSessions: [{
-          id: session.sessionId || session.id,
-          timeSlotId: form.timeSlotId,
-          dayOfWeek: form.dayOfWeek,
-          startTime: form.startTime,
-          endTime: form.endTime,
-          status: "Rescheduled"
-        }]
-      });
-      
-      setPreviewData(preview);
-      setShowPreview(true);
-      setLoading(false);
-    } catch (err : any) {
-      setLoading(false);
-      console.error("Error obteniendo vista previa:", err);
-    }
-  };
+  const handleConfirmReschedule = async () => {
+    if (!selectedSlot) return;
 
-  const handleConfirm = async () => {
     try {
-      
       setLoading(true);
       
-      await rescheduleSession(
-        appointment.id,
-        session.sessionId || session.id,
-        form.dayOfWeek,
-        form.startTime,
-        form.endTime,
-        form.timeSlotId
-      );
+      const payload: RescheduleSessionPayload = {
+        sessionId: session.sessionId || session.id,
+        newTimeSlotId: selectedSlot.timeSlotId,
+        newStartDateTime: selectedSlot.startDateTime,
+        newEndDateTime: selectedSlot.endDateTime
+      };
+
+      await rescheduleSession(appointment.id, payload);
       
       setLoading(false);
-      setShowPreview(false);
       onRescheduleSuccess();
       onClose();
-    } catch (err : any) {
+    } catch (err: any) {
       setLoading(false);
-      setError("Error al reprogramar la sesión. Intente nuevamente.");
+      setError("Error al confirmar la reprogramación. Intente nuevamente.");
       console.error("Error reprogramando sesión:", err);
     }
   };
 
-  const availableSchedules = schedules.filter(s => s.attends && s.timeSlots.length > 0);
-  const hasAvailableSchedules = availableSchedules.length > 0;
-  const hasTimeSlotsForSelectedDay = form.dayOfWeek && schedules.some(s => 
-    s.dayOfWeek === form.dayOfWeek && s.timeSlots.length > 0 && s.attends
-  );
+  const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    return {
+      date: date.toLocaleDateString('es-ES'),
+      time: date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+      day: dayTranslation[date.toLocaleDateString('es-ES', { weekday: 'long' })] || 
+           date.toLocaleDateString('es-ES', { weekday: 'long' })
+    };
+  };
+
+  const groupSlotsByDate = (slots: AvailableTimeSlot[]) => {
+    const grouped: { [key: string]: AvailableTimeSlot[] } = {};
+    
+    slots.forEach(slot => {
+      const dateKey = slot.formattedDate;
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(slot);
+    });
+    
+    return grouped;
+  };
+
+  const groupedSlots = groupSlotsByDate(availableSlots);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Reprogramar Sesión</DialogTitle>
+      <DialogTitle>
+        {step === 'options' && 'Opciones de Reprogramación'}
+        {step === 'preview' && 'Horarios Disponibles'}
+        {step === 'confirmation' && 'Confirmar Reprogramación'}
+      </DialogTitle>
+      
       <DialogContent>
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
           </Alert>
         )}
-        
-        {!showPreview ? (
+
+        {/* Paso 1: Opciones de búsqueda */}
+        {step === 'options' && (
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Información actual de la sesión:
+              Sesión actual:
             </Typography>
             <Box sx={{ 
               p: 2, 
@@ -219,106 +176,162 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
             }}>
               <Typography><strong>Día:</strong> {dayTranslation[session.dayOfWeek] || session.dayOfWeek}</Typography>
               <Typography><strong>Hora:</strong> {session.startTime} - {session.endTime}</Typography>
+              <Typography><strong>Fecha:</strong> {session.formattedDate || 'No especificada'}</Typography>
             </Box>
 
+            <FormControl component="fieldset" sx={{ width: '100%' }}>
+              <FormLabel component="legend" sx={{ mb: 2, fontWeight: 'bold' }}>
+                Buscar horarios disponibles para:
+              </FormLabel>
+              <RadioGroup
+                value={searchOption}
+                onChange={handleSearchOptionChange}
+              >
+                <FormControlLabel 
+                  value="sameDay" 
+                  control={<Radio />} 
+                  label="Mismo día de la semana (esta semana o siguiente)" 
+                />
+                <FormControlLabel 
+                  value="nextWeek" 
+                  control={<Radio />} 
+                  label="Siguiente semana del mismo día" 
+                />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+        )}
+
+        {/* Paso 2: Vista previa de horarios disponibles */}
+        {step === 'preview' && (
+          <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Nueva programación:
+              Seleccione un nuevo horario:
             </Typography>
-            
+
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                 <CircularProgress />
               </Box>
             ) : (
-              <>
-                <TextField
-                  select
-                  fullWidth
-                  margin="normal"
-                  label="Día de la semana"
-                  value={form.dayOfWeek}
-                  onChange={(e) => handleChange("dayOfWeek", e.target.value)}
-                  required
-                  disabled={!hasAvailableSchedules}
-                >
-                  {hasAvailableSchedules ? (
-                    availableSchedules.map((s) => (
-                      <MenuItem key={s.dayOfWeek} value={s.dayOfWeek}>
-                        {dayTranslation[s.dayOfWeek] || s.dayOfWeek}
-                      </MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem disabled>No hay días disponibles</MenuItem>
-                  )}
-                </TextField>
-                
-                <TextField
-                  select
-                  fullWidth
-                  margin="normal"
-                  label="Horario"
-                  value={form.timeSlotId}
-                  onChange={(e) => handleTimeSlotChange(e.target.value)}
-                  required
-                  disabled={!hasTimeSlotsForSelectedDay}
-                >
-                  {hasTimeSlotsForSelectedDay ? (
-                    schedules
-                      .find(s => s.dayOfWeek === form.dayOfWeek)!
-                      .timeSlots.map((ts) => (
-                        <MenuItem key={ts.id} value={ts.id}>
-                          {`${ts.startTime} - ${ts.endTime}`}
-                        </MenuItem>
-                      ))
-                  ) : (
-                    <MenuItem disabled>
-                      {form.dayOfWeek ? "No hay horarios disponibles para este día" : "Seleccione un día primero"}
-                    </MenuItem>
-                  )}
-                </TextField>
-              </>
+              <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                {Object.entries(groupedSlots).map(([date, slots]) => (
+                  <Box key={date} sx={{ mb: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 1, color: 'primary.main', fontWeight: 'bold' }}>
+                      {date}
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {slots.map((slot, index) => (
+                        <Box
+                          key={index}
+                          sx={{
+                            p: 2,
+                            border: '1px solid',
+                            borderColor: selectedSlot?.timeSlotId === slot.timeSlotId ? 'primary.main' : '#e0e0e0',
+                            borderRadius: 1,
+                            bgcolor: selectedSlot?.timeSlotId === slot.timeSlotId ? '#e3f2fd' : 'white',
+                            cursor: 'pointer',
+                            '&:hover': {
+                              bgcolor: '#f5f5f5',
+                            }
+                          }}
+                          onClick={() => handleSlotSelect(slot)}
+                        >
+                          <Typography variant="body1" fontWeight="medium">
+                            {slot.formattedTime}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {dayTranslation[slot.dayOfWeek] || slot.dayOfWeek}
+                            {slot.isSameDay && " • Mismo día"}
+                            {slot.isNextWeek && " • Siguiente semana"}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            )}
+
+            {availableSlots.length === 0 && !loading && (
+              <Typography color="text.secondary" sx={{ textAlign: 'center', my: 4 }}>
+                No se encontraron horarios disponibles
+              </Typography>
             )}
           </Box>
-        ) : (
+        )}
+
+        {/* Paso 3: Confirmación */}
+        {step === 'confirmation' && selectedSlot && (
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Vista previa de la nueva fecha:
+              Confirmar reprogramación:
             </Typography>
-            {previewData.map((date, index) => (
-            <Box key={index} sx={{ 
-              p: 2, 
-              mb: 2, 
-              bgcolor: '#f5f5f5', 
-              borderRadius: 1,
-              border: '1px solid #e0e0e0'
-            }}>
-              <Typography>
-                {`Sesión reprogramada: ${formatDateTime(date.start)} - ${formatDateTime(date.end)}`}
+
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Sesión actual:
               </Typography>
+              <Box sx={{ p: 2, bgcolor: '#fff3cd', borderRadius: 1, mb: 2 }}>
+                <Typography><strong>Día:</strong> {dayTranslation[session.dayOfWeek] || session.dayOfWeek}</Typography>
+                <Typography><strong>Hora:</strong> {session.startTime} - {session.endTime}</Typography>
+                <Typography><strong>Fecha:</strong> {session.formattedDate || 'No especificada'}</Typography>
+              </Box>
+
+              <Typography variant="subtitle2" color="text.secondary">
+                Nueva sesión:
+              </Typography>
+              <Box sx={{ p: 2, bgcolor: '#d1edff', borderRadius: 1 }}>
+                <Typography><strong>Día:</strong> {dayTranslation[selectedSlot.dayOfWeek] || selectedSlot.dayOfWeek}</Typography>
+                <Typography><strong>Fecha:</strong> {selectedSlot.formattedDate}</Typography>
+                <Typography><strong>Hora:</strong> {selectedSlot.formattedTime}</Typography>
+              </Box>
             </Box>
-            ))}
+
+            <Alert severity="info" sx={{ mb: 2 }}>
+              ¿Está seguro de que desea reprogramar esta sesión?
+            </Alert>
           </Box>
         )}
       </DialogContent>
+
       <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
-        {!showPreview ? (
-          <Button
-            onClick={handlePreview}
-            variant="contained"
-            disabled={!hasTimeSlotsForSelectedDay || !form.dayOfWeek || !form.timeSlotId || loading}
-          >
-            {loading ? <CircularProgress size={24} /> : "Ver vista previa"}
-          </Button>
-        ) : (
+        {step === 'options' && (
           <>
-            <Button onClick={() => setShowPreview(false)}>Atrás</Button>
+            <Button onClick={onClose}>Cancelar</Button>
             <Button
-              onClick={handleConfirm}
+              onClick={handleFindAvailableSlots}
               variant="contained"
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : "Confirmar reprogramación"}
+              {loading ? <CircularProgress size={24} /> : "Buscar Horarios"}
+            </Button>
+          </>
+        )}
+
+        {step === 'preview' && (
+          <>
+            <Button onClick={() => setStep('options')}>Atrás</Button>
+            <Button
+              onClick={handleConfirmSelection}
+              variant="contained"
+              disabled={!selectedSlot || loading}
+            >
+              {loading ? <CircularProgress size={24} /> : "Seleccionar"}
+            </Button>
+          </>
+        )}
+
+        {step === 'confirmation' && (
+          <>
+            <Button onClick={() => setStep('preview')}>Atrás</Button>
+            <Button
+              onClick={handleConfirmReschedule}
+              variant="contained"
+              disabled={loading}
+              color="primary"
+            >
+              {loading ? <CircularProgress size={24} /> : "Confirmar Reprogramación"}
             </Button>
           </>
         )}

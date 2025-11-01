@@ -41,3 +41,28 @@ export interface Filter {
   type: FilterType;
   minDate?: string;
 }
+
+export interface AvailableTimeSlot {
+  timeSlotId: string;
+  startDateTime: string;
+  endDateTime: string;
+  dayOfWeek: string;
+  formattedDate: string;
+  formattedTime: string;
+  isSameDay: boolean;
+  isNextWeek: boolean;
+}
+
+export interface ReschedulePreviewRequest {
+  sessionId: string;
+  targetDayOfWeek?: string;
+  specificDate?: string;
+  lookAheadWeeks?: number;
+}
+
+export interface RescheduleSessionPayload {
+  sessionId: string;
+  newTimeSlotId: string;
+  newStartDateTime: string;
+  newEndDateTime: string;
+}
