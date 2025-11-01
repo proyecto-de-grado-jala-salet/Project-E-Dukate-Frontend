@@ -95,7 +95,6 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
         return;
       }
       
-      // Llamar al endpoint de preview de reprogramación
       const slots = await fetchReschedulePreview(appointment.id, {
         sessionId: session.sessionId || session.id,
         targetDayOfWeek: selectedDay,
@@ -173,7 +172,6 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
           </Alert>
         )}
 
-        {/* Paso 1: Seleccionar día */}
         {step === 'select-day' && (
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
@@ -188,11 +186,10 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
             }}>
               <Typography><strong>Día:</strong> {dayTranslation[session.dayOfWeek] || session.dayOfWeek}</Typography>
               <Typography><strong>Hora:</strong> {session.startTime} - {session.endTime}</Typography>
-              <Typography><strong>Fecha:</strong> {session.formattedDate || 'No especificada'}</Typography>
             </Box>
 
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Seleccione el nuevo día:
+              Seleccione un día:
             </Typography>
             
             {loading ? (
@@ -224,7 +221,6 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
           </Box>
         )}
 
-        {/* Paso 2: Seleccionar horario */}
         {step === 'select-slot' && (
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
@@ -272,6 +268,7 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
                           <Button
                             variant="contained"
                             size="small"
+                            sx={{ bgcolor: "#f5a623", color: "black", height: "45px", padding: "10px 14px", borderRadius: "12px" }}
                             onClick={() => handleConfirmReschedule(slot)}
                             disabled={loading}
                           >
@@ -297,10 +294,11 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
       <DialogActions>
         {step === 'select-day' && (
           <>
-            <Button onClick={onClose}>Cancelar</Button>
+            <Button sx={{ color: "red" }} onClick={onClose}>Cancelar</Button>
             <Button
               onClick={handleDaySelect}
               variant="contained"
+              sx={{ bgcolor: "#013c28", color: "white", borderRadius: "11px", '&:hover': { bgcolor: '#025c3f'}, '&:disabled': { bgcolor: '#cccccc' } } }
               disabled={!selectedDay || loading}
             >
               {loading ? <CircularProgress size={24} /> : "Buscar Horarios"}
