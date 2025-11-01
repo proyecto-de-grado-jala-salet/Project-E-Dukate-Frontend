@@ -37,30 +37,18 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
 }) => {
   const [schedules, setSchedules] = useState<ScheduleDto[]>([]);
   const [availableSlots, setAvailableSlots] = useState<AvailableTimeSlot[]>([]);
-  const [selectedAvailableSlot, setSelectedAvailableSlot] = useState<AvailableTimeSlot | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<'select-day' | 'select-slot'>('select-day');
 
-  const [form, setForm] = useState({
-    dayOfWeek: session.dayOfWeek || "",
-    timeSlotId: session.timeSlotId || "",
-    startTime: session.startTime || "",
-    endTime: session.endTime || "",
-  });
+  const [selectedDay, setSelectedDay] = useState("");
 
   useEffect(() => {
     if (open) {
-      setForm({
-        dayOfWeek: session.dayOfWeek || "",
-        timeSlotId: session.timeSlotId || "",
-        startTime: session.startTime || "",
-        endTime: session.endTime || "",
-      });
+      setSelectedDay("");
       setError(null);
-      setShowPreview(false);
+      setStep('select-day');
       setAvailableSlots([]);
-      setSelectedAvailableSlot(null);
       setLoading(true);
       
       if (!appointment) {
@@ -96,67 +84,37 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
     }
   }, [open, appointment, session]);
 
-  const handleChange = (field: string, value: string) => {
-    setForm(prev => ({
-      ...prev,
-      [field]: value,
-      ...(field === 'dayOfWeek' && { 
-        timeSlotId: '', 
-        startTime: '', 
-        endTime: '' 
-      })
-    }));
-  };
-
-  const handleTimeSlotChange = (value: string) => {
-    const selectedSchedule = schedules.find(s => s.dayOfWeek === form.dayOfWeek);
-    const selectedSlot = selectedSchedule?.timeSlots.find(ts => ts.id === value);
-    
-    if (selectedSlot) {
-      setForm({
-        ...form,
-        timeSlotId: value,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
-      });
-    }
-  };
-
-  const handlePreview = async () => {
+  const handleDaySelect = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      if (!form.dayOfWeek || !form.timeSlotId) {
-        setError("Por favor, seleccione un día y horario");
+      if (!selectedDay) {
+        setError("Por favor, seleccione un día");
         setLoading(false);
         return;
       }
       
-      const specialistId = session.specialistId;
-      
-      // Llamar al nuevo endpoint de preview de reprogramación
-      const availableSlots = await fetchReschedulePreview(appointment.id, {
+      // Llamar al endpoint de preview de reprogramación
+      const slots = await fetchReschedulePreview(appointment.id, {
         sessionId: session.sessionId || session.id,
-        targetDayOfWeek: form.dayOfWeek,
-        startTime: form.startTime,
-        endTime: form.endTime,
+        targetDayOfWeek: selectedDay,
         lookAheadWeeks: 2
       });
       
-      if (availableSlots.length === 0) {
-        setError("No se encontraron horarios disponibles para la fecha y hora seleccionadas");
+      if (slots.length === 0) {
+        setError("No se encontraron horarios disponibles para el día seleccionado");
         setLoading(false);
         return;
       }
       
-      setAvailableSlots(availableSlots);
-      setShowPreview(true);
+      setAvailableSlots(slots);
+      setStep('select-slot');
       setLoading(false);
     } catch (err : any) {
       setLoading(false);
       setError(err.message || "Error al buscar horarios disponibles");
-      console.error("Error obteniendo preview de reprogramación:", err);
+      console.error("Error obteniendo horarios disponibles:", err);
     }
   };
 
@@ -174,7 +132,6 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
       await rescheduleSession(appointment.id, payload);
       
       setLoading(false);
-      setShowPreview(false);
       onRescheduleSuccess();
       onClose();
     } catch (err : any) {
@@ -182,16 +139,6 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
       setError("Error al reprogramar la sesión. Intente nuevamente.");
       console.error("Error reprogramando sesión:", err);
     }
-  };
-
-  const formatDateTime = (dateTimeString: string) => {
-    const date = new Date(dateTimeString);
-    return {
-      date: date.toLocaleDateString('es-ES'),
-      time: date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-      day: dayTranslation[date.toLocaleDateString('es-ES', { weekday: 'long' })] || 
-           date.toLocaleDateString('es-ES', { weekday: 'long' })
-    };
   };
 
   const groupSlotsByDate = (slots: AvailableTimeSlot[]) => {
@@ -212,24 +159,25 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
 
   const availableSchedules = schedules.filter(s => s.attends && s.timeSlots.length > 0);
   const hasAvailableSchedules = availableSchedules.length > 0;
-  const hasTimeSlotsForSelectedDay = form.dayOfWeek && schedules.some(s => 
-    s.dayOfWeek === form.dayOfWeek && s.timeSlots.length > 0 && s.attends
-  );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Reprogramar Sesión</DialogTitle>
+      <DialogTitle>
+        {step === 'select-day' ? 'Seleccionar Día' : 'Seleccionar Horario'}
+      </DialogTitle>
+      
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
           </Alert>
         )}
-        
-        {!showPreview ? (
+
+        {/* Paso 1: Seleccionar día */}
+        {step === 'select-day' && (
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Información actual de la sesión:
+              Sesión actual:
             </Typography>
             <Box sx={{ 
               p: 2, 
@@ -244,7 +192,7 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
             </Box>
 
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Nueva programación:
+              Seleccione el nuevo día:
             </Typography>
             
             {loading ? (
@@ -252,59 +200,35 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
                 <CircularProgress />
               </Box>
             ) : (
-              <>
-                <TextField
-                  select
-                  fullWidth
-                  margin="normal"
-                  label="Día de la semana"
-                  value={form.dayOfWeek}
-                  onChange={(e) => handleChange("dayOfWeek", e.target.value)}
-                  required
-                  disabled={!hasAvailableSchedules}
-                >
-                  {hasAvailableSchedules ? (
-                    availableSchedules.map((s) => (
-                      <MenuItem key={s.dayOfWeek} value={s.dayOfWeek}>
-                        {dayTranslation[s.dayOfWeek] || s.dayOfWeek}
-                      </MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem disabled>No hay días disponibles</MenuItem>
-                  )}
-                </TextField>
-                
-                <TextField
-                  select
-                  fullWidth
-                  margin="normal"
-                  label="Horario"
-                  value={form.timeSlotId}
-                  onChange={(e) => handleTimeSlotChange(e.target.value)}
-                  required
-                  disabled={!hasTimeSlotsForSelectedDay}
-                >
-                  {hasTimeSlotsForSelectedDay ? (
-                    schedules
-                      .find(s => s.dayOfWeek === form.dayOfWeek)!
-                      .timeSlots.map((ts) => (
-                        <MenuItem key={ts.id} value={ts.id}>
-                          {`${ts.startTime} - ${ts.endTime}`}
-                        </MenuItem>
-                      ))
-                  ) : (
-                    <MenuItem disabled>
-                      {form.dayOfWeek ? "No hay horarios disponibles para este día" : "Seleccione un día primero"}
+              <TextField
+                select
+                fullWidth
+                margin="normal"
+                label="Día de la semana"
+                value={selectedDay}
+                onChange={(e) => setSelectedDay(e.target.value)}
+                required
+                disabled={!hasAvailableSchedules}
+              >
+                {hasAvailableSchedules ? (
+                  availableSchedules.map((s) => (
+                    <MenuItem key={s.dayOfWeek} value={s.dayOfWeek}>
+                      {dayTranslation[s.dayOfWeek] || s.dayOfWeek}
                     </MenuItem>
-                  )}
-                </TextField>
-              </>
+                  ))
+                ) : (
+                  <MenuItem disabled>No hay días disponibles</MenuItem>
+                )}
+              </TextField>
             )}
           </Box>
-        ) : (
+        )}
+
+        {/* Paso 2: Seleccionar horario */}
+        {step === 'select-slot' && (
           <Box>
             <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-              Horarios disponibles para {dayTranslation[form.dayOfWeek] || form.dayOfWeek} a las {form.startTime} - {form.endTime}:
+              Horarios disponibles para {dayTranslation[selectedDay] || selectedDay}:
             </Typography>
             
             {loading ? (
@@ -324,13 +248,15 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
                           key={index}
                           sx={{
                             p: 2,
-                            border: '1px solid',
-                            borderColor: selectedAvailableSlot?.timeSlotId === slot.timeSlotId ? 'primary.main' : '#e0e0e0',
+                            border: '1px solid #e0e0e0',
                             borderRadius: 1,
-                            bgcolor: selectedAvailableSlot?.timeSlotId === slot.timeSlotId ? '#e3f2fd' : 'white',
+                            bgcolor: 'white',
                             display: 'flex',
                             justifyContent: 'space-between',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            '&:hover': {
+                              bgcolor: '#f5f5f5',
+                            }
                           }}
                         >
                           <Box>
@@ -338,7 +264,7 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
                               {slot.formattedTime}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {slot.isSameDay && " • Mismo día"}
+                              {slot.isSameDay && " • Esta semana"}
                               {slot.isNextWeek && " • Siguiente semana"}
                             </Typography>
                           </Box>
@@ -349,7 +275,7 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
                             onClick={() => handleConfirmReschedule(slot)}
                             disabled={loading}
                           >
-                            {loading ? <CircularProgress size={20} /> : "Confirmar"}
+                            {loading ? <CircularProgress size={20} /> : "Seleccionar"}
                           </Button>
                         </Box>
                       ))}
@@ -367,20 +293,23 @@ export const RescheduleSessionDialog: React.FC<RescheduleSessionDialogProps> = (
           </Box>
         )}
       </DialogContent>
+
       <DialogActions>
-        {!showPreview ? (
+        {step === 'select-day' && (
           <>
             <Button onClick={onClose}>Cancelar</Button>
             <Button
-              onClick={handlePreview}
+              onClick={handleDaySelect}
               variant="contained"
-              disabled={!hasTimeSlotsForSelectedDay || !form.dayOfWeek || !form.timeSlotId || loading}
+              disabled={!selectedDay || loading}
             >
-              {loading ? <CircularProgress size={24} /> : "Buscar Horarios Disponibles"}
+              {loading ? <CircularProgress size={24} /> : "Buscar Horarios"}
             </Button>
           </>
-        ) : (
-          <Button onClick={() => setShowPreview(false)}>Volver a selección</Button>
+        )}
+
+        {step === 'select-slot' && (
+          <Button onClick={() => setStep('select-day')}>Volver</Button>
         )}
       </DialogActions>
     </Dialog>

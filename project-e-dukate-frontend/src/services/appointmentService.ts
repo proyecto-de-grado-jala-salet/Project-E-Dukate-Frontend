@@ -32,8 +32,6 @@ export interface CreateAppointmentPayload {
 export interface ReschedulePreviewRequest {
   sessionId: string;
   targetDayOfWeek: string;
-  startTime?: string;
-  endTime?: string;
   lookAheadWeeks?: number;
 }
 
