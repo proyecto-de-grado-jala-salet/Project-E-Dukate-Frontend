@@ -6,6 +6,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
+import { useTheme, useMediaQuery } from '@mui/material';
 import { PaymentTableRow } from "./PaymentTableRow";
 import { Payment } from "../../types/payments";
 
@@ -30,6 +31,33 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
   formatDate,
   isAdmin,
 }) => {
+  const theme = useTheme();
+  const isVerySmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Configuración responsive para las celdas
+  const getCellStyles = (isHeader = false) => {
+    const baseStyles = {
+      color: "black",
+      fontWeight: isHeader ? "bold" : "normal",
+      padding: isVerySmallScreen ? "8px 4px" : "12px 8px",
+      textAlign: "center",
+      borderBottom: "1px solid #e0e0e0",
+      fontSize: isVerySmallScreen ? "0.75rem" : "0.875rem",
+      wordWrap: "break-word",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      maxWidth: "120px",
+    };
+
+    return baseStyles;
+  };
+
+  const headerCellStyles = (width: string) => ({
+    ...getCellStyles(true),
+    width: isVerySmallScreen ? "auto" : width,
+    minWidth: isVerySmallScreen ? "60px" : "80px",
+  });
+
   return (
     <TableContainer
       component={Paper}
@@ -38,141 +66,48 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         border: "1px solid #e0e0e0",
         borderRadius: "12px",
         overflow: "hidden",
+        maxWidth: "100%",
       }}
     >
-      <Table sx={{ minWidth: 650 }}>
+      <Table 
+        sx={{ 
+          minWidth: isVerySmallScreen ? "800px" : "100%",
+          tableLayout: isVerySmallScreen ? "fixed" : "auto",
+        }}
+      >
         <TableHead>
           <TableRow>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "15%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Paciente
+            <TableCell sx={headerCellStyles("12%")}>
+              {isVerySmallScreen ? "Paciente" : "Paciente"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Fecha de inicio
+            <TableCell sx={headerCellStyles("10%")}>
+              {isVerySmallScreen ? "Inicio" : "Fecha de inicio"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Fecha de finalización
+            <TableCell sx={headerCellStyles("10%")}>
+              {isVerySmallScreen ? "Fin" : "Fecha de finalización"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "5%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Sesiones
+            <TableCell sx={headerCellStyles("6%")}>
+              {isVerySmallScreen ? "Ses." : "Sesiones"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
+            <TableCell sx={headerCellStyles("8%")}>
               Costo
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Monto pagado
+            <TableCell sx={headerCellStyles("10%")}>
+              {isVerySmallScreen ? "Pagado" : "Monto pagado"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Monto pendiente
+            <TableCell sx={headerCellStyles("10%")}>
+              {isVerySmallScreen ? "Pendiente" : "Monto pendiente"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Terapia
+            <TableCell sx={headerCellStyles("8%")}>
+              {isVerySmallScreen ? "Terapia" : "Terapia"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "10%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
-              Institución
+            <TableCell sx={headerCellStyles("10%")}>
+              {isVerySmallScreen ? "Inst." : "Institución"}
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "5%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
+            <TableCell sx={headerCellStyles("8%")}>
               Estado
             </TableCell>
-            <TableCell
-              sx={{
-                color: "black",
-                fontWeight: "bold",
-                padding: "16px 24px",
-                width: "5%",
-                textAlign: "center",
-                borderBottom: "1px solid #e0e0e0",
-              }}
-            >
+            <TableCell sx={headerCellStyles("8%")}>
               Total
             </TableCell>
           </TableRow>
@@ -188,12 +123,13 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
                 getPatientName={getPatientName}
                 formatDate={formatDate}
                 isAdmin={isAdmin}
+                isVerySmallScreen={isVerySmallScreen}
               />
             ))
           ) : (
             <TableRow>
               <TableCell
-                colSpan={12}
+                colSpan={11}
                 sx={{
                   color: "black",
                   padding: "32px 24px",

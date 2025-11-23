@@ -17,6 +17,7 @@ interface PaymentTableRowProps {
   getPatientName: (patientId: string) => string;
   formatDate: (date: string | null) => string;
   isAdmin?: boolean;
+  isVerySmallScreen?: boolean;
 }
 
 export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
@@ -26,6 +27,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   getPatientName,
   formatDate,
   isAdmin = false,
+  isVerySmallScreen = false,
 }) => {
   const defaultValues = {
     sessionCost: payment.sessionCost.toString(),
@@ -34,23 +36,66 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
 
   const values = editedValues || defaultValues;
 
+  // Estilos responsive para celdas
+  const getCellStyles = () => ({
+    color: "black",
+    padding: isVerySmallScreen ? "8px 4px" : "12px 8px",
+    textAlign: "center" as const,
+    fontSize: isVerySmallScreen ? "0.75rem" : "0.875rem",
+    borderBottom: "1px solid #e0e0e0",
+    maxWidth: "120px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
+  });
+
+  // Formatear números para pantallas pequeñas
+  const formatNumber = (num: number) => {
+    if (isVerySmallScreen && num >= 1000) {
+      return `${(num / 1000).toFixed(1)}k`;
+    }
+    return num.toString();
+  };
+
+  // Formatear fechas para pantallas pequeñas
+  const formatDateCompact = (date: string | null) => {
+    if (!date) return "-";
+    if (isVerySmallScreen) {
+      const dateObj = new Date(date);
+      return `${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
+    }
+    return formatDate(date);
+  };
+
   return (
     <TableRow key={payment.id}>
-      <TableCell sx={{ color: "black", padding: "6px", textAlign: "center" }}>
-        {getPatientName(payment.patientId)}
+      {/* Paciente */}
+      <TableCell sx={getCellStyles()}>
+        <Box sx={{ 
+          maxWidth: "100px",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap"
+        }}>
+          {getPatientName(payment.patientId)}
+        </Box>
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {formatDate(payment.firstPaymentDate)}
+
+      {/* Fechas */}
+      <TableCell sx={getCellStyles()}>
+        {formatDateCompact(payment.firstPaymentDate)}
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {formatDate(payment.lastPaymentDate)}
+      <TableCell sx={getCellStyles()}>
+        {formatDateCompact(payment.lastPaymentDate)}
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {payment.sessionCount}
+
+      {/* Sesiones */}
+      <TableCell sx={getCellStyles()}>
+        {formatNumber(payment.sessionCount)}
       </TableCell>
       
-      {/* Celda de SessionCost */}
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
+      {/* Costo */}
+      <TableCell sx={getCellStyles()}>
         {isAdmin ? (
           <EditableCurrencyField
             value={values.sessionCost}
@@ -62,19 +107,30 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 1,
+              gap: 0.5,
+              flexWrap: "nowrap",
             }}
           >
-            <Typography sx={{ color: "black" }}>
-              {payment.sessionCost}
+            <Typography sx={{ 
+              color: "black", 
+              fontSize: "inherit",
+              lineHeight: 1 
+            }}>
+              {formatNumber(payment.sessionCost)}
             </Typography>
-            <Typography sx={{ color: "black" }}>bs.</Typography>
+            <Typography sx={{ 
+              color: "black", 
+              fontSize: "0.7rem",
+              lineHeight: 1 
+            }}>
+              {isVerySmallScreen ? "" : "bs."}
+            </Typography>
           </Box>
         )}
       </TableCell>
 
-      {/* Celda de AmountPaid */}
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
+      {/* Monto Pagado */}
+      <TableCell sx={getCellStyles()}>
         {isAdmin ? (
           <EditableCurrencyField
             value={values.amountPaid}
@@ -86,27 +142,112 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 1,
+              gap: 0.5,
+              flexWrap: "nowrap",
             }}
           >
-            <Typography sx={{ color: "black" }}>
-              {payment.amountPaid}
+            <Typography sx={{ 
+              color: "black", 
+              fontSize: "inherit",
+              lineHeight: 1 
+            }}>
+              {formatNumber(payment.amountPaid)}
             </Typography>
-            <Typography sx={{ color: "black" }}>bs.</Typography>
+            <Typography sx={{ 
+              color: "black", 
+              fontSize: "0.7rem",
+              lineHeight: 1 
+            }}>
+              {isVerySmallScreen ? "" : "bs."}
+            </Typography>
           </Box>
         )}
       </TableCell>
 
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {payment.pendingAmount} bs.
+      {/* Montos restantes */}
+      <TableCell sx={getCellStyles()}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            flexWrap: "nowrap",
+          }}
+        >
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "inherit",
+            lineHeight: 1 
+          }}>
+            {formatNumber(payment.pendingAmount)}
+          </Typography>
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "0.7rem",
+            lineHeight: 1 
+          }}>
+            {isVerySmallScreen ? "" : "bs."}
+          </Typography>
+        </Box>
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {payment.specialistAmount} bs.
+
+      <TableCell sx={getCellStyles()}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            flexWrap: "nowrap",
+          }}
+        >
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "inherit",
+            lineHeight: 1 
+          }}>
+            {formatNumber(payment.specialistAmount)}
+          </Typography>
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "0.7rem",
+            lineHeight: 1 
+          }}>
+            {isVerySmallScreen ? "" : "bs."}
+          </Typography>
+        </Box>
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {payment.institutionAmount} bs.
+
+      <TableCell sx={getCellStyles()}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            flexWrap: "nowrap",
+          }}
+        >
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "inherit",
+            lineHeight: 1 
+          }}>
+            {formatNumber(payment.institutionAmount)}
+          </Typography>
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "0.7rem",
+            lineHeight: 1 
+          }}>
+            {isVerySmallScreen ? "" : "bs."}
+          </Typography>
+        </Box>
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
+
+      {/* Estado */}
+      <TableCell sx={getCellStyles()}>
         <Box
           sx={{
             display: "inline-flex",
@@ -114,15 +255,46 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             justifyContent: "center",
             bgcolor: payment.status === "Completed" ? "#d4edda" : "#fff3cd",
             color: payment.status === "Completed" ? "#155724" : "#856404",
-            borderRadius: "12px",
-            padding: "4px 8px",
+            borderRadius: "8px",
+            padding: "2px 6px",
+            fontSize: isVerySmallScreen ? "0.7rem" : "0.75rem",
+            minWidth: isVerySmallScreen ? "60px" : "80px",
           }}
         >
-          {payment.status === "Completed" ? "Completado" : "Pendiente"}
+          {payment.status === "Completed" 
+            ? (isVerySmallScreen ? "Comp." : "Completado") 
+            : (isVerySmallScreen ? "Pend." : "Pendiente")}
         </Box>
       </TableCell>
-      <TableCell sx={{ color: "black", padding: "16px 24px", textAlign: "center" }}>
-        {payment.totalAmount} bs.
+
+      {/* Total */}
+      <TableCell sx={getCellStyles()}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            flexWrap: "nowrap",
+            fontWeight: "bold",
+          }}
+        >
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "inherit",
+            lineHeight: 1,
+            fontWeight: "inherit"
+          }}>
+            {formatNumber(payment.totalAmount)}
+          </Typography>
+          <Typography sx={{ 
+            color: "black", 
+            fontSize: "0.7rem",
+            lineHeight: 1 
+          }}>
+            {isVerySmallScreen ? "" : "bs."}
+          </Typography>
+        </Box>
       </TableCell>
     </TableRow>
   );

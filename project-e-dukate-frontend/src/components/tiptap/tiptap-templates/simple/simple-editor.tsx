@@ -57,8 +57,6 @@ import { ArrowLeftIcon } from "@/components/tiptap/tiptap-icons/arrow-left-icon"
 
 // --- Hooks ---
 import { useMobile } from "@/hooks/tiptap/use-mobile";
-import { useWindowSize } from "@/hooks/tiptap/use-window-size";
-import { useCursorVisibility } from "@/hooks/tiptap/use-cursor-visibility";
 
 // --- Styles ---
 import "@/components/tiptap/tiptap-templates/simple/simple-editor.scss";
@@ -150,9 +148,9 @@ export function SimpleEditor({
   editable?: boolean;
 }) {
   const isMobile = useMobile();
-  const windowSize = useWindowSize();
   const [mobileView, setMobileView] = React.useState<"main" | "link">("main");
   const toolbarRef = React.useRef<HTMLDivElement>(null);
+  const editorContainerRef = React.useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -162,6 +160,7 @@ export function SimpleEditor({
         autocorrect: "off",
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
+        class: "tiptap-editor-content",
       },
     },
     extensions: [
@@ -196,10 +195,6 @@ export function SimpleEditor({
     }
   }, [editor, editable]);
 
-  const bodyRect = useCursorVisibility({
-    editor,
-    overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
-  });
 
   React.useEffect(() => {
     if (!isMobile && mobileView !== "main") {
@@ -209,36 +204,61 @@ export function SimpleEditor({
 
   return (
     <EditorContext.Provider value={{ editor }}>
-      {editable && (
-        <Toolbar
-          ref={toolbarRef}
-          style={
-            isMobile
-              ? {
-                  bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
-                }
-              : {}
-          }
-        >
-          {mobileView === "main" ? (
-            <MainToolbarContent
-              onLinkClick={() => setMobileView("link")}
-              isMobile={isMobile}
-            />
-          ) : (
-            <MobileToolbarContent
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
-      )}
+      <div 
+        ref={editorContainerRef}
+        className="simple-editor-container"
+        style={{
+          position: 'relative',
+          minHeight: '200px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {editable && (
+          <Toolbar
+            ref={toolbarRef}
+            style={{
+              position: 'relative',
+              top: '0',
+              left: '0',
+              right: '0',
+              width: '100%',
+              zIndex: 10,
+              backgroundColor: '#fff',
+              borderBottom: '1px solid #e0e0e0',
+            }}
+          >
+            {mobileView === "main" ? (
+              <MainToolbarContent
+                onLinkClick={() => setMobileView("link")}
+                isMobile={isMobile}
+              />
+            ) : (
+              <MobileToolbarContent
+                onBack={() => setMobileView("main")}
+              />
+            )}
+          </Toolbar>
+        )}
 
-      <div className="content-wrapper">
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
+        <div 
+          className="content-wrapper"
+          style={{
+            flex: 1,
+            minHeight: '150px',
+            position: 'relative',
+          }}
+        >
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="simple-editor-content"
+            style={{
+              minHeight: '150px',
+              padding: '16px',
+            }}
+          />
+        </div>
       </div>
     </EditorContext.Provider>
   );
