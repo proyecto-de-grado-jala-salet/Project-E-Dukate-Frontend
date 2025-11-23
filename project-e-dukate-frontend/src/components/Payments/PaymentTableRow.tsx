@@ -17,6 +17,7 @@ interface PaymentTableRowProps {
   getPatientName: (patientId: string) => string;
   formatDate: (date: string | null) => string;
   isAdmin?: boolean;
+  isSmallScreen?: boolean;
   isVerySmallScreen?: boolean;
 }
 
@@ -27,6 +28,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   getPatientName,
   formatDate,
   isAdmin = false,
+  isSmallScreen = false,
   isVerySmallScreen = false,
 }) => {
   const defaultValues = {
@@ -41,65 +43,66 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
     color: "black",
     padding: isVerySmallScreen ? "8px 4px" : "12px 8px",
     textAlign: "center" as const,
-    fontSize: isVerySmallScreen ? "0.75rem" : "0.875rem",
-    borderBottom: "1px solid #e0e0e0",
-    maxWidth: "120px",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap" as const,
+    fontSize: isVerySmallScreen ? '0.75rem' : isSmallScreen ? '0.8rem' : '0.875rem',
+    wordWrap: 'break-word' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   });
 
-  // Formatear números para pantallas pequeñas
-  const formatNumber = (num: number) => {
-    if (isVerySmallScreen && num >= 1000) {
-      return `${(num / 1000).toFixed(1)}k`;
+  // Formatear nombres largos para pantallas pequeñas
+  const formatPatientName = (name: string) => {
+    if (isVerySmallScreen && name.length > 12) {
+      return name.substring(0, 10) + '...';
     }
-    return num.toString();
+    if (isSmallScreen && name.length > 15) {
+      return name.substring(0, 13) + '...';
+    }
+    return name;
   };
 
   // Formatear fechas para pantallas pequeñas
-  const formatDateCompact = (date: string | null) => {
-    if (!date) return "-";
+  const formatDateResponsive = (date: string | null) => {
+    const formattedDate = formatDate(date);
     if (isVerySmallScreen) {
-      const dateObj = new Date(date);
-      return `${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
+      return formattedDate.replace(/\//g, '/').substring(0, 5);
     }
-    return formatDate(date);
+    return formattedDate;
   };
 
   return (
     <TableRow key={payment.id}>
       {/* Paciente */}
       <TableCell sx={getCellStyles()}>
-        <Box sx={{ 
-          maxWidth: "100px",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap"
-        }}>
-          {getPatientName(payment.patientId)}
-        </Box>
+        <Typography 
+          sx={{ 
+            fontSize: 'inherit',
+            lineHeight: 1.2 
+          }}
+        >
+          {formatPatientName(getPatientName(payment.patientId))}
+        </Typography>
       </TableCell>
 
       {/* Fechas */}
       <TableCell sx={getCellStyles()}>
-        {formatDateCompact(payment.firstPaymentDate)}
+        {formatDateResponsive(payment.firstPaymentDate)}
       </TableCell>
       <TableCell sx={getCellStyles()}>
-        {formatDateCompact(payment.lastPaymentDate)}
+        {formatDateResponsive(payment.lastPaymentDate)}
       </TableCell>
 
       {/* Sesiones */}
       <TableCell sx={getCellStyles()}>
-        {formatNumber(payment.sessionCount)}
+        {payment.sessionCount}
       </TableCell>
       
-      {/* Costo */}
+      {/* Costo de Sesión */}
       <TableCell sx={getCellStyles()}>
         {isAdmin ? (
           <EditableCurrencyField
             value={values.sessionCost}
             onChange={(value) => onValueChange(payment.id, "sessionCost", value)}
+            size={isVerySmallScreen ? "small" : "medium"}
           />
         ) : (
           <Box
@@ -108,22 +111,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               alignItems: "center",
               justifyContent: "center",
               gap: 0.5,
-              flexWrap: "nowrap",
+              flexDirection: isVerySmallScreen ? 'column' : 'row',
             }}
           >
-            <Typography sx={{ 
-              color: "black", 
-              fontSize: "inherit",
-              lineHeight: 1 
-            }}>
-              {formatNumber(payment.sessionCost)}
+            <Typography sx={{ color: "black", fontSize: 'inherit' }}>
+              {payment.sessionCost}
             </Typography>
-            <Typography sx={{ 
-              color: "black", 
-              fontSize: "0.7rem",
-              lineHeight: 1 
-            }}>
-              {isVerySmallScreen ? "" : "bs."}
+            <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
+              {isVerySmallScreen ? '' : 'bs.'}
             </Typography>
           </Box>
         )}
@@ -135,6 +130,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
           <EditableCurrencyField
             value={values.amountPaid}
             onChange={(value) => onValueChange(payment.id, "amountPaid", value)}
+            size={isVerySmallScreen ? "small" : "medium"}
           />
         ) : (
           <Box
@@ -143,22 +139,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               alignItems: "center",
               justifyContent: "center",
               gap: 0.5,
-              flexWrap: "nowrap",
+              flexDirection: isVerySmallScreen ? 'column' : 'row',
             }}
           >
-            <Typography sx={{ 
-              color: "black", 
-              fontSize: "inherit",
-              lineHeight: 1 
-            }}>
-              {formatNumber(payment.amountPaid)}
+            <Typography sx={{ color: "black", fontSize: 'inherit' }}>
+              {payment.amountPaid}
             </Typography>
-            <Typography sx={{ 
-              color: "black", 
-              fontSize: "0.7rem",
-              lineHeight: 1 
-            }}>
-              {isVerySmallScreen ? "" : "bs."}
+            <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
+              {isVerySmallScreen ? '' : 'bs.'}
             </Typography>
           </Box>
         )}
@@ -172,22 +160,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexWrap: "nowrap",
+            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "inherit",
-            lineHeight: 1 
-          }}>
-            {formatNumber(payment.pendingAmount)}
+          <Typography sx={{ fontSize: 'inherit' }}>
+            {payment.pendingAmount}
           </Typography>
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "0.7rem",
-            lineHeight: 1 
-          }}>
-            {isVerySmallScreen ? "" : "bs."}
+          <Typography sx={{ fontSize: '0.7rem' }}>
+            {isVerySmallScreen ? '' : 'bs.'}
           </Typography>
         </Box>
       </TableCell>
@@ -199,22 +179,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexWrap: "nowrap",
+            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "inherit",
-            lineHeight: 1 
-          }}>
-            {formatNumber(payment.specialistAmount)}
+          <Typography sx={{ fontSize: 'inherit' }}>
+            {payment.specialistAmount}
           </Typography>
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "0.7rem",
-            lineHeight: 1 
-          }}>
-            {isVerySmallScreen ? "" : "bs."}
+          <Typography sx={{ fontSize: '0.7rem' }}>
+            {isVerySmallScreen ? '' : 'bs.'}
           </Typography>
         </Box>
       </TableCell>
@@ -226,22 +198,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexWrap: "nowrap",
+            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "inherit",
-            lineHeight: 1 
-          }}>
-            {formatNumber(payment.institutionAmount)}
+          <Typography sx={{ fontSize: 'inherit' }}>
+            {payment.institutionAmount}
           </Typography>
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "0.7rem",
-            lineHeight: 1 
-          }}>
-            {isVerySmallScreen ? "" : "bs."}
+          <Typography sx={{ fontSize: '0.7rem' }}>
+            {isVerySmallScreen ? '' : 'bs.'}
           </Typography>
         </Box>
       </TableCell>
@@ -256,14 +220,15 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             bgcolor: payment.status === "Completed" ? "#d4edda" : "#fff3cd",
             color: payment.status === "Completed" ? "#155724" : "#856404",
             borderRadius: "8px",
-            padding: "2px 6px",
-            fontSize: isVerySmallScreen ? "0.7rem" : "0.75rem",
-            minWidth: isVerySmallScreen ? "60px" : "80px",
+            padding: isVerySmallScreen ? "2px 4px" : "4px 8px",
+            fontSize: isVerySmallScreen ? '0.65rem' : '0.75rem',
+            lineHeight: 1,
           }}
         >
           {payment.status === "Completed" 
             ? (isVerySmallScreen ? "Comp." : "Completado") 
-            : (isVerySmallScreen ? "Pend." : "Pendiente")}
+            : (isVerySmallScreen ? "Pend." : "Pendiente")
+          }
         </Box>
       </TableCell>
 
@@ -275,24 +240,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexWrap: "nowrap",
-            fontWeight: "bold",
+            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "inherit",
-            lineHeight: 1,
-            fontWeight: "inherit"
-          }}>
-            {formatNumber(payment.totalAmount)}
+          <Typography sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
+            {payment.totalAmount}
           </Typography>
-          <Typography sx={{ 
-            color: "black", 
-            fontSize: "0.7rem",
-            lineHeight: 1 
-          }}>
-            {isVerySmallScreen ? "" : "bs."}
+          <Typography sx={{ fontSize: '0.7rem' }}>
+            {isVerySmallScreen ? '' : 'bs.'}
           </Typography>
         </Box>
       </TableCell>

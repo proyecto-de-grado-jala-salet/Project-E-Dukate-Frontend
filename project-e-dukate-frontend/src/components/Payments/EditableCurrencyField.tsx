@@ -6,11 +6,13 @@ import { TextField } from "../TextField";
 interface EditableCurrencyFieldProps {
   value: string;
   onChange: (value: string) => void;
+  size?: 'small' | 'medium';
 }
 
 export const EditableCurrencyField: React.FC<EditableCurrencyFieldProps> = ({
   value,
   onChange,
+  size = 'medium'
 }) => {
   return (
     <Box
@@ -30,6 +32,7 @@ export const EditableCurrencyField: React.FC<EditableCurrencyFieldProps> = ({
         }}
         type="number"
         placeholder="0"
+        size={size}
       />
       <Typography sx={{ color: "black" }}>bs.</Typography>
     </Box>
