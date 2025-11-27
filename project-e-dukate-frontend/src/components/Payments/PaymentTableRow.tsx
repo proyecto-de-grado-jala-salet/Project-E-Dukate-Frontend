@@ -247,8 +247,8 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
           }}
         >
           {payment.status === "Completed" 
-            ? (isMobile ? "OK" : "Comp.") 
-            : (isMobile ? "Pen." : "Pend.")
+            ? (isMobile ? "Comp." : "Completado") 
+            : (isMobile ? "Pend." : "Pendiente")
           }
         </Box>
       </TableCell>
