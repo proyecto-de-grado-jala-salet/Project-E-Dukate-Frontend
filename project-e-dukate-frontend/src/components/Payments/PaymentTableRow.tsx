@@ -17,7 +17,7 @@ interface PaymentTableRowProps {
   getPatientName: (patientId: string) => string;
   formatDate: (date: string | null) => string;
   isAdmin?: boolean;
-  isSmallScreen?: boolean;
+  isMobile?: boolean;
   isVerySmallScreen?: boolean;
 }
 
@@ -28,7 +28,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   getPatientName,
   formatDate,
   isAdmin = false,
-  isSmallScreen = false,
+  isMobile = false,
   isVerySmallScreen = false,
 }) => {
   const defaultValues = {
@@ -41,21 +41,22 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   // Estilos responsive para celdas
   const getCellStyles = () => ({
     color: "black",
-    padding: isVerySmallScreen ? "8px 4px" : "12px 8px",
+    padding: isMobile ? "6px 2px" : isVerySmallScreen ? "8px 4px" : "12px 8px",
     textAlign: "center" as const,
-    fontSize: isVerySmallScreen ? '0.75rem' : isSmallScreen ? '0.8rem' : '0.875rem',
-    wordWrap: 'break-word' as const,
+    fontSize: isMobile ? '0.7rem' : isVerySmallScreen ? '0.75rem' : '0.875rem',
+    whiteSpace: 'nowrap' as const,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    borderBottom: "1px solid #e0e0e0",
   });
 
-  // Formatear nombres largos para pantallas pequeñas
+  // Formatear nombres para pantallas pequeñas
   const formatPatientName = (name: string) => {
-    if (isVerySmallScreen && name.length > 12) {
-      return name.substring(0, 10) + '...';
+    if (isMobile && name.length > 10) {
+      return name.substring(0, 8) + '..';
     }
-    if (isSmallScreen && name.length > 15) {
-      return name.substring(0, 13) + '...';
+    if (isVerySmallScreen && name.length > 15) {
+      return name.substring(0, 13) + '..';
     }
     return name;
   };
@@ -63,11 +64,19 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   // Formatear fechas para pantallas pequeñas
   const formatDateResponsive = (date: string | null) => {
     const formattedDate = formatDate(date);
+    if (isMobile) {
+      // Para móvil: DD/MM
+      return formattedDate.split('/').slice(0, 2).join('/');
+    }
     if (isVerySmallScreen) {
-      return formattedDate.replace(/\//g, '/').substring(0, 5);
+      // Para pantallas pequeñas: DD/MM/YY
+      return formattedDate.split('/').slice(0, 3).join('/');
     }
     return formattedDate;
   };
+
+  // Mostrar moneda condicionalmente
+  const showCurrency = !isMobile;
 
   return (
     <TableRow key={payment.id}>
@@ -76,8 +85,9 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
         <Typography 
           sx={{ 
             fontSize: 'inherit',
-            lineHeight: 1.2 
+            fontWeight: 'medium',
           }}
+          title={getPatientName(payment.patientId)} // Tooltip con nombre completo
         >
           {formatPatientName(getPatientName(payment.patientId))}
         </Typography>
@@ -99,11 +109,13 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       {/* Costo de Sesión */}
       <TableCell sx={getCellStyles()}>
         {isAdmin ? (
-          <EditableCurrencyField
-            value={values.sessionCost}
-            onChange={(value) => onValueChange(payment.id, "sessionCost", value)}
-            size={isVerySmallScreen ? "small" : "medium"}
-          />
+          <Box sx={{ minWidth: isMobile ? 60 : 70 }}>
+            <EditableCurrencyField
+              value={values.sessionCost}
+              onChange={(value) => onValueChange(payment.id, "sessionCost", value)}
+              size={isMobile ? "small" : "medium"}
+            />
+          </Box>
         ) : (
           <Box
             sx={{
@@ -111,15 +123,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               alignItems: "center",
               justifyContent: "center",
               gap: 0.5,
-              flexDirection: isVerySmallScreen ? 'column' : 'row',
             }}
           >
             <Typography sx={{ color: "black", fontSize: 'inherit' }}>
               {payment.sessionCost}
             </Typography>
-            <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
-              {isVerySmallScreen ? '' : 'bs.'}
-            </Typography>
+            {showCurrency && (
+              <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
+                bs.
+              </Typography>
+            )}
           </Box>
         )}
       </TableCell>
@@ -127,11 +140,13 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
       {/* Monto Pagado */}
       <TableCell sx={getCellStyles()}>
         {isAdmin ? (
-          <EditableCurrencyField
-            value={values.amountPaid}
-            onChange={(value) => onValueChange(payment.id, "amountPaid", value)}
-            size={isVerySmallScreen ? "small" : "medium"}
-          />
+          <Box sx={{ minWidth: isMobile ? 60 : 70 }}>
+            <EditableCurrencyField
+              value={values.amountPaid}
+              onChange={(value) => onValueChange(payment.id, "amountPaid", value)}
+              size={isMobile ? "small" : "medium"}
+            />
+          </Box>
         ) : (
           <Box
             sx={{
@@ -139,15 +154,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               alignItems: "center",
               justifyContent: "center",
               gap: 0.5,
-              flexDirection: isVerySmallScreen ? 'column' : 'row',
             }}
           >
             <Typography sx={{ color: "black", fontSize: 'inherit' }}>
               {payment.amountPaid}
             </Typography>
-            <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
-              {isVerySmallScreen ? '' : 'bs.'}
-            </Typography>
+            {showCurrency && (
+              <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
+                bs.
+              </Typography>
+            )}
           </Box>
         )}
       </TableCell>
@@ -160,15 +176,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
           <Typography sx={{ fontSize: 'inherit' }}>
             {payment.pendingAmount}
           </Typography>
-          <Typography sx={{ fontSize: '0.7rem' }}>
-            {isVerySmallScreen ? '' : 'bs.'}
-          </Typography>
+          {showCurrency && (
+            <Typography sx={{ fontSize: '0.7rem' }}>
+              bs.
+            </Typography>
+          )}
         </Box>
       </TableCell>
 
@@ -179,15 +196,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
           <Typography sx={{ fontSize: 'inherit' }}>
             {payment.specialistAmount}
           </Typography>
-          <Typography sx={{ fontSize: '0.7rem' }}>
-            {isVerySmallScreen ? '' : 'bs.'}
-          </Typography>
+          {showCurrency && (
+            <Typography sx={{ fontSize: '0.7rem' }}>
+              bs.
+            </Typography>
+          )}
         </Box>
       </TableCell>
 
@@ -198,15 +216,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
           <Typography sx={{ fontSize: 'inherit' }}>
             {payment.institutionAmount}
           </Typography>
-          <Typography sx={{ fontSize: '0.7rem' }}>
-            {isVerySmallScreen ? '' : 'bs.'}
-          </Typography>
+          {showCurrency && (
+            <Typography sx={{ fontSize: '0.7rem' }}>
+              bs.
+            </Typography>
+          )}
         </Box>
       </TableCell>
 
@@ -219,15 +238,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             justifyContent: "center",
             bgcolor: payment.status === "Completed" ? "#d4edda" : "#fff3cd",
             color: payment.status === "Completed" ? "#155724" : "#856404",
-            borderRadius: "8px",
-            padding: isVerySmallScreen ? "2px 4px" : "4px 8px",
-            fontSize: isVerySmallScreen ? '0.65rem' : '0.75rem',
-            lineHeight: 1,
+            borderRadius: "6px",
+            padding: isMobile ? "1px 3px" : "2px 6px",
+            fontSize: isMobile ? '0.6rem' : '0.7rem',
+            lineHeight: 1.2,
+            minWidth: isMobile ? 45 : 55,
           }}
         >
           {payment.status === "Completed" 
-            ? (isVerySmallScreen ? "Comp." : "Completado") 
-            : (isVerySmallScreen ? "Pend." : "Pendiente")
+            ? (isMobile ? "OK" : "Comp.") 
+            : (isMobile ? "Pen." : "Pend.")
           }
         </Box>
       </TableCell>
@@ -240,15 +260,16 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: 0.5,
-            flexDirection: isVerySmallScreen ? 'column' : 'row',
           }}
         >
           <Typography sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
             {payment.totalAmount}
           </Typography>
-          <Typography sx={{ fontSize: '0.7rem' }}>
-            {isVerySmallScreen ? '' : 'bs.'}
-          </Typography>
+          {showCurrency && (
+            <Typography sx={{ fontSize: '0.7rem' }}>
+              bs.
+            </Typography>
+          )}
         </Box>
       </TableCell>
     </TableRow>

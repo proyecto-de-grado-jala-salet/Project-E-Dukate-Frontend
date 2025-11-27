@@ -32,71 +32,113 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
   isAdmin,
 }) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'));
-  const isVerySmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('xl'));
+  const isVerySmallScreen = useMediaQuery(theme.breakpoints.down('lg'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Configuración responsive de columnas
+  // Configuración de columnas que se ajustan automáticamente
   const getColumnStyles = (columnKey: string) => {
     const baseStyles = {
       color: "black",
       fontWeight: "bold",
-      padding: "12px 8px",
-      textAlign: "center",
+      textAlign: "center" as const,
       borderBottom: "1px solid #e0e0e0",
+      whiteSpace: 'nowrap' as const,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    };
+
+    const paddingConfig = {
+      mobile: "6px 2px",
+      small: "8px 4px",
+      normal: "12px 8px"
+    };
+
+    const getPadding = () => {
+      if (isMobile) return paddingConfig.mobile;
+      if (isVerySmallScreen) return paddingConfig.small;
+      return paddingConfig.normal;
+    };
+
+    const getFontSize = () => {
+      if (isMobile) return '0.7rem';
+      if (isVerySmallScreen) return '0.75rem';
+      return '0.875rem';
     };
 
     const columnConfig = {
-      // Para pantallas muy pequeñas
-      paciente: {
-        width: isVerySmallScreen ? '20%' : isSmallScreen ? '18%' : '15%',
-        fontSize: isVerySmallScreen ? '0.75rem' : '0.875rem',
-      },
-      fechaInicio: {
-        width: isVerySmallScreen ? '12%' : isSmallScreen ? '10%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      fechaFinalizacion: {
-        width: isVerySmallScreen ? '12%' : isSmallScreen ? '10%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      sesiones: {
-        width: isVerySmallScreen ? '8%' : isSmallScreen ? '6%' : '5%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      costo: {
-        width: isVerySmallScreen ? '10%' : isSmallScreen ? '9%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      montoPagado: {
-        width: isVerySmallScreen ? '10%' : isSmallScreen ? '9%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      montoPendiente: {
-        width: isVerySmallScreen ? '10%' : isSmallScreen ? '9%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      terapia: {
-        width: isVerySmallScreen ? '10%' : isSmallScreen ? '9%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      institucion: {
-        width: isVerySmallScreen ? '10%' : isSmallScreen ? '9%' : '10%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      estado: {
-        width: isVerySmallScreen ? '8%' : isSmallScreen ? '6%' : '5%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
-      total: {
-        width: isVerySmallScreen ? '8%' : isSmallScreen ? '6%' : '5%',
-        fontSize: isVerySmallScreen ? '0.7rem' : '0.8rem',
-      },
+      paciente: { minWidth: isMobile ? 80 : isVerySmallScreen ? 100 : 120 },
+      fechaInicio: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 100 },
+      fechaFinalizacion: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 100 },
+      sesiones: { minWidth: isMobile ? 50 : isVerySmallScreen ? 60 : 70 },
+      costo: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
+      montoPagado: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
+      montoPendiente: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
+      terapia: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
+      institucion: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
+      estado: { minWidth: isMobile ? 60 : isVerySmallScreen ? 70 : 80 },
+      total: { minWidth: isMobile ? 60 : isVerySmallScreen ? 70 : 80 },
     };
 
     return {
       ...baseStyles,
       ...columnConfig[columnKey as keyof typeof columnConfig],
+      padding: getPadding(),
+      fontSize: getFontSize(),
     };
+  };
+
+  // Textos adaptativos para headers
+  const getHeaderText = (key: string) => {
+    if (isMobile) {
+      const mobileTexts = {
+        paciente: 'Paciente',
+        fechaInicio: 'Inicio',
+        fechaFinalizacion: 'Fin',
+        sesiones: 'Ses.',
+        costo: 'Costo',
+        montoPagado: 'Pagado',
+        montoPendiente: 'Pendiente',
+        terapia: 'Terapia',
+        institucion: 'Inst.',
+        estado: 'Estado',
+        total: 'Total',
+      };
+      return mobileTexts[key as keyof typeof mobileTexts];
+    }
+
+    if (isVerySmallScreen) {
+      const smallTexts = {
+        paciente: 'Paciente',
+        fechaInicio: 'F. Inicio',
+        fechaFinalizacion: 'F. Fin',
+        sesiones: 'Sesiones',
+        costo: 'Costo',
+        montoPagado: 'M. Pagado',
+        montoPendiente: 'M. Pendiente',
+        terapia: 'Terapia',
+        institucion: 'Institución',
+        estado: 'Estado',
+        total: 'Total',
+      };
+      return smallTexts[key as keyof typeof smallTexts];
+    }
+
+    // Textos completos para pantallas normales
+    const normalTexts = {
+      paciente: 'Paciente',
+      fechaInicio: 'Fecha de inicio',
+      fechaFinalizacion: 'Fecha de finalización',
+      sesiones: 'Sesiones',
+      costo: 'Costo',
+      montoPagado: 'Monto pagado',
+      montoPendiente: 'Monto pendiente',
+      terapia: 'Terapia',
+      institucion: 'Institución',
+      estado: 'Estado',
+      total: 'Total',
+    };
+    return normalTexts[key as keyof typeof normalTexts];
   };
 
   return (
@@ -106,51 +148,50 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         boxShadow: "none",
         border: "1px solid #e0e0e0",
         borderRadius: "12px",
-        overflow: "auto",
-        maxWidth: "100%",
+        overflow: "hidden",
+        width: "100%",
       }}
     >
       <Table 
         sx={{ 
-          minWidth: isVerySmallScreen ? 800 : 1000,
-          tableLayout: 'fixed',
-          width: '100%'
+          width: "100%",
+          tableLayout: 'auto', // Cambiado a 'auto' para que se ajuste automáticamente
         }}
       >
         <TableHead>
           <TableRow>
             <TableCell sx={getColumnStyles('paciente')}>
-              {isVerySmallScreen ? 'Pac.' : 'Paciente'}
+              {getHeaderText('paciente')}
             </TableCell>
             <TableCell sx={getColumnStyles('fechaInicio')}>
-              {isVerySmallScreen ? 'Inicio' : 'Fecha de inicio'}
+              {getHeaderText('fechaInicio')}
             </TableCell>
             <TableCell sx={getColumnStyles('fechaFinalizacion')}>
-              {isVerySmallScreen ? 'Fin' : 'Fecha de finalización'}
+              {getHeaderText('fechaFinalizacion')}
             </TableCell>
             <TableCell sx={getColumnStyles('sesiones')}>
-              {isVerySmallScreen ? 'Ses.' : 'Sesiones'}
+              {getHeaderText('sesiones')}
             </TableCell>
             <TableCell sx={getColumnStyles('costo')}>
-              Costo
+              {getHeaderText('costo')}
             </TableCell>
             <TableCell sx={getColumnStyles('montoPagado')}>
-              {isVerySmallScreen ? 'Pagado' : 'Monto pagado'}
+              {getHeaderText('montoPagado')}
             </TableCell>
             <TableCell sx={getColumnStyles('montoPendiente')}>
-              {isVerySmallScreen ? 'Pendiente' : 'Monto pendiente'}
+              {getHeaderText('montoPendiente')}
             </TableCell>
             <TableCell sx={getColumnStyles('terapia')}>
-              {isVerySmallScreen ? 'Terap.' : 'Terapia'}
+              {getHeaderText('terapia')}
             </TableCell>
             <TableCell sx={getColumnStyles('institucion')}>
-              {isVerySmallScreen ? 'Inst.' : 'Institución'}
+              {getHeaderText('institucion')}
             </TableCell>
             <TableCell sx={getColumnStyles('estado')}>
-              Estado
+              {getHeaderText('estado')}
             </TableCell>
             <TableCell sx={getColumnStyles('total')}>
-              Total
+              {getHeaderText('total')}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -165,14 +206,14 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
                 getPatientName={getPatientName}
                 formatDate={formatDate}
                 isAdmin={isAdmin}
-                isSmallScreen={isSmallScreen}
+                isMobile={isMobile}
                 isVerySmallScreen={isVerySmallScreen}
               />
             ))
           ) : (
             <TableRow>
               <TableCell
-                colSpan={12}
+                colSpan={11}
                 sx={{
                   color: "black",
                   padding: "32px 24px",
