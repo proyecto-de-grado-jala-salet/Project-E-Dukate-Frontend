@@ -38,7 +38,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
 
   const values = editedValues || defaultValues;
 
-  // Estilos responsive para celdas
+  // Estilos responsive para celdas - consistentes con el header
   const getCellStyles = () => ({
     color: "black",
     padding: isMobile ? "6px 2px" : isVerySmallScreen ? "8px 4px" : "12px 8px",
@@ -48,12 +48,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     borderBottom: "1px solid #e0e0e0",
+    // Usar los mismos porcentajes que en el header
+    width: 'inherit', // Heredar el width del header
   });
 
   // Formatear nombres para pantallas pequeñas
   const formatPatientName = (name: string) => {
-    if (isMobile && name.length > 10) {
-      return name.substring(0, 8) + '..';
+    if (isMobile && name.length > 12) {
+      return name.substring(0, 10) + '..';
     }
     if (isVerySmallScreen && name.length > 15) {
       return name.substring(0, 13) + '..';
@@ -65,11 +67,9 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
   const formatDateResponsive = (date: string | null) => {
     const formattedDate = formatDate(date);
     if (isMobile) {
-      // Para móvil: DD/MM
       return formattedDate.split('/').slice(0, 2).join('/');
     }
     if (isVerySmallScreen) {
-      // Para pantallas pequeñas: DD/MM/YY
       return formattedDate.split('/').slice(0, 3).join('/');
     }
     return formattedDate;
@@ -80,20 +80,20 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
 
   return (
     <TableRow key={payment.id}>
-      {/* Paciente */}
+      {/* Paciente - 15% */}
       <TableCell sx={getCellStyles()}>
         <Typography 
           sx={{ 
             fontSize: 'inherit',
             fontWeight: 'medium',
           }}
-          title={getPatientName(payment.patientId)} // Tooltip con nombre completo
+          title={getPatientName(payment.patientId)}
         >
           {formatPatientName(getPatientName(payment.patientId))}
         </Typography>
       </TableCell>
 
-      {/* Fechas */}
+      {/* Fechas - 10% cada una */}
       <TableCell sx={getCellStyles()}>
         {formatDateResponsive(payment.firstPaymentDate)}
       </TableCell>
@@ -101,15 +101,15 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
         {formatDateResponsive(payment.lastPaymentDate)}
       </TableCell>
 
-      {/* Sesiones */}
+      {/* Sesiones - 8% */}
       <TableCell sx={getCellStyles()}>
         {payment.sessionCount}
       </TableCell>
       
-      {/* Costo de Sesión */}
+      {/* Costo de Sesión - 9% */}
       <TableCell sx={getCellStyles()}>
         {isAdmin ? (
-          <Box sx={{ minWidth: isMobile ? 60 : 70 }}>
+          <Box sx={{ minWidth: isMobile ? 50 : 60 }}>
             <EditableCurrencyField
               value={values.sessionCost}
               onChange={(value) => onValueChange(payment.id, "sessionCost", value)}
@@ -129,7 +129,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               {payment.sessionCost}
             </Typography>
             {showCurrency && (
-              <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
+              <Typography sx={{ color: "black", fontSize: '0.65rem' }}>
                 bs.
               </Typography>
             )}
@@ -137,10 +137,10 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
         )}
       </TableCell>
 
-      {/* Monto Pagado */}
+      {/* Monto Pagado - 9% */}
       <TableCell sx={getCellStyles()}>
         {isAdmin ? (
-          <Box sx={{ minWidth: isMobile ? 60 : 70 }}>
+          <Box sx={{ minWidth: isMobile ? 50 : 60 }}>
             <EditableCurrencyField
               value={values.amountPaid}
               onChange={(value) => onValueChange(payment.id, "amountPaid", value)}
@@ -160,7 +160,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
               {payment.amountPaid}
             </Typography>
             {showCurrency && (
-              <Typography sx={{ color: "black", fontSize: '0.7rem' }}>
+              <Typography sx={{ color: "black", fontSize: '0.65rem' }}>
                 bs.
               </Typography>
             )}
@@ -168,7 +168,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
         )}
       </TableCell>
 
-      {/* Montos restantes */}
+      {/* Montos restantes - 9% cada uno */}
       <TableCell sx={getCellStyles()}>
         <Box
           sx={{
@@ -182,7 +182,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             {payment.pendingAmount}
           </Typography>
           {showCurrency && (
-            <Typography sx={{ fontSize: '0.7rem' }}>
+            <Typography sx={{ fontSize: '0.65rem' }}>
               bs.
             </Typography>
           )}
@@ -202,7 +202,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             {payment.specialistAmount}
           </Typography>
           {showCurrency && (
-            <Typography sx={{ fontSize: '0.7rem' }}>
+            <Typography sx={{ fontSize: '0.65rem' }}>
               bs.
             </Typography>
           )}
@@ -222,14 +222,14 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             {payment.institutionAmount}
           </Typography>
           {showCurrency && (
-            <Typography sx={{ fontSize: '0.7rem' }}>
+            <Typography sx={{ fontSize: '0.65rem' }}>
               bs.
             </Typography>
           )}
         </Box>
       </TableCell>
 
-      {/* Estado */}
+      {/* Estado - 6% */}
       <TableCell sx={getCellStyles()}>
         <Box
           sx={{
@@ -242,7 +242,8 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             padding: isMobile ? "1px 3px" : "2px 6px",
             fontSize: isMobile ? '0.6rem' : '0.7rem',
             lineHeight: 1.2,
-            minWidth: isMobile ? 45 : 55,
+            minWidth: isMobile ? 40 : 50,
+            width: '100%',
           }}
         >
           {payment.status === "Completed" 
@@ -252,7 +253,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
         </Box>
       </TableCell>
 
-      {/* Total */}
+      {/* Total - 6% */}
       <TableCell sx={getCellStyles()}>
         <Box
           sx={{
@@ -266,7 +267,7 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             {payment.totalAmount}
           </Typography>
           {showCurrency && (
-            <Typography sx={{ fontSize: '0.7rem' }}>
+            <Typography sx={{ fontSize: '0.65rem' }}>
               bs.
             </Typography>
           )}

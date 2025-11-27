@@ -66,18 +66,19 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
       return '0.875rem';
     };
 
+    // Usar porcentajes en lugar de widths fijos
     const columnConfig = {
-      paciente: { minWidth: isMobile ? 80 : isVerySmallScreen ? 100 : 120 },
-      fechaInicio: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 100 },
-      fechaFinalizacion: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 100 },
-      sesiones: { minWidth: isMobile ? 50 : isVerySmallScreen ? 60 : 70 },
-      costo: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
-      montoPagado: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
-      montoPendiente: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
-      terapia: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
-      institucion: { minWidth: isMobile ? 70 : isVerySmallScreen ? 80 : 90 },
-      estado: { minWidth: isMobile ? 60 : isVerySmallScreen ? 70 : 80 },
-      total: { minWidth: isMobile ? 60 : isVerySmallScreen ? 70 : 80 },
+      paciente: { width: '15%' },
+      fechaInicio: { width: '10%' },
+      fechaFinalizacion: { width: '10%' },
+      sesiones: { width: '8%' },
+      costo: { width: '9%' },
+      montoPagado: { width: '9%' },
+      montoPendiente: { width: '9%' },
+      terapia: { width: '9%' },
+      institucion: { width: '9%' },
+      estado: { width: '6%' },
+      total: { width: '6%' },
     };
 
     return {
@@ -150,12 +151,16 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         borderRadius: "12px",
         overflow: "hidden",
         width: "100%",
+        maxWidth: "100%",
+        display: "block",
       }}
     >
       <Table 
         sx={{ 
           width: "100%",
-          tableLayout: 'auto', // Cambiado a 'auto' para que se ajuste automáticamente
+          maxWidth: "100%",
+          tableLayout: 'fixed',
+          minWidth: '100%',
         }}
       >
         <TableHead>
@@ -220,6 +225,7 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
                   textAlign: "center",
                   fontSize: "1.1rem",
                   fontWeight: "medium",
+                  width: "100%",
                 }}
               >
                 No se encontraron elementos
