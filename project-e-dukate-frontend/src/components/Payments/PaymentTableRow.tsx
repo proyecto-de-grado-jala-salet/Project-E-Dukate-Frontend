@@ -263,11 +263,11 @@ export const PaymentTableRow: React.FC<PaymentTableRowProps> = ({
             gap: 0.5,
           }}
         >
-          <Typography sx={{ fontSize: 'inherit', fontWeight: 'bold' }}>
+          <Typography sx={{ fontSize: 'inherit' }}>
             {payment.totalAmount}
           </Typography>
           {showCurrency && (
-            <Typography sx={{ fontSize: '0.65rem' }}>
+            <Typography>
               bs.
             </Typography>
           )}

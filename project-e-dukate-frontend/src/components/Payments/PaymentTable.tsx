@@ -68,17 +68,17 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
 
     // Usar porcentajes en lugar de widths fijos
     const columnConfig = {
-      paciente: { width: '15%' },
-      fechaInicio: { width: '10%' },
-      fechaFinalizacion: { width: '10%' },
-      sesiones: { width: '8%' },
-      costo: { width: '9%' },
-      montoPagado: { width: '9%' },
-      montoPendiente: { width: '9%' },
-      terapia: { width: '9%' },
-      institucion: { width: '9%' },
-      estado: { width: '6%' },
-      total: { width: '6%' },
+      paciente: { minWidth: '120px' },
+      fechaInicio: { minWidth: '80px' },
+      fechaFinalizacion: { minWidth: '80px' },
+      sesiones: { minWidth: '60px' },
+      costo: { minWidth: '70px' },
+      montoPagado: { minWidth: '70px' },
+      montoPendiente: { minWidth: '70px' },
+      terapia: { minWidth: '70px' },
+      institucion: { minWidth: '70px' },
+      estado: { minWidth: '50px' },
+      total: { minWidth: '50px' },
     };
 
     return {
@@ -149,18 +149,18 @@ export const PaymentTable: React.FC<PaymentTableProps> = ({
         boxShadow: "none",
         border: "1px solid #e0e0e0",
         borderRadius: "12px",
-        overflow: "hidden",
+        overflow: "visible",
         width: "100%",
         maxWidth: "100%",
         display: "block",
+        minHeight: "auto",
       }}
     >
       <Table 
         sx={{ 
-          width: "100%",
-          maxWidth: "100%",
-          tableLayout: 'fixed',
-          minWidth: '100%',
+          width: "auto",
+          minWidth: "100%",
+          tableLayout: 'auto',
         }}
       >
         <TableHead>
