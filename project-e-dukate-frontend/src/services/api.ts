@@ -3,7 +3,7 @@
 import Cookies from 'js-cookie';
 
 const getApiBaseUrl = (): string => {
-  const defaultUrl = 'https://project-e-dukate-backend-production.up.railway.app/api';
+  const defaultUrl = 'https://e-dukate-backend-production.up.railway.app/api';
 
   if (typeof window === 'undefined') {
     return defaultUrl;
@@ -16,7 +16,7 @@ const getApiBaseUrl = (): string => {
   }
   
   if (hostname.includes('test')) {
-    return 'https://project-e-dukate-backend-test.up.railway.app/api';
+    return 'https://e-dukate-backend-production.up.railway.app/api';
   }
   
   return defaultUrl;
