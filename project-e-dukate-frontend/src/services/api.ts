@@ -48,6 +48,9 @@ export const API_ENDPOINTS = {
   paymentQRs: `${API_BASE_URL}/PaymentQRs`,
   temporaryAppointments: `${API_BASE_URL}/TemporaryAppointments`,
   uploadComprobante: `${API_BASE_URL}/TemporaryAppointments/upload-comprobante`,
+  temporaryAppointmentsPending: `${API_BASE_URL}/TemporaryAppointments/pending`,
+  temporaryAppointmentsApproved: `${API_BASE_URL}/TemporaryAppointments/approved`,
+  temporaryAppointmentsRejected: `${API_BASE_URL}/TemporaryAppointments/rejected`,
   // reschedulePreview: `${API_BASE_URL}/Appointments/reschedule-preview`,
 };
 

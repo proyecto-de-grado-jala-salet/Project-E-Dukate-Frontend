@@ -222,18 +222,23 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     setError(null);
 
     try {
-      // Llamamos al endpoint sin el parámetro 'pending' para obtener todas
-      // Ajusta la URL según tu API: puede ser "temporaryAppointments" o "temporaryAppointments/all"
-      const allAppointments = await apiRequest<PaymentNotification[]>('temporaryAppointments', 'GET');
-      setNotifications(allAppointments);
-      // Contamos las no leídas: asumimos que las pendientes (Payment_Uploaded y no procesadas) son las "no leídas"
-      const pendingUnread = allAppointments.filter(
-        (app) => app.status === 'Payment_Uploaded' && !app.isProcessed && !app.read
-      ).length;
-      setUnreadCount(pendingUnread);
+      // Llamadas paralelas a los tres endpoints
+      const [pending, approved, rejected] = await Promise.all([
+        apiRequest<PaymentNotification[]>('temporaryAppointmentsPending', 'GET'),
+        apiRequest<PaymentNotification[]>('temporaryAppointmentsApproved', 'GET'),
+        apiRequest<PaymentNotification[]>('temporaryAppointmentsRejected', 'GET'),
+      ]);
+
+      // Combinar todas en una sola lista (opcional)
+      const all = [...pending, ...approved, ...rejected];
+      setNotifications(all);
+      
+      // El contador de no leídas solo considera pendientes
+      const unreadPending = pending.filter(n => !n.read).length;
+      setUnreadCount(unreadPending);
       setLastUpdate(new Date());
     } catch (err) {
-      console.error('Error fetching all notifications:', err);
+      console.error('Error fetching notifications:', err);
       if (!silent) setError('Error al cargar las notificaciones');
     } finally {
       if (!silent) setLoading(false);
